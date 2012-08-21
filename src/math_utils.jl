@@ -15,10 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
-function rcm(A, v)
-    # TODO Determinar o vértice inicial.
+function spy_text(A)
+    (m,n) = size(A)
+    for i in 1:m
+        for j in 1:n
+            if A[i,j] != 0
+                print("X ")
+            else
+                print("  ")
+            end
+        end
+        print("\n")
+    end
+end
 
-    # TODO Loop percorrendo os vizinhos.
-
-    # TODO Ordenação inversa.
+function matrix2graph(A)
+    # Apenas para matrizes simétricas.
+    f = open("temp.gv", "w")
+    write(f, "graph G {\n")
+    (m,n) = size(A)
+    # j corresponde as colunas
+    for j in 1:n
+        # i corresponde as linhas
+        for i in 1:j-1
+            if A[i,j] != 0
+                write(f, "$i -- $j;\n")
+            end
+        end
+    end
+    write(f, "}")
+    close(f)
+    system("dot -Tpng -o temp.png temp.gv")
 end

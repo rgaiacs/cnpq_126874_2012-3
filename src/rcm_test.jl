@@ -15,10 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
-function rcm(A, v)
-    # TODO Determinar o vértice inicial.
+load("rcm.jl")
+load("math_utils.jl")
 
-    # TODO Loop percorrendo os vizinhos.
+# Exemplo corespondente a Figura 4.8 da Fernanda.
+A = [1 1 0 0 0 0 0 0 0 0;
+     1 1 1 0 1 1 0 0 0 0;
+     0 1 1 0 0 1 0 0 0 0;
+     0 0 0 1 0 0 1 0 0 0;
+     0 1 0 0 1 0 1 1 0 0;
+     0 1 1 0 0 1 0 0 1 1;
+     0 0 0 1 1 0 1 1 0 1;
+     0 0 0 0 1 0 1 1 0 1;
+     0 0 0 0 0 1 0 0 1 1;
+     0 0 0 0 0 1 1 1 1 1]
 
-    # TODO Ordenação inversa.
-end
+spy_text(A)
+matrix2graph(A)
