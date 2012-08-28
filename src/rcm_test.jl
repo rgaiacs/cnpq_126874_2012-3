@@ -18,17 +18,19 @@
 load("rcm.jl")
 load("math_utils.jl")
 
-# Exemplo corespondente a Figura 4.8 da Fernanda.
-A = [1 1 0 0 0 0 0 0 0 0;
-     1 1 1 0 1 1 0 0 0 0;
-     0 1 1 0 0 1 0 0 0 0;
-     0 0 0 1 0 0 1 0 0 0;
-     0 1 0 0 1 0 1 1 0 0;
-     0 1 1 0 0 1 0 0 1 1;
-     0 0 0 1 1 0 1 1 0 1;
-     0 0 0 0 1 0 1 1 0 1;
-     0 0 0 0 0 1 0 0 1 1;
-     0 0 0 0 0 1 1 1 1 1]
+# Exemplo corespondente a Figura 5.6 da Fernanda.
+A = [1 0 0 1 0 1 0 0 0 0;
+     0 1 1 0 1 0 1 0 0 1;
+     0 1 1 1 1 0 0 0 0 0;
+     1 0 1 1 0 1 0 0 1 0;
+     0 1 1 0 1 0 1 0 0 0;
+     1 0 0 1 0 1 1 1 0 0;
+     0 1 0 0 1 1 1 1 0 0;
+     0 0 0 0 0 1 1 1 0 0;
+     0 0 0 1 0 0 0 0 1 0;
+     0 1 0 0 0 0 0 0 0 1]
 
 spy_text(A)
-matrix2graph(A)
+ord = rcm(A)
+print("\n")
+spy_text(A[ord, ord])
