@@ -4,7 +4,7 @@
 % Description: Relat\'{o}rio Parcial.
 % 
 % Created: 20.08.12 07:27:58 PM
-% Last Change: 20.08.12 07:27:58 PM
+% Last Change: 29.08.12 08:20:00 AM
 % 
 % Author: Raniere Silva, <r.gaia.cs@gmail.com>
 % 
@@ -12,5 +12,21 @@
 % 
 % This file is license under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. More details at <http://www.gnu.org/licenses/>
 %
-\section{Revis\~{a}o Liter\'{a}ria}
+\section{Cuthill-McKee reverso}
+\section{Grafos e matrizes esparsas}
+A teoria dos grafos foi identificada como uma poderosa ferramenta para a computação de matrizes esparsas quando Seymour Parter [Par61] usou grafos não direcionados para modelar a eliminação Gaussiana há mais de quarenta anos atrás. Grafos podem ser usados para modelar matrizes simítricas, não simétricas, fatorações etc. Além de tornar mais fácil a compreensão e análise de algoritmos para matrizes esparsas, eles também aumentam o escopo de manipulações destas matrizes usando algoritmos e técnicas já existentes.
+
+Um grafo é, fundamentalmente, um modo de representar uma relação binária entre objetos. Para o propósito deste trabalho, considere um grafo $G = (V, E)$ como um conjunto de vértices $V = \{v_1, v_2, \ldots \}$ (ou nós) e um conjunto de arestas $E = \{e_1, e_2, \ldots \}$. Estas arestas são representadas por pares não ordenados, por exemplo, $e_1 = (v_1 , v_2)$.
+
+Um conhecimento básico de teoria dos grafos é importante para o entendimento do trabalho. Conceitos mais específicos serão introduzidos quando necessários. Um resumo dos principais conceitos é dado por:
+\begin{description}
+    \item[Grau do vértice] número de arestas incidentes no vértice.
+    \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes quando possue uma aresta entre eles, ou seja, $e_1 = (v_1, v_2)$.
+    \item[Caminho] sequência de arestas disjuntas $\left( (x_1, x_2), (x_2, x_3), \ldots (x_{k - 1}, x_k) \right)$.
+    \item[Grafo conectado (conexo)] possui caminho entre qualquer par de vértices.
+    \item[Subgrafo completo (clique)] cada vértice do subgrafo possue aresta incidente em todos os outros vértices do subgrafo.
+    \item[Árvore] grafo conectado sem ciclos.
+\end{description}
+
+Assim como um grafo, uma matriz tambm descreve uma relação binária entre variáveis através de seus elementos não nulos. Uma matriz simétrica $A_{n \times n}$ pode ser modelada como um grafo $G(V, E)$, onde os $n$ vértices em $V$ representam as dimensões da matriz e existe uma aresta conectando os vértices $i$ e $j$ se $a_{ij} = 0$.
 % TODO Escrever
