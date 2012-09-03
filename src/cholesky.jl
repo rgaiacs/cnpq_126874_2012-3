@@ -15,22 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-load("rcm.jl")
-load("math_utils.jl")
-
-# Exemplo corespondente a Figura 5.6 da Fernanda.
-A = [1 0 0 1 0 1 0 0 0 0;
-     0 1 1 0 1 0 1 0 0 1;
-     0 1 1 1 1 0 0 0 0 0;
-     1 0 1 1 0 1 0 0 1 0;
-     0 1 1 0 1 0 1 0 0 0;
-     1 0 0 1 0 1 1 1 0 0;
-     0 1 0 0 1 1 1 1 0 0;
-     0 0 0 0 0 1 1 1 0 0;
-     0 0 0 1 0 0 0 0 1 0;
-     0 1 0 0 0 0 0 0 0 1]
-
-spy_text(A)
-ord = rcm(A)
-print("\n")
-spy_text(A[ord, ord])
+A = [4 1 2 .5 2;
+     1 .5 0 0 0;
+     2 0 3 0 0;
+     .5 0 0 .625 0;
+     2 0 0 0 16]

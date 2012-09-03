@@ -1,0 +1,50 @@
+% Copyright (C) 2012 Raniere Silva
+% 
+% This file is part of 'CNPq 126874/2012-3'.
+% 
+% 'CNPq 126874/2012-3' is licensed under the Creative Commons
+% Attribution 3.0 Unported License. To view a copy of this license,
+% visit http://creativecommons.org/licenses/by/3.0/.
+% 
+% 'CNPq 126874/2012-3' is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+\section{Cuthill-McKee reverso}
+No Método Preditor-Corretor pode-se utilizar a Decomposição de Cholesky para resolver o sistema linear
+% TODO Identificar o sistema linear do Método Preditor-Corretor
+
+Para problemas de grande porte, esse sistema linear é esparso e ao utilizar a Decomposição de Cholesky pode ocorrer o preenchimento da matriz.
+% TODO Incluir exemplo.
+
+É possivel permutar linhas e colunas do sistema linear de modo a minimizar o preenchimento decorrente da Decomposição de Choleslky.
+% TODO Incluir exemplo.
+
+Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram um algoritmo de reordenação, cujo objetivo principal é reduzir a largura de banda de uma matriz simétrica.
+
+% TODO Mostrar equivalência com grafos
+\begin{algorithm}
+    \caption{Pseudo-algoritmo RCM}
+    \label{alg:rcm}
+    \begin{algorithmic}
+        \REQUIRE Grafo $G(A)$ e um vértice $v$.
+        \ENSURE $n$, novo ordenamento dos vértices de $G(A)$.
+        \STATE $p = \text{ vetor de zeros}$
+        \STATE $n = \text{ vetor de zeros}$
+        \STATE $i = 1$
+        \STATE $f = \text{ fila vazia}$
+        \STATE Enfileira $v$ em $f$
+        \STATE $p_v = 1$
+        \WHILE{$f$ não for vazia}
+            \STATE Desenfeira $f$ em $v$
+            \STATE $n_v = i$
+            \STATE $i = i + 1$
+            \FOR{vertice $w$ adjacente a $v$}
+                \IF{$p_w == 0$}
+                    \STATE Enfileira $w$ em $f$
+                    \STATE $p_w = 1$
+                \ENDIF
+            \ENDFOR
+        \ENDWHILE
+    \end{algorithmic}
+\end{algorithm}
