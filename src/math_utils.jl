@@ -29,6 +29,65 @@ function spy_text(A)
     end
 end
 
+function bandwidth_text(A)
+    # $\beta = \max_{a_{ij} \neq 0} |i - j|
+    beta = 0
+    for i in 1:size(A, 1)
+        aux = 0
+        tmp = 0
+        for j in i + 1:size(A, 2)
+            tmp = tmp + 1
+            if A[i, j] != 0
+                aux = tmp
+            end
+        end
+        if aux > beta
+            beta = aux
+        end
+    end
+
+    for i in 1:size(A, 1)
+        for j in 1:size(A, 2)
+            if A[i,j] != 0
+                print("X ")
+            elseif abs(j - i) <= beta
+                print("0 ")
+            else
+                print("  ")
+            end
+        end
+        print("\n")
+    end
+end
+
+function profile_text(A)
+    # $\beta_i = \max_{a_{ij} \neq 0} |i - j|
+    beta = zeros(size(A, 1))
+    for i in 1:size(A, 1)
+        tmp = 0
+        for j in i + 1:size(A, 2)
+            tmp = tmp + 1
+            if A[i, j] != 0
+                beta[i] = tmp
+            end
+        end
+    end
+
+    for i in 1:size(A, 1)
+        for j in 1:size(A, 2)
+            if A[i,j] != 0
+                print("X ")
+            elseif (j > i && abs(j - i) <= beta[i]) ||
+                    (j < i && abs(j - i) <=  beta[j])
+                print("0 ")
+            else
+                print("  ")
+            end
+        end
+        print("\n")
+    end
+end
+
 function matrix2graph(A)
     # Apenas para matrizes simétricas.
     f = open("temp.gv", "w")

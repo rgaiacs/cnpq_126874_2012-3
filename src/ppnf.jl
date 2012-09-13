@@ -23,6 +23,7 @@ function ppnf(A)
     # println(L)
     stop = false
     it = 0
+    aux = 0
     while !stop && it < 10
         it = it + 1
         # println("iteration: $it")

@@ -15,9 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-function rcm(A)
-    # TODO Determinar o vértice inicial.
-    v = 7
+load("ppnf.jl")
+
+function rcm(A, v...)
+    if isempty(v)
+        v = ppnf(A)
+    else
+        v = v[1]
+    end
 
     # TODO Loop percorrendo os vizinhos.
     (adj, grau) = matrix2adj(A)
@@ -45,7 +50,6 @@ function rcm(A)
         print("v = $v queue = $queue\n")
     end
 
-    # TODO Ordenação inversa.
     (s,p) = sortperm(news)
     return reverse(p)
 end
