@@ -1,16 +1,16 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID 1223ab1592d4c5986715a55670c016eb63755807
-# Parent  1b1a2f0434bb3b8319fac8578f5669861a6a4a1e
+# Node ID 3464938993cb7b2a6bb386dd73dc4f51c449dac7
+# Parent  f9c85dd894b315dc78411651800a6a1e4ad80456
 Version 0.1.0
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12877,6 +12877,270 @@
-                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
-             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
+@@ -13038,6 +13038,326 @@
+ 
+         return (p, q)
  
 +    def rcm(self, root=None, root_finder='ppnf'):
 +        r"""
@@ -158,8 +158,23 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        EXAMPLES:
 +
++            sage: A = matrix([[1, 1, 1, 0, 0],
++                             [1, 1, 1, 0, 1],
++                             [1, 1, 1, 1, 0],
++                             [0, 0, 1, 1, 0],
++                             [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._rls(0)
++            deque([[0], [1, 2], [4, 3]])
++            sage: A._rls(4)
++            deque([[4], [1], [0, 2], [3]])
++
 +        ALGORITHM:
-+        
++
 +        See the references below.
 +
 +        REFERENCES:
@@ -177,8 +192,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        cdef int i
 +
 +        L = deque([])
-+        L.append(r)
-+        L.append(self._adj(r))
++        L.append([r])
++        L.append(self._adj([r]))
 +
 +        stop = False
 +        while not stop:
@@ -204,15 +219,37 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        EXAMPLES:
 +
++            sage: A = matrix([[1, 1, 1, 0, 0],
++                             [1, 1, 1, 0, 1],
++                             [1, 1, 1, 1, 0],
++                             [0, 0, 1, 1, 0],
++                             [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._adj([0])
++            [1, 2]
++            sage: A._adj([1])
++            [0, 2, 4]
++            sage: A._adj([2])
++            [0, 1, 3]
++            sage: A._adj([3])
++            [2]
++            sage: A._adj([4])
++            [1]
++            sage: A._adj([0,1,2])
++            [4, 3]
++
 +        AUTHORS:
 +
 +        - Raniere Silva (2012): initial version.
 +        """
 +        l = []
-+        cdef int i, j
 +        for j in r:
 +            for i in xrange(self.ncols()):
-+                if i != j and i not in l and self[i, j] != 0:
++                if i not in r and self[i, j] != 0:
 +                    l.append(i)
 +        return l
 +
@@ -244,19 +281,38 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return new
 +
 +    def _min_degree(self, l):
-+        """Select a node of minimum degree.
++        """Select a node of minimum degree from the list ``l``.
 +
 +        INPUT:
 +
 +        - ``self`` - a square symetric matrix.
 +
-+        - ``l`` - a list of nots.
++        - ``l`` - a list of nodes.
 +
 +        OUTPUT:
 +
-+        A node of minimum degree.
++        A node of minimum degree from the list ``l``.
 +
-+        ALGORITHM:
++        EXAMPLES:
++
++            sage: A = matrix([[1, 1, 1, 0, 0],
++                             [1, 1, 1, 0, 1],
++                             [1, 1, 1, 1, 0],
++                             [0, 0, 1, 1, 0],
++                             [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._min_degree([0])
++            0
++            sage: A._min_degree([1])
++            1
++            sage: A._min_degree([0,1,2])
++            0
++            sage: A._min_degree([0,1,2,3,4])
++            3
 +
 +        AUTHORS:
 +

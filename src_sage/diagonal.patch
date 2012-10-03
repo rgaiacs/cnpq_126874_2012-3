@@ -1,0 +1,116 @@
+# HG changeset patch
+# User Raniere Silva <r.gaia.cs@gmail.com>
+# Date 1349296008 10800
+# Node ID f41361170730ff2a15202de6c1a7dfd4b8e66ed9
+# Parent  d06cf4b2215d37d3a87a58f65ac53234502dd471
+[mq]: diagonal
+
+diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
+--- a/sage/matrix/matrix2.pyx
++++ b/sage/matrix/matrix2.pyx
+@@ -1820,9 +1820,15 @@
+             raise TypeError, "lcm function not defined for elements of the base ring"
+         return d
+         
+-    def diagonal(self):
++    def diagonal(self, d=0):
+       r"""
+-      Return the diagonal entries of ``self``.
++      Return the ``d``-th diagonal entries of ``self``.
++
++      INPUT:
++
++      - ``d`` - the diagonal to return. The main diagonal is 0, the lower
++        diagonal is -1, -2, ... and the upper diagonal is 1, 2, ... The default
++        value is 0.
+       
+       OUTPUT:
+       
+@@ -1837,6 +1843,26 @@
+           [3 7]
+           sage: A.diagonal()
+           [2, 7]
++          sage: A.diagonal(1)
++          [5]
++          sage: A.diagonal(2)
++          Traceback (most recent call last):
++          ...
++          ValueError: diagonal must be less or equal to number of columns.
++          sage: A.diagonal(3)
++          Traceback (most recent call last):
++          ...
++          ValueError: diagonal must be less or equal to number of columns.
++          sage: A.diagonal(-1)
++          [3]
++          sage: A.diagonal(-2)
++          Traceback (most recent call last):
++          ...
++          ValueError: diagonal must be less or equal to number of rows.
++          sage: A.diagonal(-3)
++          Traceback (most recent call last):
++          ...
++          ValueError: diagonal must be less or equal to number of rows.
+           
+       Two rectangular matrices.  ::
+       
+@@ -1846,6 +1872,16 @@
+           [14 15 16 17 18 19 20]
+           sage: B.diagonal()
+           [0, 8, 16]
++          sage: B.diagonal(1)
++          [1, 9, 17]
++          sage: B.diagonal(2)
++          [2, 10, 18]
++          sage: B.diagonal(6)
++          [6]
++          sage: B.diagonal(-1)
++          [7, 15]
++          sage: B.diagonal(-2)
++          [14]
+           
+           sage: C = matrix(3, 2, range(6)); C
+           [0 1]
+@@ -1853,6 +1889,12 @@
+           [4 5]
+           sage: C.diagonal()
+           [0, 3]
++          sage: C.diagonal(1)
++          [1]
++          sage: C.diagonal(-1)
++          [2, 5]
++          sage: C.diagonal(-2)
++          [4]
+       
+       Empty matrices behave properly. ::
+       
+@@ -1860,9 +1902,28 @@
+           []
+           sage: E.diagonal()
+           []
++
++      AUTHORS:
++
++      - Unknown: No author specified in the file from 2012-10-03
++
++      - Raniere Silva (2012): Add parameter ``d``.
+       """
+-      n = min(self.nrows(), self.ncols())
+-      return [self[i,i] for i in range(n)]
++      if d == 0:
++          n = min(self.nrows(), self.ncols())
++          return [self[i,i] for i in range(n)]
++      elif d > 0:
++          if d >= self.ncols():
++              raise ValueError('diagonal must be less or equal to number of columns.')
++          else:
++              n = min(self.nrows(), self.ncols() - d)
++              return [self[i, i + d] for i in range(n)]
++      elif d < 0:
++          if -d >= self.nrows():
++              raise ValueError('diagonal must be less or equal to number of rows.')
++          else:
++              n = min(self.nrows(), self.ncols() - d)
++              return [self[i, i + d] for i in range(-d, n)]
+ 
+     def trace(self):
+         """

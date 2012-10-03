@@ -15,8 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
+A = matrix([[1, 1, 1, 0, 0],
+            [1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 0],
+            [0, 1, 0, 0, 1]]); A
+
 # Exemplo corespondente a Figura 5.6 da Fernanda.
-A = matrix(10, 
+Z = matrix(10, 
         [1, 0, 0, 1, 0, 1, 0, 0, 0, 0,
          0, 1, 1, 0, 1, 0, 1, 0, 0, 1,
          0, 1, 1, 1, 1, 0, 0, 0, 0, 0,
@@ -27,7 +33,7 @@ A = matrix(10,
          0, 0, 0, 0, 0, 1, 1, 1, 0, 0,
          0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
          0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-A
 
-r = A.rcm()
-A[r, r]
+# print("{0}\n\n".format(Z))
+# r = Z.rcm()
+# print(Z[r, r])
