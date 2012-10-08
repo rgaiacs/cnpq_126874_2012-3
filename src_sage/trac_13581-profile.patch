@@ -1,20 +1,20 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
-# Date 1349295945 10800
-# Node ID b48026c1c8b7088d0d1fb8b6553111d42d6ac59a
-# Parent  44d279841b91a102f699543c1d8307f3206df1fe
-[mq]: bandwidth
+# Date 1349698379 10800
+# Node ID e249841a34eb61db551cf01871f6c807dbd7112f
+# Parent  c2ee7c0bf6487250519ff45a4c11f57a4119ae88
+First version of get_profile.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12942,6 +12942,102 @@
-                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
-             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
+@@ -13038,6 +13038,94 @@
  
-+    def get_bandwidth(self):
+         return (p, q)
+ 
++    def get_profile(self):
 +        r"""
-+        Return the bandwidths of the matrix.
++        Return the number of elementos of the profile of the matrix.
 +
 +        INPUT:
 +
@@ -22,8 +22,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        OUTPUT:
 +
-+        A tuple ``(p, q)`` where ``p`` is the lower bandwidth and ``q`` is the
-+        upper bandwidth.
++        A tuple ``(p, q)`` where ``p`` is the lower profile and ``q`` is the
++        upper profile.
 +
 +        EXAMPLES::
 +
@@ -80,31 +80,23 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        if not self:
 +            raise ValueError('matrix can\'t be empty.')
 +
-+        # Compute the lower bandwidth.
-+        p = self.nrows() - 1
-+        band_is_null = True
-+        while p > 0:
-+            for a in self.diagonal(-p):
-+                if a != 0:
-+                    band_is_null = False
++        cdef int i, j
++
++        # Compute the lower profile.
++        p = 0
++        for i in xrange(1, self.nrows()):
++            for j in xrange(min(i, self.ncols())):
++                if self[i, j] != 0:
++                    p = p + (i - j)
 +                    break
-+            if band_is_null == True:
-+                p = p - 1
-+            else:
-+                break
 +
 +        # Compute the upper bandwidth.
-+        q = self.ncols() - 1
-+        band_is_null = True
-+        while q > 0:
-+            for a in self.diagonal(q):
-+                if a != 0:
-+                    band_is_null = False
++        q = 0
++        for j in xrange(1, self.ncols()):
++            for i in xrange(min(j, self.nrows())):
++                if self[i, j] != 0:
++                    q = q + (j - i)
 +                    break
-+            if band_is_null == True:
-+                q = q - 1
-+            else:
-+                break
 +
 +        return (p, q)
 +

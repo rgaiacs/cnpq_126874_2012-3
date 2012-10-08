@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
-# Date 1349296008 10800
-# Node ID f41361170730ff2a15202de6c1a7dfd4b8e66ed9
+# Date 1349703595 10800
+# Node ID 6e83c123f44a34debcec62750031c1bd0a281ee3
 # Parent  d06cf4b2215d37d3a87a58f65ac53234502dd471
-[mq]: diagonal
+Improve diagonal to return any of the diagonals parallel to the main diagonal.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx

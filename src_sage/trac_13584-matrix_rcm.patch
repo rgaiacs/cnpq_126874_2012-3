@@ -1,105 +1,17 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID 36b84787a8550dee0db3d9f0dbd739a27f5ffeeb
-# Parent  c2ee7c0bf6487250519ff45a4c11f57a4119ae88
-Version 0.1.0
+# Node ID f55266aa97cca2c4545aab8e81cab19118abef00
+# Parent  e4776c303daf726a229aca173448ebdfdbee1f07
+First version of matrix.rcm.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -13038,6 +13038,452 @@
+@@ -13126,6 +13126,365 @@
  
          return (p, q)
  
-+    def get_profile(self):
-+        r"""
-+        Return the number of elementos of the profile of the matrix.
-+
-+        INPUT:
-+
-+        - ``self`` - a square matrix.
-+
-+        OUTPUT:
-+
-+        A tuple ``(p, q)`` where ``p`` is the lower profile and ``q`` is the
-+        upper profile.
-+
-+        EXAMPLES::
-+
-+          sage: A = matrix([[2,0],[0,7]]); A
-+          [2 0]
-+          [0 7]
-+          sage: A.get_bandwidth()
-+          (0, 0)
-+          sage: A = matrix([[2,0],[3,7]]); A
-+          [2 0]
-+          [3 7]
-+          sage: A.get_bandwidth()
-+          (1, 0)
-+          sage: A = matrix([[2,5],[0,7]]); A
-+          [2 5]
-+          [0 7]
-+          sage: A.get_bandwidth()
-+          (0, 1)
-+          sage: A = matrix([[2,5],[3,7]]); A
-+          [2 5]
-+          [3 7]
-+          sage: A.get_bandwidth()
-+          (1, 1)
-+
-+      Two rectangular matrices.  ::
-+
-+          sage: B = matrix([[ 0, 1, 2, 3, 4, 0, 0],[ 7, 8, 9,10,11,12, 0],[ 0,15,16,17,18,19,20]]); B
-+          [ 0  1  2  3  4  0  0]
-+          [ 7  8  9 10 11 12  0]
-+          [ 0 15 16 17 18 19 20]
-+          sage: B.get_bandwidth()
-+          (1, 4)
-+
-+          sage: C = matrix([[0,1],[2,3],[0,5]]); C
-+          [0 1]
-+          [2 3]
-+          [0 5]
-+          sage: C.get_bandwidth()
-+          (1, 1)
-+
-+      Empty matrices behave properly. ::
-+
-+          sage: E = matrix(0, 5, []); E
-+          []
-+          sage: E.get_bandwidth()
-+          Traceback (most recent call last):
-+          ...
-+          ValueError: matrix can't be empty.
-+
-+        AUTHORS:
-+
-+        - Raniere Silva (2012)
-+        """
-+        if not self:
-+            raise ValueError('matrix can\'t be empty.')
-+
-+        cdef int i, j
-+
-+        # Compute the lower profile.
-+        p = 0
-+        for i in xrange(1, self.nrows()):
-+            for j in xrange(min(i, self.ncols())):
-+                if self[i, j] != 0:
-+                    p = p + (i - j)
-+                    break
-+
-+        # Compute the upper bandwidth.
-+        q = 0
-+        for j in xrange(1, self.ncols()):
-+            for i in xrange(min(j, self.nrows())):
-+                if self[i, j] != 0:
-+                    q = q + (j - i)
-+                    break
-+
-+        return (p, q)
-+
 +    def rcm(self, root=None, root_finder='ppnf'):
 +        r"""
 +        Return the permutation obtain by the Reverse Cuthill-Mckee
@@ -187,6 +99,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +                if w[0] in adj[v] and visited[w[0]] == False:
 +                    q.append(w[0])
 +                    visited[w[0]] = True
++        news.reverse()
 +        return news
 +
 +    def _ppnf(self):

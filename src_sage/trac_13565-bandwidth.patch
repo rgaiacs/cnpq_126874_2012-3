@@ -1,0 +1,113 @@
+# HG changeset patch
+# User Raniere Silva <r.gaia.cs@gmail.com>
+# Date 1349703466 10800
+# Node ID e4d77b6433ffb41af7851a7fee52ef4abfad17db
+# Parent  f41361170730ff2a15202de6c1a7dfd4b8e66ed9
+First version of get_bandwidth.
+
+diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
+--- a/sage/matrix/matrix2.pyx
++++ b/sage/matrix/matrix2.pyx
+@@ -12942,6 +12942,102 @@
+                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
+             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
+ 
++    def get_bandwidth(self):
++        r"""
++        Return the bandwidths of the matrix.
++
++        INPUT:
++
++        - ``self`` - a square matrix.
++
++        OUTPUT:
++
++        A tuple ``(p, q)`` where ``p`` is the lower bandwidth and ``q`` is the
++        upper bandwidth.
++
++        EXAMPLES::
++
++          sage: A = matrix([[2,0],[0,7]]); A
++          [2 0]
++          [0 7]
++          sage: A.get_bandwidth()
++          (0, 0)
++          sage: A = matrix([[2,0],[3,7]]); A
++          [2 0]
++          [3 7]
++          sage: A.get_bandwidth()
++          (1, 0)
++          sage: A = matrix([[2,5],[0,7]]); A
++          [2 5]
++          [0 7]
++          sage: A.get_bandwidth()
++          (0, 1)
++          sage: A = matrix([[2,5],[3,7]]); A
++          [2 5]
++          [3 7]
++          sage: A.get_bandwidth()
++          (1, 1)
++
++      Two rectangular matrices.  ::
++
++          sage: B = matrix([[ 0, 1, 2, 3, 4, 0, 0],[ 7, 8, 9,10,11,12, 0],[ 0,15,16,17,18,19,20]]); B
++          [ 0  1  2  3  4  0  0]
++          [ 7  8  9 10 11 12  0]
++          [ 0 15 16 17 18 19 20]
++          sage: B.get_bandwidth()
++          (1, 4)
++
++          sage: C = matrix([[0,1],[2,3],[0,5]]); C
++          [0 1]
++          [2 3]
++          [0 5]
++          sage: C.get_bandwidth()
++          (1, 1)
++
++      Empty matrices behave properly. ::
++
++          sage: E = matrix(0, 5, []); E
++          []
++          sage: E.get_bandwidth()
++          Traceback (most recent call last):
++          ...
++          ValueError: matrix can't be empty.
++
++        AUTHORS:
++
++        - Raniere Silva (2012)
++        """
++        if not self:
++            raise ValueError('matrix can\'t be empty.')
++
++        # Compute the lower bandwidth.
++        p = self.nrows() - 1
++        band_is_null = True
++        while p > 0:
++            for a in self.diagonal(-p):
++                if a != 0:
++                    band_is_null = False
++                    break
++            if band_is_null == True:
++                p = p - 1
++            else:
++                break
++
++        # Compute the upper bandwidth.
++        q = self.ncols() - 1
++        band_is_null = True
++        while q > 0:
++            for a in self.diagonal(q):
++                if a != 0:
++                    band_is_null = False
++                    break
++            if band_is_null == True:
++                q = q - 1
++            else:
++                break
++
++        return (p, q)
++
+     # A limited number of access-only properties are provided for matrices
+     property T:
+         r"""
