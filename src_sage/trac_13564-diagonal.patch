@@ -1,7 +1,7 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
-# Date 1349703595 10800
-# Node ID 6e83c123f44a34debcec62750031c1bd0a281ee3
+# Date 1349707768 10800
+# Node ID cda4ddea7d532034902561ce2246f262e2cba017
 # Parent  d06cf4b2215d37d3a87a58f65ac53234502dd471
 Improve diagonal to return any of the diagonals parallel to the main diagonal.
 
@@ -83,14 +83,12 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
        
        Empty matrices behave properly. ::
        
-@@ -1860,9 +1902,28 @@
+@@ -1860,9 +1902,26 @@
            []
            sage: E.diagonal()
            []
 +
 +      AUTHORS:
-+
-+      - Unknown: No author specified in the file from 2012-10-03
 +
 +      - Raniere Silva (2012): Add parameter ``d``.
        """

@@ -1,0 +1,383 @@
+# HG changeset patch
+# User Raniere Silva <r.gaia.cs@gmail.com>
+# Date 1349729365 10800
+# Node ID 0d8c5532b79d3cdf3ba874f13526e212ece91544
+# Parent  00d38cb9d6f792153cf95d716a8f00f064fb9445
+Copy matrix_rcm to graph_rcm.
+
+diff --git a/sage/graphs/graph.py b/sage/graphs/graph.py
+--- a/sage/graphs/graph.py
++++ b/sage/graphs/graph.py
+@@ -5143,6 +5143,372 @@
+ 
+         return classes_b
+ 
++    def rcm(self, start=None, start_finder='ppnf'):
++        r"""
++        Return the permutation obtain by the Reverse Cuthill-Mckee
++        Algorithm.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        - ``start`` - the node to be use as start. If None it will be use the
++          ``start_finder``.
++
++        - ``start_finder`` - a string option for the start finder
++          algorithm to be used. The options are:
++
++          * 'ppnf'.
++
++        OUTPUT:
++
++        The permutation.
++
++        .. SEEALSO::
++
++        - :meth:`breadth_first_search <sage.graphs.base.c_graph.CGraphBackend.breadth_first_search>`
++          -- breadth-first search for fast compiled graphs.
++
++        - :meth:`depth_first_search <sage.graphs.base.c_graph.CGraphBackend.depth_first_search>`
++          -- depth-first search for fast compiled graphs.
++          
++        - :meth:`breadth_first_search` -- breadth-first search for generic graphs.
++
++        - :meth:`depth_first_search` -- depth-first search for generic graphs.
++        
++        EXAMPLES:
++          sage: A = matrix([[1, 1], [0, 1]]); A
++          [1 1]
++          [0 1]
++          sage: A.rcm()
++          Traceback (most recent call last):
++          ...
++          ValueError: matrix must be symmetric.
++
++        ALGORITHM:
++
++        See the references below.
++
++        REFERENCES:
++
++        - [CM69] E. Cuthill and J. McKee. Reducing the bandwidth of sparse
++          symmetric matrics. In Proceedings of the 1969 24th national
++          conference, ACM '69, pages 157-172, New York, NY, USA, 1969. ACM.
++
++        - [Geo71] J. A. George. Computer implementation of the finite element
++          method. Report. Dept. of Computer Science, 1971.
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        # TODO The Cython implementation
++        # Preferably use the Cython implementation
++        from collections import deque
++
++        # TODO Loop over the neighboor.
++        adj = {}
++        degree = {}
++        visited = {}
++        for i in self.vertices():
++            adj[i] = self.neighbors(i)
++            degree[i] = self.degree(i)
++            visited[i] = False
++
++        # given a list of numbers degree, the degree_s is a list of tuples
++        # where the each tuple is the form of (i, degree[i]) and the list is
++        # sorted based on the degree[i].
++        degree_s = sorted(d.items(), key=lambda x: x[1])
++
++        if start:
++            v = start
++        elif start_finder == 'ppnf':
++            v = self._ppnf()
++
++        q = deque([v])
++        count = 0
++
++        visited[v] = True
++        while len(q):
++            v = q.pop()
++            news[v] = count
++            count = count + 1
++            for w in degree_s:
++                if w[0] in adj[v] and visited[w[0]] == False:
++                    q.append(w[0])
++                    visited[w[0]] = True
++        news.reverse()
++        return news
++
++    def _ppnf(self):
++        """
++        Return a pseudo-peripheral node of the square symetric matrix.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        OUTPUT:
++
++        A pseudo-peripheral node.
++
++        EXAMPLES:
++
++        ALGORITHM:
++
++        See the references below.
++
++        REFERENCES:
++
++        - [GL79] Alan George and Joseph W. H. Liu. An implementation of a
++          pseudoperipheral node finder. ACM Trans. Math. Softw., 5(3):284-295,
++          September 1979.
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        r = 1  # Any node of the graph.
++        L = self._rls([r])
++        stop = False
++        it = 0
++        aux = 0
++
++        while not stop and it < 10:
++            it = it + 1
++            aux = self._min_degree(L[-1])
++            auxL = self._rls([aux])
++            if len(auxL) > len(L):
++                r = aux
++                L = auxL
++            else:
++                stop = True
++        return aux
++
++    def _rls(self, r):
++        """
++        Return a root level structure of the square symetric matrix.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        - ``r`` - a node to be the root.
++
++        OUTPUT:
++
++        The root level structure.
++
++        EXAMPLES:
++
++            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._rls(0)
++            deque([[0], [1, 2], [4, 3]])
++            sage: A._rls(4)
++            deque([[4], [1], [0, 2], [3]])
++
++        ALGORITHM:
++
++        See the references below.
++
++        REFERENCES:
++
++        - [GL79] Alan George and Joseph W. H. Liu. An implementation of a
++          pseudoperipheral node finder. ACM Trans. Math. Softw., 5(3):284-295,
++          September 1979.
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        from collections import deque
++
++        cdef int i
++
++        L = deque([])
++        L.append([r])
++        L.append(self._adj([r]))
++
++        stop = False
++        while not stop:
++            aux = self._rm_root_adj(self._adj(L[-1]), L[-2])
++            if not aux:
++                stop = True
++            else:
++                L.append(aux)
++        return L
++
++    def _adj_list(self):
++        """Adjacent list.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        OUTPUT:
++
++        The adjacent list of the matrix.
++
++        EXAMPLES:
++
++            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._adj_list()
++            [[1, 2], [0, 2, 4], [0, 1, 3], [2], [1]]
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        l = []
++        for i in xrange(self.ncols()):
++            aux = []
++            for j in xrange(self.ncols()):
++                if i != j and self[i, j]:
++                    aux.append(j)
++            l.append(aux)
++        return l
++
++    def _adj(self, r):
++        """List of adjacent nodes to ``r``.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        - ``r`` - a non-empty list of nodes.
++
++        OUTPUT:
++
++        A list of nodes adjacent to nodes in r.
++
++        EXAMPLES:
++
++            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._adj([0])
++            [1, 2]
++            sage: A._adj([1])
++            [0, 2, 4]
++            sage: A._adj([2])
++            [0, 1, 3]
++            sage: A._adj([3])
++            [2]
++            sage: A._adj([4])
++            [1]
++            sage: A._adj([0,1,2])
++            [4, 3]
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        l = []
++        for j in r:
++            for i in xrange(self.ncols()):
++                if i not in r and self[i, j] != 0:
++                    l.append(i)
++        return l
++
++    def _rm_root_adj(self, l1, l2):
++        """Remove elements of above root level structure.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        - ``l1`` - a level structure.
++
++        - ``l2`` - the level structure above l1.
++
++        OUTPUT:
++
++        A level structure.
++
++        EXAMPLES:
++
++            sage: A = matrix([[1]]); A
++            [1]
++            sage: A._rm_root_adj([0], [0])
++            []
++            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0])
++            [1, 2, 3, 4, 5]
++            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0, 1, 2])
++            [3, 4, 5]
++            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0, 3, 5])
++            [1, 2, 4]
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        new = []
++        for i in l1:
++            if i not in l2:
++                new.append(i)
++        return new
++
++    def _min_degree(self, l):
++        """Select a node of minimum degree from the list ``l``.
++
++        INPUT:
++
++        - ``self`` - a square symetric matrix.
++
++        - ``l`` - a list of nodes.
++
++        OUTPUT:
++
++        A node of minimum degree from the list ``l``.
++
++        EXAMPLES:
++
++            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: A._min_degree([0])
++            0
++            sage: A._min_degree([1])
++            1
++            sage: A._min_degree([0,1,2])
++            0
++            sage: A._min_degree([0,1,2,3,4])
++            3
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        r = l[0]
++        g = float('inf')
++        cdef int j
++
++        for i in l:
++            aux = 0
++            for j in xrange(self.ncols()):
++                if self[i, j] != 0:
++                    aux = aux + 1
++            if aux < g:
++                g = aux
++                r = i
++        return r
++
+ # Aliases to functions defined in Cython modules
+ import types
+ 

@@ -1,0 +1,102 @@
+# HG changeset patch
+# User Raniere Silva <r.gaia.cs@gmail.com>
+# Date 1349743392 10800
+# Node ID 5f4dcf95ec13c1a1693c90130eb93c22e104321e
+# Parent  00d38cb9d6f792153cf95d716a8f00f064fb9445
+Prototype of the function load_matrix.
+
+diff --git a/sage/matrix/all.py b/sage/matrix/all.py
+--- a/sage/matrix/all.py
++++ b/sage/matrix/all.py
+@@ -1,5 +1,5 @@
+ from matrix_space import MatrixSpace, is_MatrixSpace
+-from constructor import matrix, Matrix, column_matrix, random_matrix, diagonal_matrix, identity_matrix, block_matrix, block_diagonal_matrix, jordan_block, zero_matrix, ones_matrix, elementary_matrix, companion_matrix
++from constructor import matrix, Matrix, column_matrix, random_matrix, diagonal_matrix, identity_matrix, block_matrix, block_diagonal_matrix, jordan_block, zero_matrix, ones_matrix, elementary_matrix, companion_matrix, load_matrix
+ from matrix import is_Matrix
+ from berlekamp_massey import berlekamp_massey
+ 
+diff --git a/sage/matrix/constructor.py b/sage/matrix/constructor.py
+--- a/sage/matrix/constructor.py
++++ b/sage/matrix/constructor.py
+@@ -3956,5 +3956,79 @@
+     entries.update({(j,j):aa, (j,i):bb, (i,j):-bb, (i,i):aa})
+     return matrix(entries, nrows=dim, ring=ring)
+ 
+-
+-
++def load_matrix(f_name, f_format=None):
++    """Load matrix from file.
++
++    INPUT:
++
++    - ``f_name`` - name of the file to be load.
++
++    - ``f_format`` - string specify the format of the file to be load. If no
++      format is specify will be used the extension of the file.
++
++      ======= ========== ====================================================
++      Format  Extensions Mean
++      ======= ========== ====================================================
++      ascii   txt        A single matrix in a text file without header or any
++                         other information. (*)
++      oct     oct        Octave's binary data format. (*)
++      f-oct   f-oct      Octave's binary data format but only using single
++                         precision. (*)
++      t-oct   t-oct      Save the data in Octave's text data format. (*)
++      hdf5    hdf5       Save the data in hdf5 format. (HDF5 is a free,
++                         portable binary format developed by the National
++                         Center for Supercomputing Applications at the
++                         University of Illinois.) (*)
++      f-hdf5  f-hdf5     Save the data in hdf5 format but only using single
++                         precision. (*)
++      mat7    m          Save the data in matlab's v7 binary data format. (*)
++      mat6               Save the data in matlab's v6 binary data format. (*)
++      mat4               Save the data in matlab's v5 binary data format. (*)
++      ======= ========== ====================================================
++
++      (*) Mean that is not implemented yet.
++
++    OUTPUT:
++
++    Dictionary of matrixs.
++
++    EXAMPLES::
++
++    REFERENCES:
++
++        .. [OCTAVE] GNU Octave, Simple File I/O.
++
++    AUTHORS:
++
++    - Raniere Silva (2012)
++    """
++    import scipy.io
++
++    if f_format == None:
++        f_format = f_name.split('.')[-1]
++    if f_format in ['ascii', 'txt']:
++        raise NotImplementedError("Can't read ascii format.")
++    elif f_format in ['oct']:
++        raise NotImplementedError("Can't read oct format.")
++    elif f_format in ['f-oct']:
++        raise NotImplementedError("Can't read f-oct format.")
++    elif f_format in ['t-oct']:
++        raise NotImplementedError("Can't read t-oct format.")
++    elif f_format in ['hdf5']:
++        raise NotImplementedError("Can't read hdf5 format.")
++    elif f_format in ['f-hdf5']:
++        raise NotImplementedError("Can't read f-hdf5 format.")
++    elif f_format in ['m', 'mat7']:
++        m = scipy.io.loadmat(f_name)
++        d = {}
++        for k in m.keys():
++            if not k.startswith('__'):
++                try:
++                    d[k] = matrix(m[k])
++                except:
++                    pass
++        return d
++    elif f_format in ['mat6']:
++        raise NotImplementedError("Can't read mat6 format.")
++    elif f_format in ['mat4']:
++        raise NotImplementedError("Can't read mat4 format.")
