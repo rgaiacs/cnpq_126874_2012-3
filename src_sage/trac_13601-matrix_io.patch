@@ -1,9 +1,9 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
-# Date 1350314243 10800
-# Node ID e57d94d39acebf2646e6bfb51a6e3f136b62e560
+# Date 1350337996 10800
+# Node ID f8384417a721aba679fe7760ffb280ea92753734
 # Parent  6a86b62fb148b244059274c86d6ab870f0f37402
-Prototype of matrix_io.
+Version 0.1 of matrix_io.py
 
 diff --git a/doc/en/reference/matrices.rst b/doc/en/reference/matrices.rst
 --- a/doc/en/reference/matrices.rst
@@ -31,7 +31,7 @@ diff --git a/sage/matrix/matrix_io.py b/sage/matrix/matrix_io.py
 new file mode 100644
 --- /dev/null
 +++ b/sage/matrix/matrix_io.py
-@@ -0,0 +1,977 @@
+@@ -0,0 +1,1041 @@
 +"""
 +Matrix input and output
 +
@@ -57,6 +57,7 @@ new file mode 100644
 +#                  http://www.gnu.org/licenses/
 +#*****************************************************************************
 +from constructor import *
++from sage.rings.all import RR
 +import scipy.io
 +
 +def load_matrix(file_name, file_format=None):
@@ -481,6 +482,41 @@ new file mode 100644
 +
 +    EXAMPLES::
 +
++        sage: mdict = load_matrix('tests/data/testprob.mps')
++        sage: mdict['A']
++        [ 1.0  1.0  0.0]
++        [ 1.0  0.0  1.0]
++        [ 0.0 -1.0  1.0]
++        sage: mdict['b']
++        (5.00000000000000, 10.0000000000000, 7.00000000000000)
++        sage: mdict['c']
++        (1.00000000000000, 4.00000000000000, 9.00000000000000)
++        sage: mdict['rows_type']
++        (-1, 1, 0)
++        sage: mdict['l']
++        (0.0, -1.0, 0.0)
++        sage: mdict['u']
++        (4.0, 1.0, +infinity)
++        sage: mdict['cols_type']
++        (0, 0, 0)
++        sage: mdict = load_matrix('tests/data/sos2test.mps')
++        sage: mdict['A']
++        [-1.0  1.0  1.0 10.0  0.0]
++        [ 1.0 -3.0  1.0  0.0  0.0]
++        [ 0.0  1.0  0.0 -3.5  0.0]
++        sage: mdict['b']
++        (30.0000000000000, 30.0000000000000, 0.000000000000000)
++        sage: mdict['c']
++        (-1.00000000000000, -2.00000000000000, -3.00000000000000, -1.00000000000000, 0.000000000000000)
++        sage: mdict['rows_type']
++        (-1, -1, 0)
++        sage: mdict['l']
++        (0.0, 0.0, 0.0, 2.0, 0.0)
++        sage: mdict['u']
++        (40.0, +infinity, +infinity, 3.0, +infinity)
++        sage: mdict['cols_type']
++        (0, 0, 0, 1, 0)
++
 +    .. WARNING::
 +
 +        This function can't process semi-cont variable, rows type and ranges
@@ -488,9 +524,9 @@ new file mode 100644
 +
 +    .. TODO::
 +
-+        Implement the semi-cont variable.
-+
-+        Implement the range parse.
++        * Implement the semi-cont variable.
++        * Implement the range parse.
++        * Implement the sos parse.
 +
 +    REFERENCES:
 +
@@ -505,7 +541,9 @@ new file mode 100644
 +        in_rows = False
 +        in_cols = False
 +        in_rhs = False
++        in_rng = False
 +        in_bnd = False
++        in_sos = False
 +        process = False
 +        # rows is a dictionary of the names of the rows that store the row
 +        # number atribute to the row's name.
@@ -528,40 +566,62 @@ new file mode 100644
 +        # cols_type is a list representing the type of column.
 +        cols_type = None
 +        # rows_type is a list representing the type of column.
-+        # rows_type = None
++        # ===== =====================
++        # type      meaning
++        # ===== =====================
++        # 0     equality
++        # -1    less than or equal
++        #  1    greater than or equal
++        rows_type = None
 +        for line in f:
 +            # Line to be treated as a comment starts with '*'.
 +            if not line.startswith('*'):
-+                process = True
-+                p = line.split()
-+                if p[0].upper() == 'NAME':
-+                    process = False
-+                elif p[0].upper() == 'ROWS':
-+                    process = False
-+                    in_rows = True
-+                    in_cols = in_rhs = in_bnd = False
-+                elif p[0].upper() == 'COLUMNS':
-+                    process = False
-+                    in_cols = True
-+                    in_rows = in_rhs = in_bnd = False
-+                elif p[0].upper() == 'RHS':
-+                    process = False
-+                    in_rhs = True
-+                    in_rows = in_cols = in_bnd = False
-+                elif p[0].upper() == 'RANGES':
-+                    process = False
-+                elif p[0].upper() == 'BOUNDS':
-+                    process = False
-+                    in_bnd = True
-+                    in_rows = in_cols = in_rhs = False
-+                    l = [0 for i in xrange(n_cols)]
-+                    u = [float('inf') for i in xrange(n_cols)]
-+                    cols_type = [0 for i in xrange(n_cols)]
-+                elif p[0].upper() == 'SOS':
-+                    process = False
-+                elif p[0].upper() == 'ENDATA':
-+                    process = False
-+                if process:
++                if line[0] != ' ':
++                    p = line.split()
++                    if p[0].upper() == 'NAME':
++                        process = False
++                    elif p[0].upper() == 'ROWS':
++                        process = False
++                        in_rows = True
++                        in_cols = in_rhs = in_rng = in_bnd = in_sos = False
++                    elif p[0].upper() == 'COLUMNS':
++                        process = False
++                        in_cols = True
++                        in_rows = in_rhs = in_rng = in_bnd = in_sos = False
++
++                        # Build the rows_tye.
++                        rows_type = [0 for i in xrange(n_rows + 1)]
++                        for k in rows.keys():
++                            if rows[k][1] == 'E':
++                                rows_type[rows[k][0]] = 0
++                            elif rows[k][1] == 'L':
++                                rows_type[rows[k][0]] = -1
++                            elif rows[k][1] == 'G':
++                                rows_type[rows[k][0]] = 1
++                    elif p[0].upper() == 'RHS':
++                        process = False
++                        in_rhs = True
++                        in_rows = in_cols = in_rng = in_bnd = in_sos = False
++                        # The variables must be set where to avoid problems.
++                        l = [0 for i in xrange(n_cols + 1)]
++                        u = [float('inf') for i in xrange(n_cols + 1)]
++                        cols_type = [0 for i in xrange(n_cols + 1)]
++                    elif p[0].upper() == 'RANGES':
++                        process = False
++                        in_rng = True
++                        in_rows = in_cols = in_rhs = in_bnd = in_sos = False
++                    elif p[0].upper() == 'BOUNDS':
++                        process = False
++                        in_bnd = True
++                        in_rows = in_cols = in_rhs = in_rng = in_sos = False
++                    elif p[0].upper() == 'SOS':
++                        process = False
++                        in_sos = True
++                        in_rows = in_cols = in_rhs = in_rng = in_bnd = False
++                    elif p[0].upper() == 'ENDATA':
++                        process = False
++                else:
++                    p = line.split()
 +                    if in_rows:
 +                        if p[0] == 'N':
 +                            rows[p[1]] = (None, p[0])
@@ -577,13 +637,15 @@ new file mode 100644
 +                            j = n_cols
 +                        for i_aux in xrange(1, len(p), 2):
 +                            i = rows[p[i_aux]][0]
-+                            if i:
-+                                A[(rows[p[i_aux]][0], j)] = float(p[i_aux + 1])
++                            if i >= 0:
++                                A[(i, j)] = float(p[i_aux + 1])
 +                            else:
 +                                c[j] = float(p[i_aux + 1])
 +                    elif in_rhs:
 +                        for i_aux in xrange(1, len(p), 2):
 +                            b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
++                    elif in_rng:
++                        pass
 +                    elif in_bnd:
 +                        i = cols[p[2]]
 +                        if p[0] == 'LO':
@@ -605,20 +667,22 @@ new file mode 100644
 +                        elif p[0] == 'BV':
 +                            l[i] = 0
 +                            u[i] = 1
-+                            t[i] = 1
++                            cols_type[i] = 1
 +                        elif p[0] == 'LI':
 +                            l[i] = float(p[3])
-+                            t[i] = 1
++                            cols_type[i] = 1
 +                        elif p[0] == 'UI':
 +                            u[i] = float(p[3])
-+                            t[i] = 1
-+        return {'A': matrix(A),
-+                'b': vector(b),
-+                'c': vector(c),
-+                'l': matrix(l),
-+                'u': matrix(u),
-+                # 'rows_type': matrix(rows_type),
-+                'cols_type': matrix(cols_type)}
++                            cols_type[i] = 1
++                    elif in_sos:
++                        pass
++        return {'A': matrix(n_rows + 1, n_cols + 1, A),
++                'b': vector(RR, n_rows + 1, b),
++                'c': vector(RR, n_cols + 1, c),
++                'l': vector(l),
++                'u': vector(u),
++                'rows_type': vector(rows_type),
++                'cols_type': vector(cols_type)}
 +
 +def write_matrix(mdict, file_name, file_format=None):
 +    """Write matrices to file.
@@ -1009,3 +1073,63 @@ new file mode 100644
 +    - Raniere Silva (2012)
 +    """
 +    raise NotImplementedError("Can't write mps format.")
+diff --git a/sage/matrix/tests/data/sos2test.mps b/sage/matrix/tests/data/sos2test.mps
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/sos2test.mps
+@@ -0,0 +1,29 @@
++NAME          SOS2test
++ROWS
++ N  obj
++ L  c1
++ L  c2
++ E  c3
++COLUMNS
++    x1        obj                 -1   c1                  -1
++    x1        c2                   1
++    x2        obj                 -2   c1                   1
++    x2        c2                  -3   c3                   1
++    x3        obj                 -3   c1                   1
++    x3        c2                   1
++    x4        obj                 -1   c1                  10
++    x4        c3                -3.5
++    x5        obj                  0
++RHS
++    rhs       c1                  30   c2                  30
++BOUNDS
++ UP BOUND     x1                  40
++ LI BOUND     x4                   2
++ UI BOUND     x4                   3
++SOS
++ S2 SET       SOS2                10
++    SET       x1               10000
++    SET       x2               20000
++    SET       x4               40000
++    SET       x5               50000
++ENDATA
+diff --git a/sage/matrix/tests/data/testprob.mps b/sage/matrix/tests/data/testprob.mps
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/testprob.mps
+@@ -0,0 +1,21 @@
++NAME          TESTPROB
++ROWS
++ N  COST
++ L  LIM1
++ G  LIM2
++ E  MYEQN
++COLUMNS
++    XONE      COST                 1   LIM1                 1
++    XONE      LIM2                 1
++    YTWO      COST                 4   LIM1                 1
++    YTWO      MYEQN               -1
++    ZTHREE    COST                 9   LIM2                 1
++    ZTHREE    MYEQN                1
++RHS
++    RHS1      LIM1                 5   LIM2                10
++    RHS1      MYEQN                7
++BOUNDS
++ UP BND1      XONE                 4
++ LO BND1      YTWO                -1
++ UP BND1      YTWO                 1
++ENDATA
