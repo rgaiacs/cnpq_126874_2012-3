@@ -1,16 +1,16 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
-# Date 1349698379 10800
-# Node ID e249841a34eb61db551cf01871f6c807dbd7112f
-# Parent  c2ee7c0bf6487250519ff45a4c11f57a4119ae88
-First version of get_profile.
+# Date 1350304726 10800
+# Node ID 94ba3e55f682c377234661fce0c862b846e4c4cc
+# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
+Correct doctests of get_profile.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -13038,6 +13038,94 @@
- 
-         return (p, q)
+@@ -12877,6 +12877,108 @@
+                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
+             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
  
 +    def get_profile(self):
 +        r"""
@@ -30,23 +30,30 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +          sage: A = matrix([[2,0],[0,7]]); A
 +          [2 0]
 +          [0 7]
-+          sage: A.get_bandwidth()
++          sage: A.get_profile()
 +          (0, 0)
 +          sage: A = matrix([[2,0],[3,7]]); A
 +          [2 0]
 +          [3 7]
-+          sage: A.get_bandwidth()
++          sage: A.get_profile()
 +          (1, 0)
 +          sage: A = matrix([[2,5],[0,7]]); A
 +          [2 5]
 +          [0 7]
-+          sage: A.get_bandwidth()
++          sage: A.get_profile()
 +          (0, 1)
 +          sage: A = matrix([[2,5],[3,7]]); A
 +          [2 5]
 +          [3 7]
-+          sage: A.get_bandwidth()
++          sage: A.get_profile()
 +          (1, 1)
++          sage: A = matrix([[ 0, 1, 0, 0],[ 7, 8, 9,10],[ 0,15,16,17],[ 1,15,16,17]]); A
++          [ 0  1  0  0]
++          [ 7  8  9 10]
++          [ 0 15 16 17]
++          [ 1 15 16 17]
++          sage: A.get_profile()
++          (5, 4)
 +
 +      Two rectangular matrices.  ::
 +
@@ -54,21 +61,25 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +          [ 0  1  2  3  4  0  0]
 +          [ 7  8  9 10 11 12  0]
 +          [ 0 15 16 17 18 19 20]
-+          sage: B.get_bandwidth()
-+          (1, 4)
++          sage: B.get_profile()
++          Traceback (most recent call last):
++          ...
++          ValueError: matrix must be square.
 +
 +          sage: C = matrix([[0,1],[2,3],[0,5]]); C
 +          [0 1]
 +          [2 3]
 +          [0 5]
-+          sage: C.get_bandwidth()
-+          (1, 1)
++          sage: C.get_profile()
++          Traceback (most recent call last):
++          ...
++          ValueError: matrix must be square.
 +
 +      Empty matrices behave properly. ::
 +
 +          sage: E = matrix(0, 5, []); E
 +          []
-+          sage: E.get_bandwidth()
++          sage: E.get_profile()
 +          Traceback (most recent call last):
 +          ...
 +          ValueError: matrix can't be empty.
@@ -80,20 +91,23 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        if not self:
 +            raise ValueError('matrix can\'t be empty.')
 +
++        if not self.is_square():
++            raise ValueError('matrix must be square.')
++
 +        cdef int i, j
 +
 +        # Compute the lower profile.
 +        p = 0
 +        for i in xrange(1, self.nrows()):
-+            for j in xrange(min(i, self.ncols())):
++            for j in xrange(i):
 +                if self[i, j] != 0:
 +                    p = p + (i - j)
 +                    break
 +
 +        # Compute the upper bandwidth.
 +        q = 0
-+        for j in xrange(1, self.ncols()):
-+            for i in xrange(min(j, self.nrows())):
++        for i in xrange(0, self.nrows() - 1):
++            for j in xrange(self.ncols() - 1, i, -1):
 +                if self[i, j] != 0:
 +                    q = q + (j - i)
 +                    break

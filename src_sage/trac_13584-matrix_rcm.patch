@@ -1,16 +1,16 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID f55266aa97cca2c4545aab8e81cab19118abef00
-# Parent  e4776c303daf726a229aca173448ebdfdbee1f07
-First version of matrix.rcm.
+# Node ID 6a86b62fb148b244059274c86d6ab870f0f37402
+# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
+Add some matrix to doctest of rcm().
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -13126,6 +13126,365 @@
- 
-         return (p, q)
+@@ -12877,6 +12877,388 @@
+                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
+             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
  
 +    def rcm(self, root=None, root_finder='ppnf'):
 +        r"""
@@ -42,6 +42,29 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +          Traceback (most recent call last):
 +          ...
 +          ValueError: matrix must be symmetric.
++
++          A = matrix([[1, 1, 1, 0, 0],
++                      [1, 1, 1, 0, 1],
++                      [1, 1, 1, 1, 0],
++                      [0, 0, 1, 1, 0],
++                      [0, 1, 0, 0, 1]]); A
++          r = A.rcm()
++
++          A = matrix([[1, 1, 0, 0, 1, 0],
++                      [1, 1, 1, 0, 0, 1],
++                      [0, 1, 1, 0, 1, 0],
++                      [0, 0, 0, 1, 1, 0],
++                      [1, 0, 1, 1, 1, 1],
++                      [0, 1, 0, 0, 1, 1]]); A
++          r = A.rcm()
++
++          A = matrix([[1, 1, 0, 0, 1, 1],
++                      [1, 1, 1, 1, 0, 1],
++                      [0, 1, 1, 0, 1, 0],
++                      [0, 1, 0, 1, 0, 0],
++                      [1, 0, 1, 0, 1, 1],
++                      [1, 1, 0, 0, 1, 1]]); A
++          r = A.rcm()
 +
 +        ALGORITHM:
 +
