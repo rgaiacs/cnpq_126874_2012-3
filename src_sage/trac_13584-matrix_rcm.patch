@@ -1,14 +1,16 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID 6a86b62fb148b244059274c86d6ab870f0f37402
-# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
-Add some matrix to doctest of rcm().
+# Node ID 8582808f260107605a969ccb5afa8c44eaa4c339
+# Parent  2cdf82afac2e6a2e2b095bcd8b7204de1300c2bd
+Version 0.2 of rcm().
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e Tecnologico - Brasil.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12877,6 +12877,388 @@
+@@ -12877,6 +12877,515 @@
                  companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
              return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
  
@@ -35,36 +37,135 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        The permutation.
 +
 +        EXAMPLES:
-+          sage: A = matrix([[1, 1], [0, 1]]); A
-+          [1 1]
-+          [0 1]
-+          sage: A.rcm()
-+          Traceback (most recent call last):
-+          ...
-+          ValueError: matrix must be symmetric.
 +
-+          A = matrix([[1, 1, 1, 0, 0],
-+                      [1, 1, 1, 0, 1],
-+                      [1, 1, 1, 1, 0],
-+                      [0, 0, 1, 1, 0],
-+                      [0, 1, 0, 0, 1]]); A
-+          r = A.rcm()
++        The implementation only handle with symmetric matrices. ::
 +
-+          A = matrix([[1, 1, 0, 0, 1, 0],
-+                      [1, 1, 1, 0, 0, 1],
-+                      [0, 1, 1, 0, 1, 0],
-+                      [0, 0, 0, 1, 1, 0],
-+                      [1, 0, 1, 1, 1, 1],
-+                      [0, 1, 0, 0, 1, 1]]); A
-+          r = A.rcm()
++            sage: A = matrix([[1, 1], [0, 1]]); A
++            [1 1]
++            [0 1]
++            sage: A.rcm()
++            Traceback (most recent call last):
++            ...
++            ValueError: matrix must be symmetric.
 +
-+          A = matrix([[1, 1, 0, 0, 1, 1],
-+                      [1, 1, 1, 1, 0, 1],
-+                      [0, 1, 1, 0, 1, 0],
-+                      [0, 1, 0, 1, 0, 0],
-+                      [1, 0, 1, 0, 1, 1],
-+                      [1, 1, 0, 0, 1, 1]]); A
-+          r = A.rcm()
++        The following example is from "Comparative Analysis of the
++        Cuthill-McKee and the Reverse Cuthill-McKee Ordering Algorithms for
++        Sparse Matrices". ::
++
++            sage: A = matrix([[1, 1, 1, 1, 1, 1, 1],
++            ...              [1, 1, 0, 0, 0, 0, 0],
++            ...              [1, 0, 1, 0, 0, 0, 0],
++            ...              [1, 0, 0, 1, 0, 0, 0],
++            ...              [1, 0, 0, 0, 1, 0, 0],
++            ...              [1, 0, 0, 0, 0, 1, 0],
++            ...              [1, 0, 0, 0, 0, 0, 1]]); A
++            [1 1 1 1 1 1 1]
++            [1 1 0 0 0 0 0]
++            [1 0 1 0 0 0 0]
++            [1 0 0 1 0 0 0]
++            [1 0 0 0 1 0 0]
++            [1 0 0 0 0 1 0]
++            [1 0 0 0 0 0 1]
++            sage: r = A.rcm();
++            sage: A[r, r]
++            [1 0 0 0 1 0 0]
++            [0 1 0 0 1 0 0]
++            [0 0 1 0 1 0 0]
++            [0 0 0 1 1 0 0]
++            [0 0 0 0 0 1 0]
++            [1 1 1 1 1 1 1]
++            [0 0 0 0 0 1 1]
++
++        The following example if from "Análise da Influência de
++        Algoritmos de Reordenação de Matrizes Esparsas no Desempenho do Método
++        CCCG(n)".
++
++            sage: A = matrix([[1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
++            ...               [0, 1, 1, 0, 1, 0, 1, 0, 0, 1],
++            ...               [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
++            ...               [1, 0, 1, 1, 0, 1, 0, 0, 1, 0],
++            ...               [0, 1, 1, 0, 1, 0, 1, 0, 0, 0],
++            ...               [1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
++            ...               [0, 1, 0, 0, 1, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
++            ...               [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]]); A
++            [1 0 0 1 0 1 0 0 0 0]
++            [0 1 1 0 1 0 1 0 0 1]
++            [0 1 1 1 1 0 0 0 0 0]
++            [1 0 1 1 0 1 0 0 1 0]
++            [0 1 1 0 1 0 1 0 0 0]
++            [1 0 0 1 0 1 1 1 0 0]
++            [0 1 0 0 1 1 1 1 0 0]
++            [0 0 0 0 0 1 1 1 0 0]
++            [0 0 0 1 0 0 0 0 1 0]
++            [0 1 0 0 0 0 0 0 0 1]
++            sage: r = A.rcm(6)
++            sage: A[r, r]
++            [1 0 1 0 0 0 0 0 0 0]
++            [1 1 1 0 1 1 0 0 0 0]
++            [0 1 1 0 0 1 0 0 0 0]
++            [0 0 0 1 0 0 1 0 0 0]
++            [0 1 0 0 1 0 1 1 0 0]
++            [0 1 1 0 0 1 0 0 1 1]
++            [0 0 0 1 1 0 1 1 0 1]
++            [0 0 0 0 1 0 1 1 0 1]
++            [0 0 0 0 0 1 0 0 1 1]
++            [0 0 0 0 0 1 1 1 1 1]
++            sage: r = A.rcm(0)
++            sage: A[r, r]
++            [1 1 0 0 0 0 0 0 0 0]
++            [1 1 1 1 0 1 0 0 0 0]
++            [0 1 1 1 0 1 0 0 0 0]
++            [0 1 1 1 1 0 0 1 0 0]
++            [0 0 0 1 1 0 0 1 1 0]
++            [0 1 1 0 0 1 0 0 1 0]
++            [0 0 0 0 0 0 1 0 1 0]
++            [0 0 0 1 1 0 0 1 1 1]
++            [0 0 0 0 0 1 1 1 1 1]
++            [0 0 0 0 0 0 0 1 1 1]
++
++        The following example only are used only to search for erros. ::
++
++            sage: A = matrix([[1, 1, 1, 0, 0],
++            ...               [1, 1, 1, 0, 1],
++            ...               [1, 1, 1, 1, 0],
++            ...               [0, 0, 1, 1, 0],
++            ...               [0, 1, 0, 0, 1]]); A
++            [1 1 1 0 0]
++            [1 1 1 0 1]
++            [1 1 1 1 0]
++            [0 0 1 1 0]
++            [0 1 0 0 1]
++            sage: r = A.rcm()
++
++            sage: A = matrix([[1, 1, 0, 0, 1, 0],
++            ...               [1, 1, 1, 0, 0, 1],
++            ...               [0, 1, 1, 0, 1, 0],
++            ...               [0, 0, 0, 1, 1, 0],
++            ...               [1, 0, 1, 1, 1, 1],
++            ...               [0, 1, 0, 0, 1, 1]]); A
++            [1 1 0 0 1 0]
++            [1 1 1 0 0 1]
++            [0 1 1 0 1 0]
++            [0 0 0 1 1 0]
++            [1 0 1 1 1 1]
++            [0 1 0 0 1 1]
++            sage: r = A.rcm()
++
++            sage: A = matrix([[1, 1, 0, 0, 1, 1],
++            ...               [1, 1, 1, 1, 0, 1],
++            ...               [0, 1, 1, 0, 1, 0],
++            ...               [0, 1, 0, 1, 0, 0],
++            ...               [1, 0, 1, 0, 1, 1],
++            ...               [1, 1, 0, 0, 1, 1]]); A
++            [1 1 0 0 1 1]
++            [1 1 1 1 0 1]
++            [0 1 1 0 1 0]
++            [0 1 0 1 0 0]
++            [1 0 1 0 1 1]
++            [1 1 0 0 1 1]
++            sage: r = A.rcm()
 +
 +        ALGORITHM:
 +
@@ -105,17 +206,17 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        degree_s = [k for k in sorted(enumerate(degree), key=lambda x:x[1])]
 +        visited = [False for k in xrange(n)]
 +
-+        if root:
++        if root >= 0 and root < n:
 +            v = root
 +        elif root_finder == 'ppnf':
 +            v = self._ppnf()
 +
 +        q = deque([v])
++        visited[v] = True
 +        count = 0
 +
-+        visited[v] = True
 +        while len(q):
-+            v = q.pop()
++            v = q.popleft()
 +            news[v] = count
 +            count = count + 1
 +            for w in degree_s:
@@ -126,7 +227,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return news
 +
 +    def _ppnf(self):
-+        """
++        r"""
 +        Return a pseudo-peripheral node of the square symetric matrix.
 +
 +        INPUT:
@@ -171,7 +272,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return aux
 +
 +    def _rls(self, r):
-+        """
++        r"""
 +        Return a root level structure of the square symetric matrix.
 +
 +        INPUT:
@@ -185,6 +286,30 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        The root level structure.
 +
 +        EXAMPLES:
++
++        The following example are from "An implementation of a
++        pseudo-peripheral node finder". ::
++
++            sage: A = matrix([[1, 1, 0, 0, 0, 1, 0, 0],
++            ...               [1, 1, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 1, 0, 1, 0, 1, 1],
++            ...               [0, 0, 0, 1, 0, 0, 1, 1],
++            ...               [0, 0, 1, 0, 1, 0, 0, 0],
++            ...               [1, 0, 0, 0, 0, 1, 0, 1],
++            ...               [0, 0, 1, 1, 0, 0, 1, 0],
++            ...               [0, 0, 1, 1, 0, 1, 0, 1]]); A
++            [1 1 0 0 0 1 0 0]
++            [1 1 0 0 0 0 0 0]
++            [0 0 1 0 1 0 1 1]
++            [0 0 0 1 0 0 1 1]
++            [0 0 1 0 1 0 0 0]
++            [1 0 0 0 0 1 0 1]
++            [0 0 1 1 0 0 1 0]
++            [0 0 1 1 0 1 0 1]
++            sage: A._rls(5)
++            deque([[5], [0, 7], [1, 2, 3], [4, 6]])
++
++        More examples::
 +
 +            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
 +            [1 1 1 0 0]
@@ -229,7 +354,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return L
 +
 +    def _adj_list(self):
-+        """Adjacent list.
++        r"""
++        Adjacent list.
 +
 +        INPUT:
 +
@@ -239,7 +365,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        The adjacent list of the matrix.
 +
-+        EXAMPLES:
++        EXAMPLES::
 +
 +            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
 +            [1 1 1 0 0]
@@ -264,7 +390,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return l
 +
 +    def _adj(self, r):
-+        """List of adjacent nodes to ``r``.
++        r"""
++        List of adjacent nodes to ``r``.
 +
 +        INPUT:
 +
@@ -276,7 +403,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        A list of nodes adjacent to nodes in r.
 +
-+        EXAMPLES:
++        EXAMPLES::
 +
 +            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
 +            [1 1 1 0 0]
@@ -304,12 +431,13 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        l = []
 +        for j in r:
 +            for i in xrange(self.ncols()):
-+                if i not in r and self[i, j] != 0:
++                if i not in r and self[i, j] != 0 and i not in l:
 +                    l.append(i)
 +        return l
 +
 +    def _rm_root_adj(self, l1, l2):
-+        """Remove elements of above root level structure.
++        r"""
++        Remove elements of above root level structure.
 +
 +        INPUT:
 +
@@ -323,7 +451,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        A level structure.
 +
-+        EXAMPLES:
++        EXAMPLES::
 +
 +            sage: A = matrix([[1]]); A
 +            [1]
@@ -347,7 +475,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        return new
 +
 +    def _min_degree(self, l):
-+        """Select a node of minimum degree from the list ``l``.
++        r"""
++        Select a node of minimum degree from the list ``l``.
 +
 +        INPUT:
 +
@@ -359,7 +488,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        A node of minimum degree from the list ``l``.
 +
-+        EXAMPLES:
++        EXAMPLES::
 +
 +            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
 +            [1 1 1 0 0]
