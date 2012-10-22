@@ -1,20 +1,26 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID 8582808f260107605a969ccb5afa8c44eaa4c339
-# Parent  2cdf82afac2e6a2e2b095bcd8b7204de1300c2bd
-Version 0.2 of rcm().
+# Node ID 5b42d9be8e850116ac8564edfb9b2bc3f58c0894
+# Parent  0d4b62ee6589d9282eb95cb313ddd9e47f62bd3d
+Version 0.5 of rcm().
 
-Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e Tecnologico - Brasil.
+* Implemented the Reverse Cuthill-McKee reordering.
+
+This function is important because it can be used to improve the performace of
+some decompositions.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12877,6 +12877,515 @@
-                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
-             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
+@@ -13136,6 +13136,834 @@
  
-+    def rcm(self, root=None, root_finder='ppnf'):
+         return p
+ 
++    def rcm(self, root=None, r_finder='ppnf', **r_finder_options):
 +        r"""
 +        Return the permutation obtain by the Reverse Cuthill-Mckee
 +        Algorithm to be use for reduce the bandwidth of the square symetric
@@ -25,12 +31,15 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        - ``self`` - a square symetric matrix.
 +
 +        - ``root`` - the node to be use as root. If None it will be use the
-+          ``root_finder``.
++          ``r_finder``.
 +
-+        - ``root_finder`` - a string option for the root finder
++        - ``r_finder`` - a string option for the root finder
 +          algorithm to be used. The options are:
 +
-+          * 'ppnf'.
++          * ``'ppnf'`` - pseudo-peripheral node finder.
++
++        - ``r_finder_options`` - options to be pass to the root finder
++          algorithm.
 +
 +        OUTPUT:
 +
@@ -48,37 +57,36 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +            ...
 +            ValueError: matrix must be symmetric.
 +
-+        The following example is from "Comparative Analysis of the
-+        Cuthill-McKee and the Reverse Cuthill-McKee Ordering Algorithms for
-+        Sparse Matrices". ::
++        The following example is from "Reducing the bandwidth of sparse
++        symmetric matrices", Figure 2. ::
 +
-+            sage: A = matrix([[1, 1, 1, 1, 1, 1, 1],
-+            ...              [1, 1, 0, 0, 0, 0, 0],
-+            ...              [1, 0, 1, 0, 0, 0, 0],
-+            ...              [1, 0, 0, 1, 0, 0, 0],
-+            ...              [1, 0, 0, 0, 1, 0, 0],
-+            ...              [1, 0, 0, 0, 0, 1, 0],
-+            ...              [1, 0, 0, 0, 0, 0, 1]]); A
-+            [1 1 1 1 1 1 1]
-+            [1 1 0 0 0 0 0]
-+            [1 0 1 0 0 0 0]
-+            [1 0 0 1 0 0 0]
-+            [1 0 0 0 1 0 0]
-+            [1 0 0 0 0 1 0]
-+            [1 0 0 0 0 0 1]
-+            sage: r = A.rcm();
-+            sage: A[r, r]
-+            [1 0 0 0 1 0 0]
-+            [0 1 0 0 1 0 0]
-+            [0 0 1 0 1 0 0]
-+            [0 0 0 1 1 0 0]
-+            [0 0 0 0 0 1 0]
-+            [1 1 1 1 1 1 1]
-+            [0 0 0 0 0 1 1]
++            sage: A = matrix([[1, 1, 0, 1, 0, 0, 0, 0, 1, 0],
++            ...               [1, 1, 1, 0, 0, 0, 0, 0, 1, 0],
++            ...               [0, 1, 1, 0, 1, 0, 0, 0, 1, 0],
++            ...               [1, 0, 0, 1, 1, 1, 0, 0, 1, 1],
++            ...               [0, 0, 1, 1, 1, 0, 0, 1, 1, 1],
++            ...               [0, 0, 0, 1, 0, 1, 1, 0, 0, 1],
++            ...               [0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
++            ...               [0, 0, 0, 0, 1, 0, 1, 1, 0, 1],
++            ...               [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
++            ...               [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]); A
++            [1 1 0 1 0 0 0 0 1 0]
++            [1 1 1 0 0 0 0 0 1 0]
++            [0 1 1 0 1 0 0 0 1 0]
++            [1 0 0 1 1 1 0 0 1 1]
++            [0 0 1 1 1 0 0 1 1 1]
++            [0 0 0 1 0 1 1 0 0 1]
++            [0 0 0 0 0 1 1 1 0 1]
++            [0 0 0 0 1 0 1 1 0 1]
++            [1 1 1 1 1 0 0 0 1 1]
++            [0 0 0 1 1 1 1 1 1 1]
++            sage: r = A.rcm(0); r
++            [7, 6, 9, 4, 5, 2, 8, 3, 1, 0]
++            sage: r = A.rcm(1); r
++            [6, 7, 5, 9, 4, 3, 8, 2, 0, 1]
 +
-+        The following example if from "Análise da Influência de
-+        Algoritmos de Reordenação de Matrizes Esparsas no Desempenho do Método
-+        CCCG(n)".
++        The following example is from "Computer Solution of Sparse Linear
++        Systems", Figure 4.4.2. ::
 +
 +            sage: A = matrix([[1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
 +            ...               [0, 1, 1, 0, 1, 0, 1, 0, 0, 1],
@@ -100,72 +108,36 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +            [0 0 0 0 0 1 1 1 0 0]
 +            [0 0 0 1 0 0 0 0 1 0]
 +            [0 1 0 0 0 0 0 0 0 1]
-+            sage: r = A.rcm(6)
-+            sage: A[r, r]
-+            [1 0 1 0 0 0 0 0 0 0]
-+            [1 1 1 0 1 1 0 0 0 0]
-+            [0 1 1 0 0 1 0 0 0 0]
-+            [0 0 0 1 0 0 1 0 0 0]
-+            [0 1 0 0 1 0 1 1 0 0]
-+            [0 1 1 0 0 1 0 0 1 1]
-+            [0 0 0 1 1 0 1 1 0 1]
-+            [0 0 0 0 1 0 1 1 0 1]
-+            [0 0 0 0 0 1 0 0 1 1]
-+            [0 0 0 0 0 1 1 1 1 1]
-+            sage: r = A.rcm(0)
-+            sage: A[r, r]
-+            [1 1 0 0 0 0 0 0 0 0]
-+            [1 1 1 1 0 1 0 0 0 0]
-+            [0 1 1 1 0 1 0 0 0 0]
-+            [0 1 1 1 1 0 0 1 0 0]
-+            [0 0 0 1 1 0 0 1 1 0]
-+            [0 1 1 0 0 1 0 0 1 0]
-+            [0 0 0 0 0 0 1 0 1 0]
-+            [0 0 0 1 1 0 0 1 1 1]
-+            [0 0 0 0 0 1 1 1 1 1]
-+            [0 0 0 0 0 0 0 1 1 1]
++            sage: r = A.rcm(6); r
++            [8, 3, 0, 9, 2, 5, 1, 4, 7, 6]
++            sage: r = A.rcm(0); r
++            [9, 1, 4, 6, 7, 2, 8, 5, 3, 0]
 +
-+        The following example only are used only to search for erros. ::
++        The following examples join the previous one. ::
 +
-+            sage: A = matrix([[1, 1, 1, 0, 0],
-+            ...               [1, 1, 1, 0, 1],
-+            ...               [1, 1, 1, 1, 0],
-+            ...               [0, 0, 1, 1, 0],
-+            ...               [0, 1, 0, 0, 1]]); A
-+            [1 1 1 0 0]
-+            [1 1 1 0 1]
-+            [1 1 1 1 0]
-+            [0 0 1 1 0]
-+            [0 1 0 0 1]
-+            sage: r = A.rcm()
-+
-+            sage: A = matrix([[1, 1, 0, 0, 1, 0],
-+            ...               [1, 1, 1, 0, 0, 1],
-+            ...               [0, 1, 1, 0, 1, 0],
-+            ...               [0, 0, 0, 1, 1, 0],
-+            ...               [1, 0, 1, 1, 1, 1],
-+            ...               [0, 1, 0, 0, 1, 1]]); A
-+            [1 1 0 0 1 0]
-+            [1 1 1 0 0 1]
-+            [0 1 1 0 1 0]
-+            [0 0 0 1 1 0]
-+            [1 0 1 1 1 1]
-+            [0 1 0 0 1 1]
-+            sage: r = A.rcm()
-+
-+            sage: A = matrix([[1, 1, 0, 0, 1, 1],
-+            ...               [1, 1, 1, 1, 0, 1],
-+            ...               [0, 1, 1, 0, 1, 0],
-+            ...               [0, 1, 0, 1, 0, 0],
-+            ...               [1, 0, 1, 0, 1, 1],
-+            ...               [1, 1, 0, 0, 1, 1]]); A
-+            [1 1 0 0 1 1]
-+            [1 1 1 1 0 1]
-+            [0 1 1 0 1 0]
-+            [0 1 0 1 0 0]
-+            [1 0 1 0 1 1]
-+            [1 1 0 0 1 1]
-+            sage: r = A.rcm()
++            sage: A = matrix([[1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
++            ...               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]]); A
++            20 x 20 dense matrix over Integer Ring (type 'print A.str()' to see all of the entries)
++            sage: r = A.rcm(); r
++            [10, 18, 15, 17, 13, 16, 14, 12, 11, 19, 0, 1, 8, 3, 2, 5, 9, 4, 6, 7]
 +
 +        ALGORITHM:
 +
@@ -189,56 +161,247 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        if not self.is_symmetric():
 +            raise ValueError('matrix must be symmetric.')
 +
-+        cdef int n = self.ncols()
++        cdef int n
 +        cdef int i, j
-+        degree = [0 for k in xrange(n)]
-+        news = [0 for k in xrange(n)]
++        # ``reorder[i]`` store the new label for the ``i`` node.
++        reorder = [0 for k in xrange(self.ncols())]
++        # ``shift`` is used to correct the new label when have more than one
++        # connected component.
++        shift = 0
 +
-+        # Build adjacent list of matrix.
-+        adj = self._adj_list()
-+        for i in xrange(n):
-+            degree[i] = len(adj[i])
++        # get the connected component.
++        components = self._fcc()
++        # print("Have been detect {0} connected components.".format(len(components)))
++        # sort elements of ``components`` by the size.
++        components.sort(key=len)
 +
-+        # TODO Loop over the neighboor.
-+        # given a list of numbers degree, the degree_s is a list of tuples
-+        # where the each tuple is the form of (i, degree[i]) and the list is
-+        # sorted based on the degree[i].
-+        degree_s = [k for k in sorted(enumerate(degree), key=lambda x:x[1])]
-+        visited = [False for k in xrange(n)]
++        number_components = 0
++        for component in components:
++            # print("Running the algorithm for the {0} connected component.".format(number_components))
++            number_components += 1
++            # print(component)
++            if len(component) > 1:
++                # Use the ``self`` matrix in blocks. This is not eficient.
++                s_comp = sorted(component)
++                M_comp = self[s_comp, s_comp]
++                n = M_comp.ncols()
 +
-+        if root >= 0 and root < n:
-+            v = root
-+        elif root_finder == 'ppnf':
-+            v = self._ppnf()
++                adj = M_comp._adj_list()
++                # print(adj)
++                degree = [len(adj[i]) for i in xrange(n)]
++                # degree_s is a list of tuples where the each tuple is the form of
++                # (i, degree[i]) and the list is sorted based on the degree[i].
++                degree_s = sorted(enumerate(degree), key=lambda x:x[1])
 +
-+        q = deque([v])
-+        visited[v] = True
-+        count = 0
++                t_reorder = [0 for k in xrange(n)]
++                visited = [False for k in xrange(n)]
 +
-+        while len(q):
-+            v = q.popleft()
-+            news[v] = count
-+            count = count + 1
-+            for w in degree_s:
-+                if w[0] in adj[v] and visited[w[0]] == False:
-+                    q.append(w[0])
-+                    visited[w[0]] = True
-+        news.reverse()
-+        return news
++                if root >= 0 and root < n:
++                    v = root
++                elif r_finder == 'ppnf':
++                    v = M_comp._ppnf(**r_finder_options)
++                print('root = {0}'.format(v))
 +
-+    def _ppnf(self):
++                q = deque([v])
++                visited[v] = True
++                count = 0
++
++                while len(q):
++                    # print(80*'-')
++                    v = q.popleft()
++                    # print('v = {0}'.format(v))
++                    t_reorder[v] = count
++                    count = count + 1
++    #                 print(degree_s)
++                    for w in degree_s:
++                        if w[0] in adj[v] and not visited[w[0]]:
++                            # print('w = {0}'.format(w))
++                            q.append(w[0])
++                            visited[w[0]] = True
++
++                # print('t_reorder = {0}'.format(t_reorder))
++                # print('reversed(t_reorder) = {0}'.format([i for i in reversed(t_reorder)]))
++                for i in xrange(n):
++                    reorder[s_comp[i]] = t_reorder[i] + shift
++                shift = n
++            else:
++                reorder[component[0]] = shift
++                shift += 1
++        return [x[0] for x in sorted(enumerate(reorder), key=lambda x:x[1],
++            reverse=True)]
++
++    def _fcc(self):
++        r"""
++        Finding Connected Components of a symmetric matrix.
++
++        INPUT:
++
++        - ``self`` - a square symmetric matrix.
++
++        OUTPUT:
++
++        A list of list with the labels of the elements in each
++        components.
++
++        EXAMPLES::
++
++            sage: A = identity_matrix(1); A
++            [1]
++            sage: l = A._fcc()
++            sage: [sorted(c) for c in l]
++            [[0]]
++            sage: A = identity_matrix(4); A
++            [1 0 0 0]
++            [0 1 0 0]
++            [0 0 1 0]
++            [0 0 0 1]
++            sage: l = A._fcc()
++            sage: [sorted(c) for c in l]
++            [[0], [1], [2], [3]]
++            sage: A = matrix([[1, 1, 0, 0],
++            ...               [1, 1, 0, 0],
++            ...               [0, 0, 1, 0],
++            ...               [0, 0, 0, 1]]); A
++            [1 1 0 0]
++            [1 1 0 0]
++            [0 0 1 0]
++            [0 0 0 1]
++            sage: l = A._fcc()
++            sage: [sorted(c) for c in l]
++            [[0, 1], [2], [3]]
++
++        A bigger matrix.
++
++            sage: A = matrix([[1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
++            ...               [0, 1, 1, 0, 1, 0, 1, 0, 0, 1],
++            ...               [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
++            ...               [1, 0, 1, 1, 0, 1, 0, 0, 1, 0],
++            ...               [0, 1, 1, 0, 1, 0, 1, 0, 0, 0],
++            ...               [1, 0, 0, 1, 0, 1, 1, 1, 0, 0],
++            ...               [0, 1, 0, 0, 1, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
++            ...               [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
++            ...               [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]])
++            sage: l = A._fcc()
++            sage: [sorted(c) for c in l]
++            [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
++
++        If the matrix is empty, the function's return is a empty list. ::
++
++            sage: A = matrix(); A
++            []
++            sage: A._fcc()
++            []
++
++        The matrix must be symmetric. ::
++
++            sage: A = matrix([[1, 1],
++            ...               [0, 0]])
++            sage: A._fcc()
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix must be symmetric
++
++        ALGORITHM:
++
++        See the references below.
++
++        REFERENCES:
++
++        - [Eck04] CPSC 327: Data Structures and Algorithms - Chapter 9: Graph
++          Algorithms. David J. Eck.
++
++        AUTHORS:
++
++        - Raniere Silva (2012): initial version.
++        """
++        if not self.is_symmetric():
++            raise ValueError('the matrix must be symmetric')
++
++        cdef int n = self.ncols()
++        cdef int j
++
++        comp_number = 0
++        comp_info = [None for i in xrange(n)]
++        comp_list = []
++        trans_list = []
++
++        while True:
++            # Check if travell for all vertices.
++            if not trans_list:
++                for j in xrange(n):
++                    if comp_info[j] is None:
++                        # Add new component.
++                        trans_list.append(j)
++                        comp_number += 1
++                        comp_info[j] = comp_number - 1
++                        comp_list.append([j])
++                        break
++            if not trans_list:
++                break
++            while trans_list:
++                v = trans_list.pop()
++                for j in xrange(n):
++                    if comp_info[j] is None and v != j and self[v, j] != 0:
++                        comp_info[j] = comp_number - 1
++                        comp_list[comp_number - 1].append(j)
++                        trans_list.append(j)
++        return comp_list
++
++    def _ppnf(self, r=0):
 +        r"""
 +        Return a pseudo-peripheral node of the square symetric matrix.
 +
 +        INPUT:
 +
-+        - ``self`` - a square symetric matrix.
++        - ``self`` - a square symmetric matrix.
++
++        - ``r`` - the number of a valid column of the matrix to be used as the
++          first root. If ``None`` use a random number.
 +
 +        OUTPUT:
 +
 +        A pseudo-peripheral node.
 +
 +        EXAMPLES:
++
++        If the first root is `< 0` or `>= n`, where `n` is the number
++        of columns of the matrix a error will raise. ::
++
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._ppnf(2)
++            Traceback (most recent call last):
++            ...
++            ValueError: the first root is out of range
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._ppnf(-2)
++            Traceback (most recent call last):
++            ...
++            ValueError: the first root is out of range
++
++        If the matrix is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._ppnf()
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix can't be empty
++
++        Example from [GL79]:
++
++            sage: A = matrix([[ 1, 1, 0, 1, 0, 0, 1, 0],
++            ...               [ 1, 1, 1, 1, 0, 0, 0, 0],
++            ...               [ 0, 1, 1, 0, 0, 0, 0, 0],
++            ...               [ 1, 1, 0, 1, 1, 0, 0, 0],
++            ...               [ 0, 0, 0, 1, 1, 1, 0, 0],
++            ...               [ 0, 0, 0, 0, 1, 1, 1, 1],
++            ...               [ 1, 0, 0, 0, 0, 1, 1, 1],
++            ...               [ 0, 0, 0, 0, 0, 1, 1, 1]])
++            sage: A._ppnf()
++            7
 +
 +        ALGORITHM:
 +
@@ -254,22 +417,43 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        - Raniere Silva (2012): initial version.
 +        """
-+        r = 1  # Any node of the graph.
-+        L = self._rls([r])
++        import random
++
++        # Choose an abitrary node `r`.
++        # print('ncols: {0}'.format(self.ncols()))
++        if not self.ncols():
++            raise ValueError("the matrix can't be empty")
++        if r is None:
++            r = random.randrange(self.ncols())
++        elif r < 0 or r >= self.ncols():
++            raise ValueError("the first root is out of range")
++        print('root: {0}'.format(r))
++
 +        stop = False
 +        it = 0
-+        aux = 0
 +
-+        while not stop and it < 10:
++        # Construct the level structure rooted at `r`.
++        L = self._rls(r)
++        # print(L)
++
++        while not stop and it < 2^10:
 +            it = it + 1
-+            aux = self._min_degree(L[-1])
-+            auxL = self._rls([aux])
-+            if len(auxL) > len(L):
-+                r = aux
-+                L = auxL
++            # Choose a node `x` of minimum degree in the higher level.
++            print(L[-1])
++            x = self._min_degree(L[-1])
++            print('x: {0}'.format(x))
++            # Construct the level structure rooted at `x`.
++            Lx = self._rls(x)
++            # print(Lx)
++            # print('{0} >? {1}'.format(len(Lx), len(L)))
++            if len(Lx) > len(L):
++                r = x
++                L = Lx
 +            else:
++                if len(Lx) == len(L):
++                    x = self._min_degree(Lx[-1])
 +                stop = True
-+        return aux
++        return x
 +
 +    def _rls(self, r):
 +        r"""
@@ -322,6 +506,15 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +            sage: A._rls(4)
 +            deque([[4], [1], [0, 2], [3]])
 +
++        If the matrix is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._rls(2)
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix can't be empty
++
 +        ALGORITHM:
 +
 +        See the references below.
@@ -338,15 +531,20 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        """
 +        from collections import deque
 +
++        if not self.ncols():
++            raise ValueError("the matrix can't be empty")
++
 +        cdef int i
 +
 +        L = deque([])
 +        L.append([r])
 +        L.append(self._adj([r]))
++        # print(L)
++        # print(self[0,:])
 +
 +        stop = False
 +        while not stop:
-+            aux = self._rm_root_adj(self._adj(L[-1]), L[-2])
++            aux = [x for x in self._adj(L[-1]) if x not in L[-2]]
 +            if not aux:
 +                stop = True
 +            else:
@@ -365,21 +563,63 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        The adjacent list of the matrix.
 +
-+        EXAMPLES::
++        EXAMPLES:
 +
-+            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
-+            [1 1 1 0 0]
-+            [1 1 1 0 1]
-+            [1 1 1 1 0]
-+            [0 0 1 1 0]
-+            [0 1 0 0 1]
++        A trivial test when the matrix is `1 \times 1`. ::
++
++            sage: A = matrix([1]); A
++            [1]
 +            sage: A._adj_list()
-+            [[1, 2], [0, 2, 4], [0, 1, 3], [2], [1]]
++            [[]]
++
++        A trivial test when the matrix is `2 \times 2`. ::
++
++            sage: A = matrix([[1, 1],
++            ...               [1, 1]]); A
++            [1 1]
++            [1 1]
++            sage: A._adj_list()
++            [[1], [0]]
++
++        More examples. ::
++
++            sage: A= matrix([[1, 1, 1],
++            ...              [1, 1, 0],
++            ...              [1, 0, 1]]); A
++            [1 1 1]
++            [1 1 0]
++            [1 0 1]
++            sage: A._adj_list()
++            [[1, 2], [0], [0]]
++            sage: A = matrix([[1, 0, 1, 0, 0],
++            ...               [0, 1, 1, 0, 0],
++            ...               [1, 1, 1, 1, 1],
++            ...               [0, 0, 1, 1, 0],
++            ...               [0, 0, 1, 0, 1]]); A
++            [1 0 1 0 0]
++            [0 1 1 0 0]
++            [1 1 1 1 1]
++            [0 0 1 1 0]
++            [0 0 1 0 1]
++            sage: A._adj_list()
++            [[2], [2], [0, 1, 3, 4], [2], [2]]
++
++        If the matrix is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._adj_list()
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix can't be empty
 +
 +        AUTHORS:
 +
 +        - Raniere Silva (2012): initial version.
 +        """
++        if not self.ncols():
++            raise ValueError("the matrix can't be empty")
++
 +        l = []
 +        for i in xrange(self.ncols()):
 +            aux = []
@@ -391,7 +631,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +    def _adj(self, r):
 +        r"""
-+        List of adjacent nodes to ``r``.
++        List of adjacent nodes to nodes in ``r``.
 +
 +        INPUT:
 +
@@ -401,78 +641,104 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        OUTPUT:
 +
-+        A list of nodes adjacent to nodes in r.
++        A list of nodes adjacent to nodes in ``r``.
 +
-+        EXAMPLES::
++        EXAMPLES:
 +
-+            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
-+            [1 1 1 0 0]
-+            [1 1 1 0 1]
-+            [1 1 1 1 0]
-+            [0 0 1 1 0]
-+            [0 1 0 0 1]
++        A trivial test when the matrix is `1 \times 1`. ::
++
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._adj([0])
++            []
++
++        A trivial test when the matrix is `2 \times 2`. ::
++
++            sage: A = matrix([[1, 1],
++            ...               [1, 1]]); A
++            [1 1]
++            [1 1]
++            sage: A._adj([0])
++            [1]
++            sage: A._adj([0, 1])
++            []
++
++        If any element of the list is `< 0` or `>= n`, where `n` is the number
++        of columns of the matrix a error will raise. ::
++
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._adj([2])
++            Traceback (most recent call last):
++            ...
++            ValueError: at least one element of the list is out of range
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._adj([-2])
++            Traceback (most recent call last):
++            ...
++            ValueError: at least one element of the list is out of range
++
++        More examples. ::
++
++            sage: A= matrix([[1, 1, 1],
++            ...              [1, 1, 0],
++            ...              [1, 0, 1]]); A
++            [1 1 1]
++            [1 1 0]
++            [1 0 1]
 +            sage: A._adj([0])
 +            [1, 2]
++            sage: A._adj([1, 2])
++            [0]
++            sage: A = matrix([[1, 0, 1, 0, 0],
++            ...               [0, 1, 1, 0, 0],
++            ...               [1, 1, 1, 1, 1],
++            ...               [0, 0, 1, 1, 0],
++            ...               [0, 0, 1, 0, 1]]); A
++            [1 0 1 0 0]
++            [0 1 1 0 0]
++            [1 1 1 1 1]
++            [0 0 1 1 0]
++            [0 0 1 0 1]
++            sage: A._adj([1, 2])
++            [0, 3, 4]
++
++        If the list is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._adj([])
++            Traceback (most recent call last):
++            ...
++            ValueError: the list can't be empty
++
++        If the matrix is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
 +            sage: A._adj([1])
-+            [0, 2, 4]
-+            sage: A._adj([2])
-+            [0, 1, 3]
-+            sage: A._adj([3])
-+            [2]
-+            sage: A._adj([4])
-+            [1]
-+            sage: A._adj([0,1,2])
-+            [4, 3]
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix can't be empty
 +
 +        AUTHORS:
 +
 +        - Raniere Silva (2012): initial version.
 +        """
++        if not r:
++            raise ValueError("the list can't be empty")
++        if not self.ncols():
++            raise ValueError("the matrix can't be empty")
++
 +        l = []
 +        for j in r:
++            if j < 0 or j >= self.ncols():
++                raise ValueError("at least one element of the list is out of range")
 +            for i in xrange(self.ncols()):
-+                if i not in r and self[i, j] != 0 and i not in l:
++                if i not in r and self[i, j] and i not in l:
 +                    l.append(i)
 +        return l
-+
-+    def _rm_root_adj(self, l1, l2):
-+        r"""
-+        Remove elements of above root level structure.
-+
-+        INPUT:
-+
-+        - ``self`` - a square symetric matrix.
-+
-+        - ``l1`` - a level structure.
-+
-+        - ``l2`` - the level structure above l1.
-+
-+        OUTPUT:
-+
-+        A level structure.
-+
-+        EXAMPLES::
-+
-+            sage: A = matrix([[1]]); A
-+            [1]
-+            sage: A._rm_root_adj([0], [0])
-+            []
-+            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0])
-+            [1, 2, 3, 4, 5]
-+            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0, 1, 2])
-+            [3, 4, 5]
-+            sage: A._rm_root_adj([0, 1, 2, 3, 4, 5], [0, 3, 5])
-+            [1, 2, 4]
-+
-+        AUTHORS:
-+
-+        - Raniere Silva (2012): initial version.
-+        """
-+        new = []
-+        for i in l1:
-+            if i not in l2:
-+                new.append(i)
-+        return new
 +
 +    def _min_degree(self, l):
 +        r"""
@@ -482,43 +748,102 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        - ``self`` - a square symetric matrix.
 +
-+        - ``l`` - a list of nodes.
++        - ``l`` - a non-empty list of nodes.
 +
 +        OUTPUT:
 +
 +        A node of minimum degree from the list ``l``.
 +
-+        EXAMPLES::
++        EXAMPLES:
 +
-+            sage: A = matrix([[1, 1, 1, 0, 0], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [0, 0, 1, 1, 0], [0, 1, 0, 0, 1]]); A
-+            [1 1 1 0 0]
-+            [1 1 1 0 1]
-+            [1 1 1 1 0]
-+            [0 0 1 1 0]
-+            [0 1 0 0 1]
++        A trivial test when the matrix is `1 \times 1`. ::
++
++            sage: A = matrix([1]); A
++            [1]
 +            sage: A._min_degree([0])
 +            0
-+            sage: A._min_degree([1])
++
++        If any element of the list is `< 0` or `>= n`, where `n` is the number
++        of columns of the matrix a error will raise. ::
++
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._min_degree([2])
++            Traceback (most recent call last):
++            ...
++            ValueError: at least one element of the list is out of range
++            sage: A = matrix([1]); A
++            [1]
++            sage: A._min_degree([-2])
++            Traceback (most recent call last):
++            ...
++            ValueError: at least one element of the list is out of range
++
++        More examples. ::
++
++            sage: A= matrix([[1, 1, 1],
++            ...              [1, 1, 0],
++            ...              [1, 0, 1]]); A
++            [1 1 1]
++            [1 1 0]
++            [1 0 1]
++            sage: A._min_degree([0, 1, 2])
 +            1
-+            sage: A._min_degree([0,1,2])
-+            0
-+            sage: A._min_degree([0,1,2,3,4])
++            sage: A = matrix([[1, 0, 1, 0, 0],
++            ...               [0, 1, 1, 0, 0],
++            ...               [1, 1, 1, 1, 1],
++            ...               [0, 0, 1, 1, 0],
++            ...               [0, 0, 1, 0, 1]]); A
++            [1 0 1 0 0]
++            [0 1 1 0 0]
++            [1 1 1 1 1]
++            [0 0 1 1 0]
++            [0 0 1 0 1]
++            sage: A._min_degree([1, 2, 3])
++            1
++            sage: A._min_degree([3, 1, 4])
 +            3
++
++        If the list is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._min_degree([])
++            Traceback (most recent call last):
++            ...
++            ValueError: the list can't be empty
++
++        If the matrix is empty a error must be raise. ::
++
++            sage: A = matrix([]); A
++            []
++            sage: A._min_degree([1])
++            Traceback (most recent call last):
++            ...
++            ValueError: the matrix can't be empty
 +
 +        AUTHORS:
 +
 +        - Raniere Silva (2012): initial version.
 +        """
++        if not l:
++            raise ValueError("the list can't be empty")
++        if not self.ncols():
++            raise ValueError("the matrix can't be empty")
++
 +        r = l[0]
-+        g = float('inf')
++        g = float('-inf')
 +        cdef int j
 +
 +        for i in l:
++            if i < 0 or i >= self.ncols():
++                raise ValueError("at least one element of the list is out of range")
 +            aux = 0
 +            for j in xrange(self.ncols()):
-+                if self[i, j] != 0:
-+                    aux = aux + 1
-+            if aux < g:
++                if i != j and self[i, j]:
++                    aux += 1
++            # print('{0}: {1}'.format(i, aux))
++            if aux > g:
 +                g = aux
 +                r = i
 +        return r

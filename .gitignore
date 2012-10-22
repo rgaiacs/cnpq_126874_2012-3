@@ -49,3 +49,7 @@
 *.exe
 *.out
 *.app
+
+# Others
+references/*
+netlib/*

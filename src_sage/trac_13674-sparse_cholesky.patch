@@ -1,0 +1,13 @@
+# HG changeset patch
+# User Raniere Silva <r.gaia.cs@gmail.com>
+# Date 1351642810 7200
+# Node ID ba162e4e4660c18b06942920204c8ed65d550119
+# Parent  a64c75dc520c875e9180d8891019705092cddb20
+Version 0.0 of sparse cholesky.
+
+The sparse cholesky is important because it is used in many real applications of
+many fields and today large sparse matrix are commonn.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
+

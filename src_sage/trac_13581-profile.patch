@@ -1,20 +1,29 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1350304726 10800
-# Node ID 94ba3e55f682c377234661fce0c862b846e4c4cc
-# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
-Correct doctests of get_profile.
+# Node ID 5fbd0c4dc94c91bfde135d906950ee8bbfaa5539
+# Parent  29fdb36330271bb91d2fde39d7472d59ebef0a5f
+version 0.2 of get_profile().
+
+* Now it return just one integer as describe by Cuthill and McKee.
+
+This function is important because it is used to benchmark operations with
+sparse matrix.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12877,6 +12877,108 @@
-                 companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
-             return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
+@@ -13032,6 +13032,110 @@
+ 
+         return (p, q)
  
 +    def get_profile(self):
 +        r"""
-+        Return the number of elementos of the profile of the matrix.
++        Return the number of elementos in the profile of the
++        symmetric matrix.
 +
 +        INPUT:
 +
@@ -22,67 +31,76 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        OUTPUT:
 +
-+        A tuple ``(p, q)`` where ``p`` is the lower profile and ``q`` is the
-+        upper profile.
++        The profile of the matrix.
 +
 +        EXAMPLES::
 +
-+          sage: A = matrix([[2,0],[0,7]]); A
-+          [2 0]
-+          [0 7]
-+          sage: A.get_profile()
-+          (0, 0)
-+          sage: A = matrix([[2,0],[3,7]]); A
-+          [2 0]
-+          [3 7]
-+          sage: A.get_profile()
-+          (1, 0)
-+          sage: A = matrix([[2,5],[0,7]]); A
-+          [2 5]
-+          [0 7]
-+          sage: A.get_profile()
-+          (0, 1)
-+          sage: A = matrix([[2,5],[3,7]]); A
-+          [2 5]
-+          [3 7]
-+          sage: A.get_profile()
-+          (1, 1)
-+          sage: A = matrix([[ 0, 1, 0, 0],[ 7, 8, 9,10],[ 0,15,16,17],[ 1,15,16,17]]); A
-+          [ 0  1  0  0]
-+          [ 7  8  9 10]
-+          [ 0 15 16 17]
-+          [ 1 15 16 17]
-+          sage: A.get_profile()
-+          (5, 4)
++            sage: A = matrix([[2,0],[0,7]]); A
++            [2 0]
++            [0 7]
++            sage: A.get_profile()
++            0
++            sage: A = matrix([[2,5],[5,7]]); A
++            [2 5]
++            [5 7]
++            sage: A.get_profile()
++            1
++            sage: A = matrix([[ 0, 1, 0, 0],
++            ...               [ 1, 8, 9,15],
++            ...               [ 0, 9,16,17],
++            ...               [ 0,15,17,17]]); A
++            [ 0  1  0  0]
++            [ 1  8  9 15]
++            [ 0  9 16 17]
++            [ 0 15 17 17]
++            sage: A.get_profile()
++            4
 +
-+      Two rectangular matrices.  ::
++        Non-symmetric matrices. ::
 +
-+          sage: B = matrix([[ 0, 1, 2, 3, 4, 0, 0],[ 7, 8, 9,10,11,12, 0],[ 0,15,16,17,18,19,20]]); B
-+          [ 0  1  2  3  4  0  0]
-+          [ 7  8  9 10 11 12  0]
-+          [ 0 15 16 17 18 19 20]
-+          sage: B.get_profile()
-+          Traceback (most recent call last):
-+          ...
-+          ValueError: matrix must be square.
++            sage: A = matrix([[2,0],[3,7]]); A
++            [2 0]
++            [3 7]
++            sage: A.get_profile()
++            Traceback (most recent call last):
++            ...
++            ValueError: matrix must be symmetric.
 +
-+          sage: C = matrix([[0,1],[2,3],[0,5]]); C
-+          [0 1]
-+          [2 3]
-+          [0 5]
-+          sage: C.get_profile()
-+          Traceback (most recent call last):
-+          ...
-+          ValueError: matrix must be square.
++        Two rectangular matrices.  ::
 +
-+      Empty matrices behave properly. ::
++            sage: B = matrix([[ 0, 1, 2, 3, 4, 0, 0],
++            ...               [ 7, 8, 9,10,11,12, 0],
++            ...               [ 0,15,16,17,18,19,20]]); B
++            [ 0  1  2  3  4  0  0]
++            [ 7  8  9 10 11 12  0]
++            [ 0 15 16 17 18 19 20]
++            sage: B.get_profile()
++            Traceback (most recent call last):
++            ...
++            ValueError: matrix must be symmetric.
++            sage: C = matrix([[0,1],[2,3],[0,5]]); C
++            [0 1]
++            [2 3]
++            [0 5]
++            sage: C.get_profile()
++            Traceback (most recent call last):
++            ...
++            ValueError: matrix must be symmetric.
 +
-+          sage: E = matrix(0, 5, []); E
-+          []
-+          sage: E.get_profile()
-+          Traceback (most recent call last):
-+          ...
-+          ValueError: matrix can't be empty.
++        Empty matrices behave properly. ::
++
++            sage: E = matrix(0, 5, []); E
++            []
++            sage: E.get_profile()
++            Traceback (most recent call last):
++            ...
++            ValueError: matrix can't be empty.
++
++        REFERENCES:
++
++        - [CM69] E. Cuthill and J. McKee. Reducing the bandwidth of sparse
++          symmetric matrics. In Proceedings of the 1969 24th national
++          conference, ACM '69, pages 157-172, New York, NY, USA, 1969. ACM.
 +
 +        AUTHORS:
 +
@@ -91,8 +109,8 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        if not self:
 +            raise ValueError('matrix can\'t be empty.')
 +
-+        if not self.is_square():
-+            raise ValueError('matrix must be square.')
++        if not self.is_symmetric():
++            raise ValueError('matrix must be symmetric.')
 +
 +        cdef int i, j
 +
@@ -104,15 +122,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +                    p = p + (i - j)
 +                    break
 +
-+        # Compute the upper bandwidth.
-+        q = 0
-+        for i in xrange(0, self.nrows() - 1):
-+            for j in xrange(self.ncols() - 1, i, -1):
-+                if self[i, j] != 0:
-+                    q = q + (j - i)
-+                    break
-+
-+        return (p, q)
++        return p
 +
      # A limited number of access-only properties are provided for matrices
      property T:

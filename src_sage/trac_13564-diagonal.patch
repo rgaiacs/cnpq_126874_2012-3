@@ -1,9 +1,17 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349707768 10800
-# Node ID cda4ddea7d532034902561ce2246f262e2cba017
-# Parent  d06cf4b2215d37d3a87a58f65ac53234502dd471
-Improve diagonal to return any of the diagonals parallel to the main diagonal.
+# Node ID 1225aed36baff1214cce122d11f87aaa2491d44e
+# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
+Improve in diagonal().
+
+* Now it return any of the diagonals parallel to the main diagonal.
+
+This function is important because it is used to benchmark operations with
+sparse matrix.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx

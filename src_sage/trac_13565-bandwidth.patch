@@ -1,14 +1,20 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349703466 10800
-# Node ID e4d77b6433ffb41af7851a7fee52ef4abfad17db
-# Parent  f41361170730ff2a15202de6c1a7dfd4b8e66ed9
-First version of get_bandwidth.
+# Node ID 1ebdce352e6c9cd3c228374fccc1cd72650a10f2
+# Parent  05f00d34acbd7a4340a322d3752461edbae46fd0
+Version 0.1 of get_bandwidth().
+
+This function is important because it is used to benchmark operations with
+sparse matrix.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
 
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -12942,6 +12942,102 @@
+@@ -12936,6 +12936,102 @@
                  companions.append(sage.matrix.constructor.companion_matrix(poly, format=format))
              return sage.matrix.constructor.block_diagonal_matrix(companions, subdivide=subdivide)
  

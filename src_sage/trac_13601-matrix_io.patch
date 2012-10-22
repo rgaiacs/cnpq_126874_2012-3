@@ -1,9 +1,18 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1350337996 10800
-# Node ID 2cdf82afac2e6a2e2b095bcd8b7204de1300c2bd
-# Parent  c95c1ffa8aff73e6055bf82919815d93bf66d1a8
-Version 0.1 of matrix_io.
+# Node ID 3265cef0b77802c78a06156501325feedee43d17
+# Parent  78c6a7ec4db73a926f04e0528370bc11d832125b
+Version 0.2 of matrix_io.
+
+* Improve the parameters of the functions and the documentation.
+* Add some files to test.
+
+The functions to input and output matrix is really important because files
+is a common way to share information.
+
+Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
+Tecnologico - Brasil.
 
 diff --git a/doc/en/reference/matrices.rst b/doc/en/reference/matrices.rst
 --- a/doc/en/reference/matrices.rst
@@ -31,11 +40,11 @@ diff --git a/sage/matrix/matrix_io.py b/sage/matrix/matrix_io.py
 new file mode 100644
 --- /dev/null
 +++ b/sage/matrix/matrix_io.py
-@@ -0,0 +1,930 @@
+@@ -0,0 +1,1414 @@
 +"""
 +Matrix input and output
 +
-+This file has many functions for input and output of matrices.
++Functions for load matrices form files and save matrices into files.
 +
 +REFERENCES:
 +
@@ -54,6 +63,9 @@ new file mode 100644
 +.. [HBEF] Harwell-Boeing Exchange Format. http://math.nist.gov/MatrixMarket/formats.html
 +
 +.. [MFF] MAT-File Format. http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf
++
++.. [IDL] Unofficial Format Specification of the IDL ``SAVE`` File. Craig
++   Markwardt. http://cow.physics.wisc.edu/~craigm/idl/savefmt/
 +
 +.. [LPSOLVE] MPS file format. http://lpsolve.sourceforge.net/5.5/mps-format.htm
 +
@@ -79,7 +91,7 @@ new file mode 100644
 +from constructor import *
 +from sage.rings.all import RR
 +
-+def load_matrix(file_name, file_format=None):
++def load_matrix(file_name, file_format=None, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from file.
 +
 +    INPUT:
@@ -118,29 +130,49 @@ new file mode 100644
 +
 +      (*) Mean that is not implemented yet.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * ``None`` - nothing is done,
++      * ``False`` - the output matrix are dense,
++      * ``True`` - the output matrix are sparse.
++
++    - ``options`` - options that are handle only for some types of files.
++
++      +-------+-------------+------+------------------------------------------+
++      |Format |Options      |Values|Mean                                      |
++      +=======+=============+======+==========================================+
++      |mps    |standard_form|True  |Set the output in the standard form.      |
++      |       |             +------+------------------------------------------+
++      |       |             |False |Nothing is done.                          |
++      +-------+-------------+------+------------------------------------------+
++
 +    OUTPUT:
 +
 +    Dictionary of matrices.
 +
 +    EXAMPLES::
 +
-+        sage: mdict = load_matrix('tests/data/testprob.mps')
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'testprob.mps')
 +        sage: mdict['A']
 +        [ 1.0  1.0  0.0]
 +        [ 1.0  0.0  1.0]
 +        [ 0.0 -1.0  1.0]
 +        sage: mdict['b']
-+        (5.00000000000000, 10.0000000000000, 7.00000000000000)
++        (5.0, 10.0, 7.0)
 +        sage: mdict['c']
-+        (1.00000000000000, 4.00000000000000, 9.00000000000000)
++        (1.0, 4.0, 9.0)
 +        sage: mdict['rows_type']
-+        (-1, 1, 0)
++        (-1.0, 1.0, 0.0)
 +        sage: mdict['l']
 +        (0.0, -1.0, 0.0)
 +        sage: mdict['u']
 +        (4.0, 1.0, +infinity)
 +        sage: mdict['cols_type']
-+        (0, 0, 0)
++        (0.0, 0.0, 0.0)
 +
 +    .. NOTE::
 +
@@ -172,28 +204,30 @@ new file mode 100644
 +    if file_format == None:
 +        file_format = file_name.split('.')[-1]
 +    if file_format in ['ascii', 'txt']:
-+        mdict = _load_mps(file_name)
++        mdict = _load_ascii(file_name, ring=ring, set_sparse=set_sparse, **options)
++    elif file_format in ['ctf']:
++        mdict = _load_ctf(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['oct']:
-+        mdict = _load_oct(file_name)
++        mdict = _load_oct(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['f-oct']:
-+        mdict = _load_foct(file_name)
++        mdict = _load_foct(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['t-oct']:
-+        mdict = _load_toct(file_name)
++        mdict = _load_toct(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['hdf5']:
-+        mdict = _load_hdf5(file_name)
++        mdict = _load_hdf5(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['f-hdf5']:
-+        mdict = _load_fhdf5(file_name)
++        mdict = _load_fhdf5(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['mm']:
-+        mdict = _load_mm(file_name)
++        mdict = _load_mm(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['hb']:
-+        mdict = _load_hb(file_name)
++        mdict = _load_hb(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    # WARNING Maybe is best split the Matlab formats.
 +    elif file_format in ['m', 'mat7', 'mat6', 'mat4']:
-+        mdict = _load_m(file_name)
++        mdict = _load_m(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['sav']:
-+        mdict = _load_sav(file_name)
++        mdict = _load_sav(file_name, ring=ring, set_sparse=set_sparse, **options)
 +    elif file_format in ['mps']:
-+        return _load_mps(file_name)
++        return _load_mps(file_name, **options)
 +    else:
 +        if file_format == '':
 +            raise ValueError("Can't discovery the file format.")
@@ -201,12 +235,22 @@ new file mode 100644
 +            raise ValueError("File format is not support.")
 +    return mdict
 +
-+def _load_ascii(file_name):
++def _load_ascii(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrix from ascii file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
++
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
 +
 +    OUTPUT:
 +
@@ -214,7 +258,14 @@ new file mode 100644
 +
 +        * 'A' - the matrix.
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.ascii')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read ascii format.
 +
 +    AUTHORS:
 +
@@ -222,18 +273,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read ascii format.")
 +
-+def _load_ctf(file_name):
++def _load_ctf(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrix from ctf file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.ctf')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read ctf format.
 +
 +    AUTHORS:
 +
@@ -241,18 +309,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read ctf format.")
 +
-+def _load_oct(file_name):
++def _load_oct(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from oct file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read oct format.
 +
 +    AUTHORS:
 +
@@ -260,18 +345,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read oct format.")
 +
-+def _load_foct(file_name):
++def _load_foct(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from f-oct file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.f-oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read f-oct format.
 +
 +    AUTHORS:
 +
@@ -279,18 +381,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read f-oct format.")
 +
-+def _load_toct(file_name):
++def _load_toct(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from t-oct file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.t-oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read t-oct format.
 +
 +    AUTHORS:
 +
@@ -298,18 +417,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read t-oct format.")
 +
-+def _load_hdf5(file_name):
++def _load_hdf5(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from hdf5 file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.hdf5')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read hdf5 format.
 +
 +    AUTHORS:
 +
@@ -317,18 +453,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read hdf5 format.")
 +
-+def _load_fhdf5(file_name):
++def _load_fhdf5(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from f-hdf5 file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.f-hdf5')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read f-hdf5 format.
 +
 +    AUTHORS:
 +
@@ -336,18 +489,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read f-hdf5 format.")
 +
-+def _load_mm(file_name):
++def _load_mm(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from mm file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'sample.mm')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read mm format.
 +
 +    AUTHORS:
 +
@@ -355,18 +525,35 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read mm format.")
 +
-+def _load_hb(file_name):
++def _load_hb(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from hb file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + '5by5_rua.hb')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't read hb format.
 +
 +    AUTHORS:
 +
@@ -374,18 +561,49 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't read hb format.")
 +
-+def _load_m(file_name):
++def _load_m(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from m file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices:
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'identity.mat7')
++        sage: mdict['A']
++        [1.0 0.0 0.0 0.0]
++        [0.0 1.0 0.0 0.0]
++        [0.0 0.0 1.0 0.0]
++        [0.0 0.0 0.0 1.0]
++        sage: mdict = load_matrix(DATA_PATH + 'identity.mat6')
++        sage: mdict['A']
++        [1.0 0.0 0.0 0.0]
++        [0.0 1.0 0.0 0.0]
++        [0.0 0.0 1.0 0.0]
++        [0.0 0.0 0.0 1.0]
++        sage: mdict = load_matrix(DATA_PATH + 'identity.mat4')
++        sage: mdict['A']
++        [1.0 0.0 0.0 0.0]
++        [0.0 1.0 0.0 0.0]
++        [0.0 0.0 1.0 0.0]
++        [0.0 0.0 0.0 1.0]
 +
 +    AUTHORS:
 +
@@ -403,18 +621,33 @@ new file mode 100644
 +                pass
 +    return mdict
 +
-+def _load_sav(file_name):
++def _load_sav(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from sav file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
 +
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``options`` - extra options.
++
 +    OUTPUT:
 +
 +    Dictionary of matrices.
 +
-+    EXAMPLES:
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'scalar_byte.sav'); mdict
++        {'i8u': 234 x 234 dense matrix over Integer Ring}
 +
 +    AUTHORS:
 +
@@ -431,12 +664,24 @@ new file mode 100644
 +            pass
 +    return mdict
 +
-+def _load_mps(file_name):
++def _load_mps(file_name, ring=RDF, set_sparse=True, standard_form=False, **options):
 +    """Load matrices from mps file.
 +
 +    INPUT:
 +
 +    - ``file_name`` - name of the file to be load.
++
++    - ``ring`` - the base ring for the entries of the matrix.
++
++    - ``set_sparse`` - change the output matrix type:
++
++      * if ``None`` nothing is done,
++      * if ``False`` the output matrix are dense,
++      * if ``True`` the output matrix are sparse.
++
++    - ``standard_form``- set the output in the standard form.
++
++    - ``options`` - extra options.
 +
 +    OUTPUT:
 +
@@ -452,40 +697,77 @@ new file mode 100644
 +
 +    EXAMPLES::
 +
-+        sage: mdict = load_matrix('tests/data/testprob.mps')
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: mdict = load_matrix(DATA_PATH + 'testprob.mps')
 +        sage: mdict['A']
 +        [ 1.0  1.0  0.0]
 +        [ 1.0  0.0  1.0]
 +        [ 0.0 -1.0  1.0]
 +        sage: mdict['b']
-+        (5.00000000000000, 10.0000000000000, 7.00000000000000)
++        (5.0, 10.0, 7.0)
 +        sage: mdict['c']
-+        (1.00000000000000, 4.00000000000000, 9.00000000000000)
++        (1.0, 4.0, 9.0)
 +        sage: mdict['rows_type']
-+        (-1, 1, 0)
++        (-1.0, 1.0, 0.0)
 +        sage: mdict['l']
 +        (0.0, -1.0, 0.0)
 +        sage: mdict['u']
 +        (4.0, 1.0, +infinity)
 +        sage: mdict['cols_type']
-+        (0, 0, 0)
-+        sage: mdict = load_matrix('tests/data/sos2test.mps')
++        (0.0, 0.0, 0.0)
++        sage: mdict = load_matrix(DATA_PATH + 'testprob.mps',
++        ...   standard_form=True)
++        sage: mdict['A']
++        [ 1.0  1.0  0.0  1.0  0.0]
++        [ 1.0  0.0  1.0  0.0 -1.0]
++        [ 0.0 -1.0  1.0  0.0  0.0]
++        sage: mdict['b']
++        (5.0, 10.0, 7.0)
++        sage: mdict['c']
++        (1.0, 4.0, 9.0, 0.0, 0.0)
++        sage: mdict['rows_type']
++        (0.0, 0.0, 0.0)
++        sage: mdict['l']
++        (0.0, -1.0, 0.0, 0.0, 0.0)
++        sage: mdict['u']
++        (4.0, 1.0, +infinity, +infinity, +infinity)
++        sage: mdict['cols_type']
++        (0.0, 0.0, 0.0, 0.0, 0.0)
++        sage: mdict = load_matrix(DATA_PATH + 'sos2test.mps')
 +        sage: mdict['A']
 +        [-1.0  1.0  1.0 10.0  0.0]
 +        [ 1.0 -3.0  1.0  0.0  0.0]
 +        [ 0.0  1.0  0.0 -3.5  0.0]
 +        sage: mdict['b']
-+        (30.0000000000000, 30.0000000000000, 0.000000000000000)
++        (30.0, 30.0, 0.0)
 +        sage: mdict['c']
-+        (-1.00000000000000, -2.00000000000000, -3.00000000000000, -1.00000000000000, 0.000000000000000)
++        (-1.0, -2.0, -3.0, -1.0, 0.0)
 +        sage: mdict['rows_type']
-+        (-1, -1, 0)
++        (-1.0, -1.0, 0.0)
 +        sage: mdict['l']
 +        (0.0, 0.0, 0.0, 2.0, 0.0)
 +        sage: mdict['u']
 +        (40.0, +infinity, +infinity, 3.0, +infinity)
 +        sage: mdict['cols_type']
-+        (0, 0, 0, 1, 0)
++        (0.0, 0.0, 0.0, 1.0, 0.0)
++        sage: mdict = load_matrix(DATA_PATH + 'sos2test.mps', standard_form=True)
++        sage: mdict['A']
++        [-1.0  1.0  1.0 10.0  0.0  1.0  0.0]
++        [ 1.0 -3.0  1.0  0.0  0.0  0.0  1.0]
++        [ 0.0  1.0  0.0 -3.5  0.0  0.0  0.0]
++        sage: mdict['b']
++        (30.0, 30.0, 0.0)
++        sage: mdict['c']
++        (-1.0, -2.0, -3.0, -1.0, 0.0, 0.0, 0.0)
++        sage: mdict['rows_type']
++        (0.0, 0.0, 0.0)
++        sage: mdict['l']
++        (0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0)
++        sage: mdict['u']
++        (40.0, +infinity, +infinity, 3.0, +infinity, +infinity, +infinity)
++        sage: mdict['cols_type']
++        (0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
 +
 +    .. WARNING::
 +
@@ -509,7 +791,6 @@ new file mode 100644
 +        in_rng = False
 +        in_bnd = False
 +        in_sos = False
-+        process = False
 +        # rows is a dictionary of the names of the rows that store the row
 +        # number atribute to the row's name.
 +        rows = {}
@@ -529,14 +810,21 @@ new file mode 100644
 +        # u is a list representing the upper bound.
 +        u = None
 +        # cols_type is a list representing the type of column.
++        # ===== =====================
++        # type  meaning
++        # ===== =====================
++        # 0     real
++        # 1     integer
++        # ===== =====================
 +        cols_type = None
 +        # rows_type is a list representing the type of column.
 +        # ===== =====================
-+        # type      meaning
++        # type  meaning
 +        # ===== =====================
 +        # 0     equality
 +        # -1    less than or equal
 +        #  1    greater than or equal
++        # ===== =====================
 +        rows_type = None
 +        for line in f:
 +            # Line to be treated as a comment starts with '*'.
@@ -544,17 +832,15 @@ new file mode 100644
 +                if line[0] != ' ':
 +                    p = line.split()
 +                    if p[0].upper() == 'NAME':
-+                        process = False
++                        pass
 +                    elif p[0].upper() == 'ROWS':
-+                        process = False
 +                        in_rows = True
 +                        in_cols = in_rhs = in_rng = in_bnd = in_sos = False
 +                    elif p[0].upper() == 'COLUMNS':
-+                        process = False
 +                        in_cols = True
 +                        in_rows = in_rhs = in_rng = in_bnd = in_sos = False
 +
-+                        # Build the rows_tye.
++                        # Build the rows_type.
 +                        rows_type = [0 for i in xrange(n_rows + 1)]
 +                        for k in rows.keys():
 +                            if rows[k][1] == 'E':
@@ -564,7 +850,6 @@ new file mode 100644
 +                            elif rows[k][1] == 'G':
 +                                rows_type[rows[k][0]] = 1
 +                    elif p[0].upper() == 'RHS':
-+                        process = False
 +                        in_rhs = True
 +                        in_rows = in_cols = in_rng = in_bnd = in_sos = False
 +                        # The variables must be set where to avoid problems.
@@ -572,19 +857,16 @@ new file mode 100644
 +                        u = [float('inf') for i in xrange(n_cols + 1)]
 +                        cols_type = [0 for i in xrange(n_cols + 1)]
 +                    elif p[0].upper() == 'RANGES':
-+                        process = False
 +                        in_rng = True
 +                        in_rows = in_cols = in_rhs = in_bnd = in_sos = False
 +                    elif p[0].upper() == 'BOUNDS':
-+                        process = False
 +                        in_bnd = True
 +                        in_rows = in_cols = in_rhs = in_rng = in_sos = False
 +                    elif p[0].upper() == 'SOS':
-+                        process = False
 +                        in_sos = True
 +                        in_rows = in_cols = in_rhs = in_rng = in_bnd = False
 +                    elif p[0].upper() == 'ENDATA':
-+                        process = False
++                        pass
 +                else:
 +                    p = line.split()
 +                    if in_rows:
@@ -607,8 +889,15 @@ new file mode 100644
 +                            else:
 +                                c[j] = float(p[i_aux + 1])
 +                    elif in_rhs:
-+                        for i_aux in xrange(1, len(p), 2):
-+                            b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
++                        # Some files can not have the rhs name, e.g., blend from
++                        # http://www.netlib.org/lp/data/blend. Because of this
++                        # the lenght must be check.
++                        if len(p) == 4:
++                            for i_aux in xrange(0, len(p), 2):
++                                b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
++                        elif len(p) == 5:
++                            for i_aux in xrange(1, len(p), 2):
++                                b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
 +                    elif in_rng:
 +                        pass
 +                    elif in_bnd:
@@ -621,14 +910,14 @@ new file mode 100644
 +                            l[i] = float(p[3])
 +                            u[i] = float(p[3])
 +                        elif p[0] == 'FR':
-+                            l[i] = -Infinity
-+                            u[i] = Infinity
++                            l[i] = float('-Infinity')
++                            u[i] = float('Infinity')
 +                        elif p[0] == 'MI':
-+                            l[i] = -Infinity
++                            l[i] = float('-Infinity')
 +                            u[i] = 0
 +                        elif p[0] == 'PL':
 +                            l[i] = 0
-+                            u[i] = Infinity
++                            u[i] = float('Infinity')
 +                        elif p[0] == 'BV':
 +                            l[i] = 0
 +                            u[i] = 1
@@ -641,15 +930,35 @@ new file mode 100644
 +                            cols_type[i] = 1
 +                    elif in_sos:
 +                        pass
-+        return {'A': matrix(n_rows + 1, n_cols + 1, A),
-+                'b': vector(RR, n_rows + 1, b),
-+                'c': vector(RR, n_cols + 1, c),
-+                'l': vector(l),
-+                'u': vector(u),
-+                'rows_type': vector(rows_type),
-+                'cols_type': vector(cols_type)}
++        if standard_form:
++            for i in xrange(n_rows + 1):
++                if rows_type[i] == -1:
++                    n_cols += 1
++                    cols_type.append(0)
++                    l.append(0)
++                    u.append(float('Infinity'))
++                    A[(i, n_cols)] = 1
++                    c[(n_cols)] = 0
++                    rows_type[i] = 0
++                elif rows_type[i] == 1:
++                    n_cols += 1
++                    cols_type.append(0)
++                    l.append(0)
++                    u.append(float('Infinity'))
++                    A[(i, n_cols)] = -1
++                    c[(n_cols)] = 0
++                    rows_type[i] = 0
++        if set_sparse is None:
++            set_sparse=True
++        return {'A': matrix(ring, n_rows + 1, n_cols + 1, A, sparse=set_sparse),
++                'b': vector(ring, n_rows + 1, b, sparse=set_sparse),
++                'c': vector(ring, n_cols + 1, c, sparse=set_sparse),
++                'l': vector(ring, l, sparse=set_sparse),
++                'u': vector(ring, u, sparse=set_sparse),
++                'rows_type': vector(ring, rows_type, sparse=set_sparse),
++                'cols_type': vector(ring, cols_type, sparse=set_sparse)}
 +
-+def write_matrix(mdict, file_name, file_format=None):
++def write_matrix(mdict, file_name, file_format=None, **options):
 +    """Write matrices to file.
 +
 +    INPUT:
@@ -690,7 +999,25 @@ new file mode 100644
 +
 +      (*) Mean that is not implemented yet.
 +
-+    EXAMPLES:
++    - ``options`` - options that are handle only if some types of files.
++
++      ======= ============= ====== ==========================================
++      Format  options       values Mean
++      ======= ============= ====== ==========================================
++      ======= ============= ====== ==========================================
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.ascii')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write ascii format.
 +
 +    .. NOTE::
 +
@@ -725,44 +1052,59 @@ new file mode 100644
 +    if file_format == None:
 +        file_format = file_name.split('.')[-1]
 +    if file_format in ['ascii', 'txt']:
-+        mdict = _write_mps(mdict, file_name)
++        _write_ascii(mdict, file_name, **options)
++    elif file_format in ['ctf']:
++        _write_ctf(mdict, file_name, **options)
 +    elif file_format in ['oct']:
-+        mdict = _write_oct(mdict, file_name)
++        _write_oct(mdict, file_name, **options)
 +    elif file_format in ['f-oct']:
-+        mdict = _write_foct(mdict, file_name)
++        _write_foct(mdict, file_name, **options)
 +    elif file_format in ['t-oct']:
-+        mdict = _write_toct(mdict, file_name)
++        _write_toct(mdict, file_name, **options)
 +    elif file_format in ['hdf5']:
-+        mdict = _write_hdf5(mdict, file_name)
++        _write_hdf5(mdict, file_name, **options)
 +    elif file_format in ['f-hdf5']:
-+        mdict = _write_fhdf5(mdict, file_name)
++        _write_fhdf5(mdict, file_name, **options)
 +    elif file_format in ['mm']:
-+        mdict = _write_mm(mdict, file_name)
++        _write_mm(mdict, file_name, **options)
 +    elif file_format in ['hb']:
-+        mdict = _write_hb(mdict, file_name)
++        _write_hb(mdict, file_name, **options)
 +    # WARNING Maybe is best split the Matlab formats.
 +    elif file_format in ['m', 'mat7', 'mat6', 'mat4']:
-+        mdict = _write_m(mdict, file_name)
++        _write_m(mdict, file_name, **options)
 +    elif file_format in ['sav']:
-+        mdict = _write_sav(mdict, file_name)
++        _write_sav(mdict, file_name, **options)
 +    elif file_format in ['mps']:
-+        return _write_mps(mdict, file_name)
++        return _write_mps(mdict, file_name, **options)
 +    else:
 +        if file_format == '':
 +            raise ValueError("Can't discovery the file format.")
 +        else:
 +            raise ValueError("File format is not support.")
 +
-+def _write_ascii(mdict, file_name):
++def _write_ascii(mdict, file_name, **options):
 +    """Write matrix from ascii file.
 +
 +    INPUT:
 +
 +    - ``mdict`` - dictionary where the values are matrices.
 +
-+    - ``file_name`` - name of the file to be load.
++    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.ascii')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write ascii format.
 +
 +    AUTHORS:
 +
@@ -770,7 +1112,7 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't write ascii format.")
 +
-+def _write_ctf(mdict, file_name):
++def _write_ctf(mdict, file_name, **options):
 +    """Write matrix from ctf file.
 +
 +    INPUT:
@@ -779,30 +1121,58 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.ctf')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write ctf format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read ctf format.")
++    raise NotImplementedError("Can't write ctf format.")
 +
-+def _write_oct(mdict, file_name):
++def _write_oct(mdict, file_name, **options):
 +    """Write matrices from oct file.
 +
 +    INPUT:
 +
++    - ``mdict`` - dictionary where the values are matrices.
++
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write oct format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read oct format.")
++    raise NotImplementedError("Can't write oct format.")
 +
-+def _write_foct(file_name):
++def _write_foct(mdict, file_name, **options):
 +    """Write matrix from f-oct file.
 +
 +    INPUT:
@@ -811,15 +1181,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.f-oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write f-oct format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read f-oct format.")
++    raise NotImplementedError("Can't write f-oct format.")
 +
-+def _write_toct(file_name):
++def _write_toct(mdict, file_name, **options):
 +    """Write matrices from t-oct file.
 +
 +    INPUT:
@@ -828,15 +1211,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.t-oct')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write t-oct format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read t-oct format.")
++    raise NotImplementedError("Can't write t-oct format.")
 +
-+def _write_hdf5(mdict, file_name):
++def _write_hdf5(mdict, file_name, **options):
 +    """Write matrices from hdf5 file.
 +
 +    INPUT:
@@ -845,15 +1241,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.hdf5')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write hdf5 format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read hdf5 format.")
++    raise NotImplementedError("Can't write hdf5 format.")
 +
-+def _write_fhdf5(mdict, file_name):
++def _write_fhdf5(mdict, file_name, **options):
 +    """Write matrix from f-hdf5 file.
 +
 +    INPUT:
@@ -862,15 +1271,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.f-hdf5')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write f-hdf5 format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read f-hdf5 format.")
++    raise NotImplementedError("Can't write f-hdf5 format.")
 +
-+def _write_mm(mdict, file_name):
++def _write_mm(mdict, file_name, **options):
 +    """Write matrix from mm file.
 +
 +    INPUT:
@@ -879,15 +1301,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.mm')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write mm format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read mm format.")
++    raise NotImplementedError("Can't write mm format.")
 +
-+def _write_hb(mdict, file_name):
++def _write_hb(mdict, file_name, **options):
 +    """Write matrix from hb file.
 +
 +    INPUT:
@@ -896,15 +1331,28 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.hb')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write hb format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read hb format.")
++    raise NotImplementedError("Can't write hb format.")
 +
-+def _write_m(mdict, file_name):
++def _write_m(mdict, file_name, **options):
 +    """Write matrix from m file.
 +
 +    INPUT:
@@ -913,7 +1361,20 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.m')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write m format.
 +
 +    AUTHORS:
 +
@@ -921,7 +1382,7 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't write m format.")
 +
-+def _write_sav(mdict, file_name):
++def _write_sav(mdict, file_name, **options):
 +    """Write matrix from sav file.
 +
 +    INPUT:
@@ -930,7 +1391,20 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 0, 0, 0],
++        ...               [0, 1, 0, 0],
++        ...               [0, 0, 1, 0],
++        ...               [0, 0, 0, 1]])
++        sage: write_matrix({'A': A}, DATA_PATH + 'tmp.sav')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write sav format.
 +
 +    AUTHORS:
 +
@@ -938,7 +1412,7 @@ new file mode 100644
 +    """
 +    raise NotImplementedError("Can't write sav format.")
 +
-+def _write_mps(mdict, file_name):
++def _write_mps(mdict, file_name, **options):
 +    """Write matrix from mps file.
 +
 +    INPUT:
@@ -955,13 +1429,203 @@ new file mode 100644
 +
 +    - ``file_name`` - name of the file to be write.
 +
-+    EXAMPLES:
++    - ``options`` - extra options.
++
++    EXAMPLES::
++
++        sage: from os import path
++        sage: DATA_PATH = path.join(path.dirname(__file__), 'tests/data/')
++        sage: A = matrix([[1, 1, 1, 0, 0],
++        ...               [1, 0, 0, 1, 0],
++        ...               [0, 1, 0, 0, 1]])
++        sage: b = matrix([[1, 1, 1]])
++        sage: c = matrix([[1, 1, 1, 1, 1]])
++        sage: rows_type = matrix([[0, 0, 0]])
++        sage: l = matrix([[0, 0, 0, 0, 0]])
++        sage: u = matrix([[1, 1, 1, 1, 1]])
++        sage: cols_type = matrix([[0, 0, 0, 0, 0]])
++        sage: write_matrix({'A': A, 'b': b, 'c': c, 'rows_type': rows_type,
++        ...   'l': l, 'u':u, 'cols_type': cols_type}, DATA_PATH + 'tmp.mps')
++        Traceback (most recent call last):
++        ...
++        NotImplementedError: Can't write mps format.
 +
 +    AUTHORS:
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
 +    raise NotImplementedError("Can't write mps format.")
+diff --git a/sage/matrix/tests/data/5by5_rua.hb b/sage/matrix/tests/data/5by5_rua.hb
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/5by5_rua.hb
+@@ -0,0 +1,9 @@
++Title                                                                   Key
++             5             1             1             3             0
++RUA                        5             5            13             0
++(6I3)           (13I3)          (5E15.8)            (5E15.8)
++  1  4  7  8 11 14
++  1  3  5  2  3  5  3  1  3  4  3  4  5
++11.0           31.0           51.0           22.0           32.0
++52.0           33.0           14.0           34.0           44.0
++35.0           45.0           55.0
+diff --git a/sage/matrix/tests/data/identity.ascii b/sage/matrix/tests/data/identity.ascii
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/identity.ascii
+@@ -0,0 +1,4 @@
++ 1.00000000e+00 0.00000000e+00 0.00000000e+00 0.00000000e+00
++ 0.00000000e+00 1.00000000e+00 0.00000000e+00 0.00000000e+00
++ 0.00000000e+00 0.00000000e+00 1.00000000e+00 0.00000000e+00
++ 0.00000000e+00 0.00000000e+00 0.00000000e+00 1.00000000e+00
+diff --git a/sage/matrix/tests/data/identity.ctf b/sage/matrix/tests/data/identity.ctf
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/identity.ctf
+@@ -0,0 +1,5 @@
++      4       4       4
++      1       1       1
++      2       2       1
++      3       3       1
++      4       4       1
+diff --git a/sage/matrix/tests/data/identity.f-hdf5 b/sage/matrix/tests/data/identity.f-hdf5
+new file mode 100644
+index 0000000000000000000000000000000000000000..d94bd238c405b612c7d5a72f8392ec544b770a62
+GIT binary patch
+literal 4960
+zc%19>aB<`1lHy_j0S*oZ76t(ZWbhvf5`<CtF!=;1%?PDCp!5nRm^d?7P68?}05xBM
+z8Nx4siiZTbx`I^yM*}c>0@xrl2g4{BiNM3vF#tqIK>4s#dV&d6og<WnrAH46?G=RD
+zgr2T>8NkkAP*!j*N=+<DO;JdyRPawONi0iMFxE5DGtp59DNO~5C>R?k7@Aud7+aYd
+zDi|3U8Ywsh1&1iu6eZ?mrWU0-Kxy5ag8Y0tocV<Tn*S1@;)L?c3J#e5Q7{q#dVYbW
+zrys1S>PjjLQbBZCVooWD0n0ZIWZE0-=kLM@GzC^pPhcj~pb-uj8Q36k0gVt=V2Fa4
+zOiWB*5oRbKR4lNAm2og2DF^Z-z-(s551bGYb`<l4kkn6CnE*^HGic`-Dga2jVuGiu
+z8SHqK!^^!7g0yti&;z-NB}JJPKt_W-rX(d|qhJ(_f>AIEM!_f;w19BC64GuIRFG$2
+z0jp485a(bJuZQc0^duOe{a_XbR2tFl{0?n*I-uB(+3u{Mp6AE_u>SoHXg}o!w130{
+obvGl>#XLYa`#Xm?hPlT3xrWEP`3LzrhCuZTFu;NmwfzmF0e|Lo&Hw-a
+
+diff --git a/sage/matrix/tests/data/identity.f-oct b/sage/matrix/tests/data/identity.f-oct
+new file mode 100644
+index 0000000000000000000000000000000000000000..6a6eb6f0c96900656c1693627bd7b122fe027f86
+GIT binary patch
+literal 66
+zc%1W3E=ep))iu=hVPIrnU~psrf&ctKA|*31JwGooM<F+{q$sn31t<i<Yzzzy_Q)6j
+D;HnLX
+
+diff --git a/sage/matrix/tests/data/identity.hdf5 b/sage/matrix/tests/data/identity.hdf5
+new file mode 100644
+index 0000000000000000000000000000000000000000..ace0cded81208d71c19b45e6b4559aa80ea4500b
+GIT binary patch
+literal 4960
+zc%19>aB<`1lHy_j0S*oZ76t(ZWbhvf5`<CtF!=;1%?PDCp!5nRm^d?7P68?}05xBM
+z8Nx4siiZTbx`I^yM*}c>0@xrl2g4{BiNM3vF#tqIK>4s#dV&d6og<WnrAH46?G=RD
+zgr2T>8NkkAP*!j*N=+<DO;JdyRPawONi0iMFxE5DGtp59DNO~5C>R?k7@Aud7+V1u
+zMh1pP3Qj@6AqqA{iFui+MX3%@S~sU4Ki>{#eqn&-zXYf_q5QIf1Ezlzj6{H*UtsC!
+z2P>+&lFEWq5M7p-Qwn0h@{I$T_6Ga;yD$PxftAw}n8`F~gabwfHb`7RBZL(gq97&{
+z6BAg38OjG03+!NJ91KXxfjkK?o0;(gCq#rD#e5+o^-U@hfN5n0?L0#T07+L&@N_kU
+z9j|hDx%WYkmaZClAUCn3D6;~}`Cw0+rh!s73P!;w7zLwX6pR9@0K)A`NV`!`!5-Sy
+za$qpwW-$5B4AT$kNiahD!7L1@G@{-49op_}K(QaQ-C4mfkO0=d-vRaC4QT&}2igN-
+m1iF|9=w^TC5XUgrct6+hcsKtbU&j!regOtpP@=ZKVKe}4DtM&;
+
+diff --git a/sage/matrix/tests/data/identity.mat4 b/sage/matrix/tests/data/identity.mat4
+new file mode 100644
+index 0000000000000000000000000000000000000000..6dba54c4c06d69d89c3daad7e2607c1350fd6fee
+GIT binary patch
+literal 150
+bc${NkU|?W@Vh~^gVn-<ZgFORLfcokHOTPsO
+
+diff --git a/sage/matrix/tests/data/identity.mat6 b/sage/matrix/tests/data/identity.mat6
+new file mode 100644
+index 0000000000000000000000000000000000000000..9ce095236d6edd53afc9d727c46a702401bccd6e
+GIT binary patch
+literal 312
+zc%1Wf4DoSvQZUssQ1EpO(M`+DN!3v(FUl+_NzGG8s#Ne#E=ep)RWQ~w(lgOfFfuSS
+z(ls>DH8xN%w6roXu`)JR2n}&&P#_C1Fnap(F)%P}0Ae;E=77>5zzXHFKrtf_Is$1<
+RAZ}oQfe-c!L;>on0{|%#ALsx8
+
+diff --git a/sage/matrix/tests/data/identity.mat7 b/sage/matrix/tests/data/identity.mat7
+new file mode 100644
+index 0000000000000000000000000000000000000000..a28a991680f070682f01949ce5f5e0bf0977159b
+GIT binary patch
+literal 181
+zc%1Wf4DoSvQZUssQ1EpO(M`+DN!3v(FUl+_NzGG8s#Ne#E=ep)RWQ~w(lgOfFfuSS
+z(ls>DH8xN%w6roXu`)7I2n}&&P#_C1Fnap(GcYjd0&&Hh$H@r^HyDoOIGkZz>ewK9
+hD!nnuO`(M4(j1372N;;;-$-^aT?uDrFgU_i006{wE9d|K
+
+diff --git a/sage/matrix/tests/data/identity.oct b/sage/matrix/tests/data/identity.oct
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4970109bef6e608d9b709c94991fdf60bdb7cc6
+GIT binary patch
+literal 82
+zc%1W3E=ep))iu=hVPIrnU~psrf&ctKA|*31JwGooM<F+{q$sn31t<i<>|hlPAMA0_
+E0JH)RNdN!<
+
+diff --git a/sage/matrix/tests/data/identity.t-oct b/sage/matrix/tests/data/identity.t-oct
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/identity.t-oct
+@@ -0,0 +1,9 @@
++# Created by Octave 3.2.4, Tue Oct 30 17:03:15 2012 BRST <raniere@raniere-lpoo>
++# name: A
++# type: diagonal matrix
++# rows: 4
++# columns: 4
++1
++1
++1
++1
+diff --git a/sage/matrix/tests/data/sample.mm b/sage/matrix/tests/data/sample.mm
+new file mode 100644
+--- /dev/null
++++ b/sage/matrix/tests/data/sample.mm
+@@ -0,0 +1,31 @@
++%%MatrixMarket matrix coordinate real general
++%=================================================================================
++%
++% This ASCII file represents a sparse MxN matrix with L
++% nonzeros in the following Matrix Market format:
++%
++% +----------------------------------------------+
++% |%%MatrixMarket matrix coordinate real general | <--- header line
++% |%                                             | <--+
++% |% comments                                    |    |-- 0 or more comment lines
++% |%                                             | <--+
++% |    M  N  L                                   | <--- rows, columns, entries
++% |    I1  J1  A(I1, J1)                         | <--+
++% |    I2  J2  A(I2, J2)                         |    |
++% |    I3  J3  A(I3, J3)                         |    |-- L lines
++% |        . . .                                 |    |
++% |    IL JL  A(IL, JL)                          | <--+
++% +----------------------------------------------+
++%
++% Indices are 1-based, i.e. A(1,1) is the first element.
++%
++%=================================================================================
++  5  5  8
++    1     1   1.000e+00
++    2     2   1.050e+01
++    3     3   1.500e-02
++    1     4   6.000e+00
++    4     2   2.505e+02
++    4     4  -2.800e+02
++    4     5   3.332e+01
++    5     5   1.200e+01
+diff --git a/sage/matrix/tests/data/scalar_byte.sav b/sage/matrix/tests/data/scalar_byte.sav
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4027b3cf302b8610b87d9ef8b0aac39d5a40ef9
+GIT binary patch
+literal 2076
+zc%1E2O^?$s5H)n!g@|zB!f}qf2!$4wrRs@_-9u3Ys2^OBn@pRL5<B>#AODs!zk;#T
+zWs5j)fMYE+9yjye%X^M9orn`5L?Xn=wK$IBIF92G;@Q+I_~0w(^`Un;=yeBgUc;+y
+zugmuydW%NM8o53xwRJo{;c|O`f5gAjZU5@))n!~is7U#JL+5Q4Xv9+?&c5G4I+HYc
+z{;wlV;Nz#+=>5$AxJ;AL^%$mdjV~u?oi+$ds?Y+~3tjBMtHv)XvLzPK7~L2`C(RB>
+zEw!noBdwT2F0^;xN`%11eJdmD3?{fnV-ZlTNFf?hE6_{sBO6tKX9gK$E=&`?E~qF_
+zv1)-P@;NlMZ9y&hjVfTy>B5+DR7^fx8N?cu<L5Y!9rN+<B7<R7ML^gJ3zCf){N~B9
+z5vRG91xV(S0UrJd0%`K69<zaL%{i+1Qnss*fpxM~$rw7-OScI+u_FjDk%5gNhjyPT
+zsb9puXCA|3lG<AbCEo%G)!yOK=o&_|8GIq@CF>nzKh>2Fg=H*m8-|dpcEI^77vc_T
+zhE}Bu77GnlXN+&RAeR<j#Ex5~G}#avTJX-Oyz&KSwINr=9(!w##bKwt3H}?*gL(#^
+zE0mGIV55z@>yBX*n!PK%cV>NF9@ygt<G1i{_Rhl__l}%flg)BnUxdj2!(oUA>pmaZ
+Z#|LM#GwRR7d~d%#3-yn-K0W*h`~>t^ANBwM
+
 diff --git a/sage/matrix/tests/data/sos2test.mps b/sage/matrix/tests/data/sos2test.mps
 new file mode 100644
 --- /dev/null
