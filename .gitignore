@@ -54,4 +54,6 @@
 
 # Others
 references/*
-netlib/*
+mat/*
+MM/*
+rb/*

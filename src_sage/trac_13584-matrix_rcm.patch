@@ -1,7 +1,7 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1349227104 10800
-# Node ID 5b42d9be8e850116ac8564edfb9b2bc3f58c0894
+# Node ID e8cd06038701f87074476ff75a110bebd5749b68
 # Parent  0d4b62ee6589d9282eb95cb313ddd9e47f62bd3d
 Version 0.5 of rcm().
 
@@ -16,7 +16,7 @@ Tecnologico - Brasil.
 diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 --- a/sage/matrix/matrix2.pyx
 +++ b/sage/matrix/matrix2.pyx
-@@ -13136,6 +13136,834 @@
+@@ -13136,6 +13136,811 @@
  
          return p
  
@@ -171,15 +171,12 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +
 +        # get the connected component.
 +        components = self._fcc()
-+        # print("Have been detect {0} connected components.".format(len(components)))
 +        # sort elements of ``components`` by the size.
 +        components.sort(key=len)
 +
 +        number_components = 0
 +        for component in components:
-+            # print("Running the algorithm for the {0} connected component.".format(number_components))
 +            number_components += 1
-+            # print(component)
 +            if len(component) > 1:
 +                # Use the ``self`` matrix in blocks. This is not eficient.
 +                s_comp = sorted(component)
@@ -187,7 +184,6 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +                n = M_comp.ncols()
 +
 +                adj = M_comp._adj_list()
-+                # print(adj)
 +                degree = [len(adj[i]) for i in xrange(n)]
 +                # degree_s is a list of tuples where the each tuple is the form of
 +                # (i, degree[i]) and the list is sorted based on the degree[i].
@@ -200,27 +196,20 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +                    v = root
 +                elif r_finder == 'ppnf':
 +                    v = M_comp._ppnf(**r_finder_options)
-+                print('root = {0}'.format(v))
 +
 +                q = deque([v])
 +                visited[v] = True
 +                count = 0
 +
 +                while len(q):
-+                    # print(80*'-')
 +                    v = q.popleft()
-+                    # print('v = {0}'.format(v))
 +                    t_reorder[v] = count
 +                    count = count + 1
-+    #                 print(degree_s)
 +                    for w in degree_s:
 +                        if w[0] in adj[v] and not visited[w[0]]:
-+                            # print('w = {0}'.format(w))
 +                            q.append(w[0])
 +                            visited[w[0]] = True
 +
-+                # print('t_reorder = {0}'.format(t_reorder))
-+                # print('reversed(t_reorder) = {0}'.format([i for i in reversed(t_reorder)]))
 +                for i in xrange(n):
 +                    reorder[s_comp[i]] = t_reorder[i] + shift
 +                shift = n
@@ -420,38 +409,29 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        import random
 +
 +        # Choose an abitrary node `r`.
-+        # print('ncols: {0}'.format(self.ncols()))
 +        if not self.ncols():
 +            raise ValueError("the matrix can't be empty")
 +        if r is None:
 +            r = random.randrange(self.ncols())
 +        elif r < 0 or r >= self.ncols():
 +            raise ValueError("the first root is out of range")
-+        print('root: {0}'.format(r))
 +
 +        stop = False
 +        it = 0
 +
 +        # Construct the level structure rooted at `r`.
 +        L = self._rls(r)
-+        # print(L)
 +
 +        while not stop and it < 2^10:
 +            it = it + 1
 +            # Choose a node `x` of minimum degree in the higher level.
-+            print(L[-1])
 +            x = self._min_degree(L[-1])
-+            print('x: {0}'.format(x))
 +            # Construct the level structure rooted at `x`.
 +            Lx = self._rls(x)
-+            # print(Lx)
-+            # print('{0} >? {1}'.format(len(Lx), len(L)))
 +            if len(Lx) > len(L):
 +                r = x
 +                L = Lx
 +            else:
-+                if len(Lx) == len(L):
-+                    x = self._min_degree(Lx[-1])
 +                stop = True
 +        return x
 +
@@ -539,8 +519,6 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +        L = deque([])
 +        L.append([r])
 +        L.append(self._adj([r]))
-+        # print(L)
-+        # print(self[0,:])
 +
 +        stop = False
 +        while not stop:
@@ -842,8 +820,7 @@ diff --git a/sage/matrix/matrix2.pyx b/sage/matrix/matrix2.pyx
 +            for j in xrange(self.ncols()):
 +                if i != j and self[i, j]:
 +                    aux += 1
-+            # print('{0}: {1}'.format(i, aux))
-+            if aux > g:
++            if aux < g:
 +                g = aux
 +                r = i
 +        return r
