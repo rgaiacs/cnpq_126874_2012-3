@@ -1,8 +1,8 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1350337996 10800
-# Node ID 3265cef0b77802c78a06156501325feedee43d17
-# Parent  78c6a7ec4db73a926f04e0528370bc11d832125b
+# Node ID c2569f30d4f40cf1bacac613da21f9c909d453fd
+# Parent  ed2ea25c4ceea668f1d7200c3e00f481c65d838d
 Version 0.2 of matrix_io.
 
 * Improve the parameters of the functions and the documentation.
@@ -40,7 +40,7 @@ diff --git a/sage/matrix/matrix_io.py b/sage/matrix/matrix_io.py
 new file mode 100644
 --- /dev/null
 +++ b/sage/matrix/matrix_io.py
-@@ -0,0 +1,1414 @@
+@@ -0,0 +1,1418 @@
 +"""
 +Matrix input and output
 +
@@ -523,7 +523,11 @@ new file mode 100644
 +
 +    - Raniere Silva (2012): function declaration.
 +    """
-+    raise NotImplementedError("Can't read mm format.")
++    import scipy.io.mmio
++
++    mdict = {}
++    mdict['A'] = matrix(scipy.io.mmio.mmread(file_name).todense())
++    return mdict
 +
 +def _load_hb(file_name, ring=RDF, set_sparse=None, **options):
 +    """Load matrices from hb file.
