@@ -73,77 +73,32 @@ um sistema simétrico definido positivo com a matriz de equações normais $A
 D^{-1} A^t$ e aplicar então a fatoração de Cholesky.
 
 \section{Matrizes}
-\subsection{Matrizes Esparsas}
-Uma matriz é dita esparsa quando a maioria de seus elementos são iguais a zero, ou seja, ela possui relativamente poucos elementos não nulos. Sistemas lineares que surgem na solução de problemas reais possuem, em sua maioria, matrizes esparsas e de ordem elevada. Nestes casos, é proibitivo armazenar toda a matriz por questão de memória do computador e o que se faz na prática é guardar somente os elementos não nulos.
+Como visto na seção anterior, uma das passagens do Método Preditor-Corretor é
+resolver um sistema linear utilizando a fatoração de Cholesky. Na próxima
+subseção introduziremos as definições de banda e envelope de matrizes para
+posteriormente apresentarmos a fatoração de Cholesky.
 
-Uma matriz é dita simétrica quando $A_{ij} = A_{ji}$.
-
-\begin{figure}[!htb]
-    \centering
-    \begin{tikzpicture}
-        \matrix (A) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (0,0)
-        {%
-        X & X & X & X & X & 0 & 0 \\
-        X & X & 0 & 0 & 0 & X & X \\
-        X & 0 & X & 0 & 0 & X & X \\
-        X & 0 & 0 & X & 0 & 0 & 0 \\
-        X & 0 & 0 & 0 & X & 0 & 0 \\
-        0 & X & X & 0 & 0 & X & 0 \\
-        0 & X & X & 0 & 0 & 0 & X \\
-        };
-        \node[above, shift={(0,.5)}] at (A-1-1) {$1$};
-        \node[above, shift={(0,.5)}] at (A-1-2) {$2$};
-        \node[above, shift={(0,.5)}] at (A-1-3) {$3$};
-        \node[above, shift={(0,.5)}] at (A-1-4) {$4$};
-        \node[above, shift={(0,.5)}] at (A-1-5) {$5$};
-        \node[above, shift={(0,.5)}] at (A-1-6) {$6$};
-        \node[above, shift={(0,.5)}] at (A-1-7) {$7$};
-        \node[right, shift={(-1.5,0)}] at (A-1-1) {$1$};
-        \node[right, shift={(-1.5,0)}] at (A-2-1) {$2$};
-        \node[right, shift={(-1.5,0)}] at (A-3-1) {$3$};
-        \node[right, shift={(-1.5,0)}] at (A-4-1) {$4$};
-        \node[right, shift={(-1.5,0)}] at (A-5-1) {$5$};
-        \node[right, shift={(-1.5,0)}] at (A-6-1) {$6$};
-        \node[right, shift={(-1.5,0)}] at (A-7-1) {$7$};
-
-        \matrix (B) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (8,0)
-        {%
-        X & 0 & X & X & 0 & 0 & 0 \\
-        0 & X & X & X & 0 & 0 & 0 \\
-        X & X & X & 0 & X & 0 & 0 \\
-        X & X & 0 & X & X & 0 & 0 \\
-        0 & 0 & X & X & X & X & X \\
-        0 & 0 & 0 & 0 & X & X & 0 \\
-        0 & 0 & 0 & 0 & X & 0 & X \\
-        };
-        \node[above, shift={(0,.5)}] at (B-1-1) {$1$};
-        \node[above, shift={(0,.5)}] at (B-1-2) {$2$};
-        \node[above, shift={(0,.5)}] at (B-1-3) {$3$};
-        \node[above, shift={(0,.5)}] at (B-1-4) {$4$};
-        \node[above, shift={(0,.5)}] at (B-1-5) {$5$};
-        \node[above, shift={(0,.5)}] at (B-1-6) {$6$};
-        \node[above, shift={(0,.5)}] at (B-1-7) {$7$};
-        \node[right, shift={(-1.5,0)}] at (B-1-1) {$1$};
-        \node[right, shift={(-1.5,0)}] at (B-2-1) {$2$};
-        \node[right, shift={(-1.5,0)}] at (B-3-1) {$3$};
-        \node[right, shift={(-1.5,0)}] at (B-4-1) {$4$};
-        \node[right, shift={(-1.5,0)}] at (B-5-1) {$5$};
-        \node[right, shift={(-1.5,0)}] at (B-6-1) {$6$};
-        \node[right, shift={(-1.5,0)}] at (B-7-1) {$7$};
-    \end{tikzpicture}
-    \caption{Exemplos de matriz simétrica.}
-    \label{fig:exem_matriz_simetrica}
-\end{figure}
-
-A largura de banda, $\beta$, de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ é dada pela maior distância de um elemento não nulo à diagonal principal, ou seja:
+\subsection{Banda e Envelope de Matrizes}
+Considere $A \in \mathbb{R}^{n \times n}$ uma matriz simétrica definida positiva
+com entradas $A_{ij}$. Para cada linha $i$ de $A$, $i = 1, \ldots, n$, seja
 \begin{align*}
-    \beta(A) &= \max_{a_{ij} \neq 0} | i - j |.
+    f_i(A) &= \min\left\{ j \mid A_{ij} \neq 0 \right\},
 \end{align*}
+isso é, $f_i(A)$ corresponde a primeira coluna cujo elemento na linha $i$ é
+diferente de zero.
 
+Seguindo Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth}, definimos
+\begin{align*}
+    \beta_i(A) &= i - f_i(A), 1 \leq i \leq n, \\
+    \beta(A) &= \max\left\{ \beta_i(A) \mid 1 \leq i \leq n \right\},
+\end{align*}
+em que $\beta_i(A)$ é a largura de banda da $i$-ésima linha de $A$ e
+$\beta(A)$ é a largura de banda da matriz $A$. A banda da matriz $A$ é
+definida como
+\begin{align*}
+    \text{Band}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
+    \beta(A) \right\}.
+\end{align*}
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
@@ -174,8 +129,14 @@ A largura de banda, $\beta$, de uma matriz simétrica $A \in \mathbb{R}^{n \time
         \node[right, shift={(-1.5,0)}] at (A-6-1) {$6$};
         \node[right, shift={(-1.5,0)}] at (A-7-1) {$7$};
         % Largura de banda
-        \draw (A-1-6.north east) -- (A-2-7.north east);
+        % \draw (A-1-6.north east) -- (A-2-7.north east);
         \draw (A-6-1.south west) -- (A-7-2.south west);
+        % Banda
+        \fill[gray, fill opacity=0.2, draw=black, dotted] (A-2-1.north west) -- (A-6-1.south west)
+        -- (A-6-2.south west) -- (A-7-2.south west) -- (A-7-7.south west)
+        \foreach \x in {6,5,4,3,2}{
+        -- (A-\x-\x.south east) -- (A-\x-\x.south west) -- (A-\x-\x.north west)
+        } -- (A-2-1.north west);
 
         \matrix (B) [matrix of math nodes,%
         left delimiter  = (,%
@@ -204,18 +165,26 @@ A largura de banda, $\beta$, de uma matriz simétrica $A \in \mathbb{R}^{n \time
         \node[right, shift={(-1.5,0)}] at (B-6-1) {$6$};
         \node[right, shift={(-1.5,0)}] at (B-7-1) {$7$};
         % Largura de banda
-        \draw (B-1-4.north east) -- (B-4-7.north east);
+        % \draw (B-1-4.north east) -- (B-4-7.north east);
         \draw (B-4-1.south west) -- (B-7-4.south west);
+        % Banda
+        \fill[gray, fill opacity=0.2, draw=black, dotted] (B-1-1.south west) -- (B-4-1.south west)
+        -- (B-4-2.south west) -- (B-5-2.south west) -- (B-5-3.south west)
+        -- (B-6-3.south west) -- (B-6-4.south west) -- (B-7-4.south west)
+        -- (B-7-7.south west)
+        \foreach \x in {6,5,4,3,2}{
+        -- (B-\x-\x.south east) -- (B-\x-\x.south west) -- (B-\x-\x.north west)
+        } -- (B-1-1.south west);
     \end{tikzpicture}
-    \caption{Exemplos da largura de banda para matriz simétrica.}
+    \caption{Ilustração da banda, em rachurado e contornado por pontos, e da
+    largura de banda, linha contínua, para duas matriz simétrica.}
     \label{fig:exem_bandwidth}
 \end{figure}
-% TODO Escrever melhor
-É possível ``generalizar'' a largura de banda para cada linha da matiz simética
 
-O envelope, $\rho$, da matriz é dado por
+O envelope da matriz $A$ é definido como
 \begin{align*}
-    \rho(A) = \sum_{i = 1}^n \beta_i(A).
+    \text{Env}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
+    \beta_i(A) \right\}.
 \end{align*}
 
 \begin{figure}[!htb]
@@ -248,12 +217,12 @@ O envelope, $\rho$, da matriz é dado por
         \node[right, shift={(-1.5,0)}] at (A-6-1) {$6$};
         \node[right, shift={(-1.5,0)}] at (A-7-1) {$7$};
         % Perfil
-        \draw[fill=gray, fill opacity=0.2] (A-1-1.north west) -- (A-6-1.north
+        \fill[gray, fill opacity=0.2, draw=black, dotted] (A-2-1.north west) -- (A-6-1.north
         west) -- (A-6-2.north west) --
-        (A-7-2.south west)
-        \foreach \x in {7,6,5,4,3,2,1}{
-        -- (A-\x-\x.south east) -- (A-\x-\x.north east) -- (A-\x-\x.north west)
-        };
+        (A-7-2.south west) -- (A-7-7.south west)
+        \foreach \x in {6,5,4,3,2}{
+        -- (A-\x-\x.south east) -- (A-\x-\x.south west) -- (A-\x-\x.north west)
+        } -- (A-2-1.north west);
 
         \matrix (B) [matrix of math nodes,%
         left delimiter  = (,%
@@ -282,179 +251,354 @@ O envelope, $\rho$, da matriz é dado por
         \node[right, shift={(-1.5,0)}] at (B-6-1) {$6$};
         \node[right, shift={(-1.5,0)}] at (B-7-1) {$7$};
         % Perfil
-        \draw[fill=gray, fill opacity=0.2] (B-1-1.north west) -- (B-5-1.north
+        \fill[gray, fill opacity=0.2, draw=black, dotted] (B-2-1.south west) -- (B-5-1.north
         west) -- (B-5-3.north west) --
         (B-5-3.south west) -- (B-6-5.north west) -- (B-7-5.south west)
-        \foreach \x in {7,6,5,4,3,2,1}{
-        -- (B-\x-\x.south east) -- (B-\x-\x.north east) -- (B-\x-\x.north west)
-        };
+        -- (B-7-7.south west)
+        \foreach \x in {6,5,4,3}{
+        -- (B-\x-\x.south east) -- (B-\x-\x.south west) -- (B-\x-\x.north west)
+        } -- (B-2-1.south west);
     \end{tikzpicture}
-    \caption{Exemplos da largura de banda para matriz simétrica.}
+    \caption{Ilustração do envelope, em rechurado e contornado por
+    pontos, para duas matrizes simétricas.}
     \label{fig:exem_profile}
 \end{figure}
 
+\subsection{Fatoração de Cholesky}
+Seja $A \in \mathbb{R}^{n \times n}$ simétrica definda positiva, então existe
+uma única matriz $G \in \mathbb{R}^{n \times n}$ triangular inferior com
+elementos positivos na diagonal tal que $A = G G^T$. A fatoração $A = G G^T$ é
+conhecida como fatoração de Cholesky e no algoritmo abaixo é apresentado
+uma forma de obter-se $G$.
+
+\begin{algorithm}[H]
+    \caption{Pseudo-algoritmo da Fatoração de Cholesky}
+    \label{alg:chol}
+    \begin{algorithmic}[1]
+        \REQUIRE $A \in \mathbb{R}^{n \times n}$ simétrica definida positiva.
+        \ENSURE $G \in \mathbb{R}^{n \times n}$
+        \STATE $G \longleftarrow 0$ 
+        \FOR{$k \in 1, \ldots, n$}
+            \STATE $G_{k,k} \longleftarrow \sqrt{A_{k,k}}$ \label{alg:chol:sqrt}
+            \FOR{$i \in k+1, \ldots n$}
+                \STATE $G_{i,k} \longleftarrow A_{i,k} / G_{k,k}$
+                \label{alg:chol:div}
+            \ENDFOR
+            \FOR{$j \in k+1, \ldots, n$}
+                \FOR{$i \in k+1, \ldots, n$}
+                    \STATE $A_{i,j} \longleftarrow A_{i,j} - G_{i,k} G_{j,k}$
+                    \label{alg:chol:prod}
+                \ENDFOR
+            \ENDFOR
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{prop}
+    \label{prop:pres:env}
+    A fatoração de Cholesky preserva o envelope da matriz.
+\end{prop}
+\begin{proof}
+    Para calcular $G$ no Algoritmo~\ref{alg:chol} ocorrem operações aritmeticas
+    apenas nas linhas \ref{alg:chol:sqrt}, \ref{alg:chol:div} e
+    \ref{alg:chol:prod}. Vamos mostrar que nenhuma dessas operações aritmeticas
+    altera o envelope da matrix.
+
+    Para a linha \ref{alg:chol:sqrt}, como $A$ é simétrica definida positiva,
+    ocorre que $A_{k,k}$ é não nulo e, portanto, $G_{k,k}$ também.
+
+    Para a linha \ref{alg:chol:div} é fácil verificar que $G_{i,k}$ é nulo se e
+    somente se $A_{i,k}$.
+
+    Para a linha \ref{alg:chol:prod}, se $A_{i,j}$ não pertence ao envelope de $A$
+    então $A_{i,j}$ e $G_{i,k}$ são nulos e portanto o envelope não é alterado.
+\end{proof}
+
+\begin{prop}
+    \label{prop:pres:band}
+    A fatoração de Cholesky preserva a banda da matriz.
+\end{prop}
+\begin{proof}
+    Como o envelope da matriz está contido na banda da matriz e já provamos que
+    a fatoração de Cholesky preserva o envelope podemos concluir que a fatoração
+    de Cholesky também preserva a banda da matriz.
+\end{proof}
+
+\section{Cuthill-McKee reverso}
+Na seção anterior verificou-se que a fatoração de Cholesky preserva a banda e
+envelope da matriz. Por esse motivo é interessante utilizar matrizes de banda e
+envelope pequenos pois assim o preenchimento da matriz é reduzido. Será que dada
+uma matriz $A \in \mathbb{R}^{n \times n}$ simétrica definida positiva existe
+uma matriz $A' = P A P^T$, onde $P$ é uma matriz de permutação, tal que a banda
+e/ou envelope de $A'$ é menor que o de $A$?
+
+\begin{exem}
+    Considere a matriz $A$ e $G$ dada por
+    \begin{align*}
+        A &= \begin{bmatrix}
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+            0 & 1 & 1 & 0 & 0 & 2 & 3
+        \end{bmatrix},
+        & G &= \begin{bmatrix}
+            1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+            1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+            1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+            1 & 0 & 0 & 1 & 0 & 0 & 0 \\
+            1 & 0 & 0 & 0 & 1 & 0 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 1 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 0 & 1
+        \end{bmatrix}.
+    \end{align*}
+    Verifica-se que a largura da banda de $G$ é $5$ e o envelope é $19$.
+
+    Permutando $A$ temos 
+    % O vetor de permutação é
+    % [4, 3, 0, 2, 1, 6, 5]
+    \begin{align*}
+        A' &= \begin{bmatrix}
+            2 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 1 & 2 & 1 & 1 \\
+            0 & 0 & 0 & 1 & 1 & 3 & 2 \\
+            0 & 0 & 0 & 1 & 1 & 2 & 3
+        \end{bmatrix},
+        & G' &= \begin{bmatrix}
+             1.4 & 0 & 0 & 0 & 0 & 0 & 0 \\
+            0.70 & 1.2 & 0 & 0 & 0 & 0 & 0 \\
+            0.70 & 0.40 & 0.57 & 0 & 0 & 0 & 0 \\
+            0.70 & 0.40 & 0.57 & 1 & 0 & 0 & 0 \\
+            0.70 & 0.40 & 0.57 & 0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+            0 & 0 & 0 & 1 & 1 & 0 & 1
+        \end{bmatrix}
+    \end{align*}
+    Verifica-se que a largura da banda de $G$ é $4$ e o envelope é $15$.
+\end{exem}
+
+Pelo exemplo anterior, verifica-se a possibilidade de pré-processar a matriz
+de forma a reduzir a banda e envelope.
+
+% Alguns
+% exemplos de pré-processamentos indicados por Ghidetti
+% \cite{Ghidetti:2010:ComparativoReordenamento} são a minimização da
+% largura de banda e a redução do envelope ou \textit{profile}. ``Esses
+% pré-processamentos consistem em dispor os elementos não nulos da matriz o mais
+% próximo possível da diagonal principal.''
+% 
+% ``No contexto da solução de sisteas lineares via métodos diretos, a
+% minimização da largura da bnada pode proporcionar uma redução no
+% preenchimento que ocorre na decomposição. (\ldots) Contudo, atualmente
+% sistemas lineares de grande porte são usualmente solucionados por métodos
+% iterativos não estacionários que por um lado não alteram a esparsidade da
+% matriz, mas necessitam de critérios de convergência. Em geral, um
+% processo para acelerar a convergência, denominado precondicionamento, se faz
+% necessário. Os precondicionadores baseados na decomposição LU são
+% amplamente utilizados por apresentar uma taxa acentuada na aceleração da
+% convergência. Porém, tais operações alteram a esparsidade da matriz e
+% portanto um processo de reordenamento da matriz é fundamental para a
+% eficiência de tais precondicionadores.''
+% 
+% A saída do algoritmo de Cuthill-McKee reverso é um um reordenamento para a
+% matriz de entrada que pode minimizar a largura de banda e o envelope da
+% matriz.
+
+Na próxima subseção apresentamos algumas definições da Teoria de Grafo que
+serão utilizados no algoritmo.
+
 \subsection{Grafos e matrizes esparsas}
-A teoria dos grafos foi identificada como uma poderosa ferramenta para a computação de matrizes esparsas quando Seymour Parter [Par61] usou grafos não direcionados para modelar a eliminação Gaussiana há mais de quarenta anos atrás. Grafos podem ser usados para modelar matrizes simítricas, não simétricas, fatorações etc. Além de tornar mais fácil a compreensão e análise de algoritmos para matrizes esparsas, eles também aumentam o escopo de manipulações destas matrizes usando algoritmos e técnicas já existentes.
+Um grafo é, fundamentalmente, um modo de representar uma relação binária entre
+objetos. Para o propósito deste trabalho, considere um grafo $G = (V, E)$ como
+um conjunto de vértices $V = \{v_1, v_2, \ldots \}$ e um conjunto de
+arestas $E = \{e_1, e_2, \ldots \}$. Estas arestas são representadas por pares
+não ordenados, por exemplo, $e_1 = (v_1 , v_2)$.
 
-Um grafo é, fundamentalmente, um modo de representar uma relação binária entre objetos. Para o propósito deste trabalho, considere um grafo $G = (V, E)$ como um conjunto de vértices $V = \{v_1, v_2, \ldots \}$ (ou nós) e um conjunto de arestas $E = \{e_1, e_2, \ldots \}$. Estas arestas são representadas por pares não ordenados, por exemplo, $e_1 = (v_1 , v_2)$.
+Assim como um grafo, uma matriz também descreve uma relação binária entre objetos
+através de seus elementos não nulos. Uma matriz simétrica $A \in \mathbb{R}^{n
+\times n}$ induz um grafo $G(A)$, onde os vértices do grafo correspondem as
+dimensões da matriz e a aresta $e = (i, j)$ existe se e somente se $A_{ij} \neq 0$.
+Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
 
-Um conhecimento básico de teoria dos grafos é importante para o entendimento do trabalho. Conceitos mais específicos serão introduzidos quando necessários. Um resumo dos principais conceitos é dado por:
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \matrix (A) [matrix of math nodes,%
+        left delimiter  = (,%
+        right delimiter = )] at (0,0)
+        {%
+        X & X & X & X & X & 0 & 0 \\
+        X & X & 0 & 0 & 0 & X & X \\
+        X & 0 & X & 0 & 0 & X & X \\
+        X & 0 & 0 & X & 0 & 0 & 0 \\
+        X & 0 & 0 & 0 & X & 0 & 0 \\
+        0 & X & X & 0 & 0 & X & 0 \\
+        0 & X & X & 0 & 0 & 0 & X \\
+        };
+        %Graph
+        \node[draw, circle] (1) at (6,0) {1};
+        \node[draw, circle] (2) at (8,1) {2};
+        \node[draw, circle] (3) at (8,-1) {3};
+        \node[draw, circle] (4) at (4,1) {4};
+        \node[draw, circle] (5) at (4,-1) {5};
+        \node[draw, circle] (6) at (10,1) {6};
+        \node[draw, circle] (7) at (10,-1) {7};
+        \draw (1) -- (2);
+        \draw (1) -- (3);
+        \draw (1) -- (4);
+        \draw (1) -- (5);
+        \draw (2) -- (6);
+        \draw (2) -- (7);
+        \draw (3) -- (6);
+        \draw (3) -- (7);
+    \end{tikzpicture}
+
+    \begin{tikzpicture}
+        \matrix (B) [matrix of math nodes,%
+        left delimiter  = (,%
+        right delimiter = )] at (0,0)
+        {%
+        X & 0 & X & X & 0 & 0 & 0 \\
+        0 & X & X & X & 0 & 0 & 0 \\
+        X & X & X & 0 & X & 0 & 0 \\
+        X & X & 0 & X & X & 0 & 0 \\
+        0 & 0 & X & X & X & X & X \\
+        0 & 0 & 0 & 0 & X & X & 0 \\
+        0 & 0 & 0 & 0 & X & 0 & X \\
+        };
+        % Graph
+        \node[draw, circle] (1) at (4,0) {1};
+        \node[draw, circle] (2) at (6,0) {2};
+        \node[draw, circle] (3) at (6,1.5) {3};
+        \node[draw, circle] (4) at (6,-1.5) {4};
+        \node[draw, circle] (5) at (8,0) {5};
+        \node[draw, circle] (6) at (10,1.5) {6};
+        \node[draw, circle] (7) at (10,-1.5) {7};
+        \draw (1) -- (3);
+        \draw (1) -- (4);
+        \draw (2) -- (3);
+        \draw (2) -- (4);
+        \draw (5) -- (3);
+        \draw (5) -- (4);
+        \draw (5) -- (6);
+        \draw (5) -- (7);
+    \end{tikzpicture}
+    \caption{Ilustração do grafo (a direita) correspondente a uma matriz (a
+    esquerda).}
+    \label{fig:exem_matrix2graph}
+\end{figure}
+
+Um resumo dos principais conceitos é dado por:
 \begin{description}
     \item[Grau do vértice] número de arestas incidentes no vértice.
-    \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes quando possue uma aresta entre eles, ou seja, $e_1 = (v_1, v_2)$.
+    \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes quando existe uma aresta entre eles, ou seja, $e_1 = (v_1, v_2)$.
     \item[Caminho] sequência de arestas disjuntas $\left( (x_1, x_2), (x_2, x_3), \ldots (x_{k - 1}, x_k) \right)$.
+    \item[Distância] comprimento do menor caminho ligando dois vértices.
+    \item[Excentricidade] maior distância de um vértice a qual outro.
+    \item[Diâmetro] maior excentricidade dentre os vértices de um grafo.
     \item[Grafo conectado (conexo)] possui caminho entre qualquer par de vértices.
     \item[Subgrafo completo (clique)] cada vértice do subgrafo possue aresta incidente em todos os outros vértices do subgrafo.
     \item[Árvore] grafo conectado sem ciclos.
 \end{description}
+\subsection{Algoritmo}
+Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram um algoritmo de
+reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largura
+de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
+é conexo.
 
-Assim como um grafo, uma matriz tambm descreve uma relação binária entre variáveis através de seus elementos não nulos. Uma matriz simétrica $A_{n \times n}$ pode ser modelada como um grafo $G(V, E)$, onde os $n$ vértices em $V$ representam as dimensões da matriz e existe uma aresta conectando os vértices $i$ e $j$ se $a_{ij} = 0$.
-
-\begin{figure}[!htb]
-    \centering
-    \begin{tikzpicture}
-        \node[draw, circle] (A1) at (0,0) {1};
-        \node[draw, circle] (A5) at (-2,2) {5};
-        \node[draw, circle] (A4) at (-2,-2) {4};
-        \node[draw, circle] (A2) at (2,2) {2};
-        \node[draw, circle] (A3) at (2,-2) {3};
-        \node[draw, circle] (A6) at (2,0) {7};
-        \node[draw, circle] (A7) at (4,0) {6};
-        \draw (A1) -- (A5) (A1) -- (A4) (A1) -- (A2);
-        \draw (A1) -- (A5) (A2) -- (A7) (A3) -- (A7);
-        \draw (A2) -- (A6) (A3) -- (A6) (A1) -- (A3);
-
-        \node[draw, circle] (B1) at (8,0) {1};
-        \node[draw, circle] (B5) at (6,2) {5};
-        \node[draw, circle] (B4) at (6,-2) {4};
-        \node[draw, circle] (B2) at (10,2) {2};
-        \node[draw, circle] (B3) at (10,-2) {3};
-        \node[draw, circle] (B6) at (10,0) {7};
-        \node[draw, circle] (B7) at (12,0) {6};
-        \draw (B1) -- (B5) (B1) -- (B4) (B1) -- (B2);
-        \draw (B1) -- (B5) (B2) -- (B7) (B3) -- (B7);
-        \draw (B2) -- (B6) (B3) -- (B6) (B1) -- (B3);
-    \end{tikzpicture}
-    \caption{Exemplos do grafo correspondente a matriz simétrica.}
-    \label{fig:exem_graph}
-\end{figure}
-\subsection{Fatoração de matrizes esparsas}
-Considerando
-\begin{align*}
-    A &= \begin{bmatrix}
-        1 & 1 & 1 & 1 & 1 & 0 & 0 \\
-        1 & 1 & 0 & 0 & 0 & 1 & 1 \\
-        1 & 0 & 1 & 0 & 0 & 1 & 1 \\
-        1 & 0 & 0 & 1 & 0 & 0 & 0 \\
-        1 & 0 & 0 & 0 & 1 & 0 & 0 \\
-        0 & 1 & 1 & 0 & 0 & 1 & 0 \\
-        0 & 1 & 1 & 0 & 0 & 0 & 1
-    \end{bmatrix},
-\end{align*}
-verifica-se que
-\begin{align*}
-    U &= \begin{bmatrix}
-        1 &    1 &    1 &    1 &    1 &    0 &    0 \\
-        0 &   -1 &    0 &   -1 &   -1 &    1 &    1 \\
-        0 &    0 &   -1 &   -1 &   -1 &    1 &    1 \\
-        0 &    0 &    0 &    2 &    1 &   -2 &   -2 \\
-        0 &    0 &    0 &    0 &  3/2 &   -1 &   -1 \\
-        0 &    0 &    0 &    0 &    0 & -2/3 &  1/3 \\
-        0 &    0 &    0 &    0 &    0 &    0 & -1/2
-    \end{bmatrix},
-\end{align*}
-onde $A = P L U$.
-
-Permutando linhas e colunas de $A$ tal que
-\begin{align*}
-    A' &= \begin{bmatrix}
-        1 & 0 & 1 & 1 & 0 & 0 & 0 \\
-        0 & 1 & 1 & 1 & 0 & 0 & 0 \\
-        1 & 1 & 1 & 0 & 1 & 0 & 0 \\
-        1 & 1 & 0 & 1 & 1 & 0 & 0 \\
-        0 & 0 & 1 & 1 & 1 & 1 & 1 \\
-        0 & 0 & 0 & 0 & 1 & 1 & 0 \\
-        0 & 0 & 0 & 0 & 1 & 0 & 1
-    \end{bmatrix},
-\end{align*}
-verifica-se que
-\begin{align*}
-    U' &= \begin{bmatrix}
-        1 &    0 &    1 &    1 &    0 &    0 &    0 \\
-        0 &    1 &    1 &    1 &    0 &    0 &    0 \\
-        0 &    0 &   -2 &   -1 &    1 &    0 &    0 \\
-        0 &    0 &    0 & -3/2 &  1/2 &    0 &    0 \\
-        0 &    0 &    0 &    0 &  5/3 &    1 &    1 \\
-        0 &    0 &    0 &    0 &    0 & -3/5 &  2/5 \\
-        0 &    0 &    0 &    0 &    0 &    0 & -1/3
-    \end{bmatrix}.
-\end{align*}
-onde $A' = P' L' U'$.
-
-Comparando $U$ e $U'$ verifica-se que o número de elementos nulos na parte
-triangular superior da matriz $U'$ é maior na matriz $U$. E
-comparando os elementos nulos na parte triangular superior de $A'$ e $U'$
-verifica-se que apenas o elemento $A'_{34}$ deixou de ser nulo
-enquanto que em relação a $A$ e $U$ apenas os elementos $A_{16}$,
-$A_{17}$ e $A_{23}$ permaneceram nulos.
-comparamos os elementos 
-
-Pelo exemplo anterior, verifica-se a possibilidade de pré-processar a matrix
-de forma a reduzir a complexidade da resolução do sistema linear. Alguns
-exemplos de pré-processamentos indicados por Ghidetti
-\cite{Ghidetti:2010:ComparativoReordenamento} são a minimização da
-largura de banda e a redução do envelope ou \textit{profile}. ``Esses
-pré-processamentos consistem em dispor os elementos não nulos da matriz o mais
-próximo possível da diagonal principal.''
-
-``No contexto da solução de sisteas lineares via métodos diretos, a
-minimização da largura da bnada pode proporcionar uma redução no
-preenchimento que ocorre na decomposição. (\ldots) Contudo, atualmente
-sistemas lineares de grande pore são usualmente solucionados por métodos
-iterativos não estacionários que por um lado não alteram a esparsidade da
-matriz, mas necessitam de critérios de convergência. Em geral, um
-processo para acelerar a convergência, denominado precondicionamento, se faz
-necessário. Os precondicionadores baseados na decomposição LU são
-amplamente utilizados por apresentar uma taxa acentuada na aceleração da
-convergência. Porém, tais operações alteram a esparsidade da matriz e
-portanto um processo de reordenamento da matriz é fundamental para a
-eficiência de tais precondicionadores.''
-
-\section{Cuthill-McKee reverso}
-No Método Preditor-Corretor pode-se utilizar a Decomposição de Cholesky para resolver o sistema linear
-% TODO Identificar o sistema linear do Método Preditor-Corretor
-
-Para problemas de grande porte, esse sistema linear é esparso e ao utilizar a Decomposição de Cholesky pode ocorrer o preenchimento da matriz.
-% TODO Incluir exemplo.
-
-É possivel permutar linhas e colunas do sistema linear de modo a minimizar o preenchimento decorrente da Decomposição de Choleslky.
-% TODO Incluir exemplo.
-
-Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram um algoritmo de reordenação, cujo objetivo principal é reduzir a largura de banda de uma matriz simétrica.
-
-% TODO Mostrar equivalência com grafos
-\begin{algorithm}
-    \caption{Pseudo-algoritmo RCM}
+\begin{algorithm}[H]
+    \caption{Pseudo-algoritmo de Cuthill-McKee}
     \label{alg:rcm}
-    \begin{algorithmic}
-        \REQUIRE Grafo $G(A)$ e um vértice $v$ de grau mínimo.
-        \ENSURE $n$, novo ordenamento dos vértices de $G(A)$.
-        \STATE $p = \text{ vetor de zeros}$
-        \STATE $n = \text{ vetor de zeros}$
-        \STATE $i = 1$
-        \STATE $f = \text{ fila vazia}$
-        \STATE Enfileira $v$ em $f$
-        \STATE $p_v = 1$
+    \begin{algorithmic}[1]
+        \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
+        \ENSURE $o$, novo ordenamento dos vértices de $G(A)$.
+        \STATE Marca todos os vértices como não visitados.
+        \STATE $o \longleftarrow \text{ vetor de zeros}$
+        \STATE $i \longleftarrow 1$
+        \STATE $f \longleftarrow \text{ fila vazia}$
+        \STATE Enfileira $v$ em $f$.
+        \STATE Marca $v$ como visitado.
         \WHILE{$f$ não for vazia}
             \STATE Desenfeira $f$ em $v$
-            \STATE $n_v = i$
-            \STATE $i = i + 1$
-            \FOR{vertice $w$ adjacente a $v$}
-                \IF{$p_w == 0$}
+            \STATE $o_i \longleftarrow v$
+            \STATE $i \longleftarrow i + 1$
+            \FORALL{vértice $w$ adjacente a $v$, em ordem crescente de grau,}
+                \IF{$w$ ainda não foi visitado}
                     \STATE Enfileira $w$ em $f$
-                    \STATE $p_w = 1$
+                    \STATE Marca $w$ como visitado.
                 \ENDIF
             \ENDFOR
         \ENDWHILE
+    \end{algorithmic}
+\end{algorithm}
+
+Para o caso de uma matriz $A$ cujo grafo não é conexo, Cuthill e McKee propõe
+aplicar o algoritmo para cada uma das componentes conexas.
+
+Uma dos parâmetros de entrada do Algoritmo Cuthill-McKee é um nó inicial sendo
+experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
+nós de grau mínimo são bons candidados.
+
+George \cite{George:1971:ComputerImplementation} verificou
+experimentalmente que ao reverter o ordenamento obtido pelo Algoritmo
+Cuthill-McKee o novo ordenamento mantinha a mesma banda mas diminui o
+envelope da matriz.
+
+% \begin{algorithm}[H]
+%     \caption{Pseudo-algoritmo de Cuthill-McKee Reverso}
+%     \label{alg:rc}
+%     \begin{algorithmic}[1]
+%         \REQUIRE Grafo $G(A)$.
+%         \ENSURE $n$, novo ordenamento dos vértices de $G(A)$.
+%         \STATE $p = \text{ vetor de zeros}$
+%         \STATE $n = \text{ vetor de zeros}$
+%         \STATE $i = 1$
+%         \STATE $f = \text{ fila vazia}$
+%         \STATE Enfileira $v$ em $f$
+%         \STATE $p_v = 1$
+%         \WHILE{$f$ não for vazia}
+%             \STATE Desenfeira $f$ em $v$
+%             \STATE $n_v = i$
+%             \STATE $i = i + 1$
+%             \FOR{vertice $w$ adjacente a $v$}
+%                 \IF{$p_w == 0$}
+%                     \STATE Enfileira $w$ em $f$
+%                     \STATE $p_w = 1$
+%                 \ENDIF
+%             \ENDFOR
+%         \ENDWHILE
+%         \STATE Reverter a ordem de $n$.
+%     \end{algorithmic}
+% \end{algorithm}
+
+Um dos algoritmos para encontrar nós pseudo-periféricos foi proposto por Alan
+George e Joseph W. H. Liu \cite{George:1979:NodeFinder} e é uma
+modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
+\cite{Gibbs:1976:ReducingBandwidth} baseado na observação de que
+\begin{align*}
+    y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y).
+\end{align*}
+
+\begin{algorithm}[H]
+    \caption{Pseudo-algoritmo para encontrar no pseudo-periférico, $x$.}
+    \label{alg:ppn}
+    \begin{algorithmic}[1]
+        \REQUIRE Grafo $G(A)$.
+        \ENSURE $x$.
+        \STATE $r \longleftarrow \text{Nó arbitrário em }G(A)$
+        \STATE Construir estrutura de nível a partir de $r$, $\mathcal{L}(r)$.
+        \label{alg:ppn:brle}
+        \STATE Escolher um nó $x$ pertencente ao último nível de
+        $\mathcal{L}(r)$.
+        \STATE Construir estrutura de nível a partir de $x$, $\mathcal{L}(x)$.
+        \IF{$l(x) > l(r)$}
+            \STATE $r \longleftarrow x$
+            \STATE Retorna para a linha~\ref{alg:ppn:brle}
+        \ENDIF
     \end{algorithmic}
 \end{algorithm}
