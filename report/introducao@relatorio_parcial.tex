@@ -99,6 +99,7 @@ definida como
     \text{Band}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
     \beta(A) \right\}.
 \end{align*}
+e ilustrado na figura abaixo.
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
@@ -186,7 +187,7 @@ O envelope da matriz $A$ é definido como
     \text{Env}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
     \beta_i(A) \right\}.
 \end{align*}
-
+e ilustrado na figura abaixo.
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
@@ -265,7 +266,7 @@ O envelope da matriz $A$ é definido como
 \end{figure}
 
 \subsection{Fatoração de Cholesky}
-Seja $A \in \mathbb{R}^{n \times n}$ simétrica definda positiva, então existe
+Seja $A \in \mathbb{R}^{n \times n}$ uma matriz simétrica definda positiva, então existe
 uma única matriz $G \in \mathbb{R}^{n \times n}$ triangular inferior com
 elementos positivos na diagonal tal que $A = G G^T$. A fatoração $A = G G^T$ é
 conhecida como fatoração de Cholesky e no algoritmo abaixo é apresentado
@@ -325,9 +326,33 @@ uma forma de obter-se $G$.
 \end{proof}
 
 \section{Cuthill-McKee reverso}
+Considere a matriz $A$ e seu fator de Cholesky $G$ dados por
+\begin{align*}
+    A &= \begin{bmatrix}
+        1 &  1 &  1 &  1 &  1 &  1 &  1 \\
+        1 & 10 &  0 &  0 &  0 &  0 &  0 \\
+        1 &  0 & 10 &  0 &  0 &  0 &  0 \\
+        1 &  0 &  0 & 10 &  0 &  0 &  0 \\
+        1 &  0 &  0 &  0 & 10 &  0 &  0 \\
+        1 &  0 &  0 &  0 &  0 & 10 &  0 \\
+        1 &  0 &  0 &  0 &  0 &  0 & 10
+    \end{bmatrix}, & G &= \begin{bmatrix}
+        1.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 \\
+        1.0 &  3.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 \\
+        1.0 & -0.3 &  2.9 &  0.0 &  0.0 &  0.0 &  0.0 \\
+        1.0 & -0.3 & -0.3 &  2.9 &  0.0 &  0.0 &  0.0 \\
+        1.0 & -0.3 & -0.3 & -0.4 &  2.9 &  0.0 &  0.0 \\
+        1.0 & -0.3 & -0.3 & -0.4 & -0.4 &  2.8 &  0.0 \\
+        1.0 & -0.3 & -0.3 & -0.4 & -0.4 & -0.5 &  2.8
+    \end{bmatrix}.
+\end{align*}
+Observa-se que vários elementos nulos na parte triangular inferior de $A$ são
+não nulos em $G$. A perda de elementos nulos ao realizar a fatoração de
+Cholesky é denominada de preeenchimento e deve ser evitada.
+
 Na seção anterior verificou-se que a fatoração de Cholesky preserva a banda e
-envelope da matriz. Por esse motivo é interessante utilizar matrizes de banda e
-envelope pequenos pois assim o preenchimento da matriz é reduzido. Será que dada
+envelope da matriz. Por esse motivo, ao utilizar matrizes de banda e
+envelope pequenos o preenchimento da matriz também será pequeno. Será que dada
 uma matriz $A \in \mathbb{R}^{n \times n}$ simétrica definida positiva existe
 uma matriz $A' = P A P^T$, onde $P$ é uma matriz de permutação, tal que a banda
 e/ou envelope de $A'$ é menor que o de $A$?
@@ -354,9 +379,10 @@ e/ou envelope de $A'$ é menor que o de $A$?
             0 & 1 & 1 & 0 & 0 & 0 & 1
         \end{bmatrix}.
     \end{align*}
-    Verifica-se que a largura da banda de $G$ é $5$ e o envelope é $19$.
+    Verifica-se que a largura da banda de $A$ e $G$ é $5$ e o envelope é $19$.
 
-    Permutando $A$ temos 
+    Agora, considere a matriz $A' = P A P^T = G' G'^T$, em que $P$ é uma matriz de
+    permutação, dada por
     % O vetor de permutação é
     % [4, 3, 0, 2, 1, 6, 5]
     \begin{align*}
@@ -379,7 +405,7 @@ e/ou envelope de $A'$ é menor que o de $A$?
             0 & 0 & 0 & 1 & 1 & 0 & 1
         \end{bmatrix}
     \end{align*}
-    Verifica-se que a largura da banda de $G$ é $4$ e o envelope é $15$.
+    Verifica-se que a largura da banda de $A$ e $G$ é $4$ e o envelope é $15$.
 \end{exem}
 
 Pelo exemplo anterior, verifica-se a possibilidade de pré-processar a matriz
@@ -410,7 +436,8 @@ de forma a reduzir a banda e envelope.
 % matriz.
 
 Na próxima subseção apresentamos algumas definições da Teoria de Grafo que
-serão utilizados no algoritmo.
+serão utilizadas no algoritmo estudado para obter uma permutação que reduza
+a largura de banda e envelope.
 
 \subsection{Grafos e matrizes esparsas}
 Um grafo é, fundamentalmente, um modo de representar uma relação binária entre
@@ -538,52 +565,26 @@ de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 \end{algorithm}
 
 Para o caso de uma matriz $A$ cujo grafo não é conexo, Cuthill e McKee propõe
-aplicar o algoritmo para cada uma das componentes conexas.
-
-Uma dos parâmetros de entrada do Algoritmo Cuthill-McKee é um nó inicial sendo
-experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
-nós de grau mínimo são bons candidados.
+aplicar o mesmo algoritmo para cada uma das componentes conexas.
 
 George \cite{George:1971:ComputerImplementation} verificou
 experimentalmente que ao reverter o ordenamento obtido pelo Algoritmo
 Cuthill-McKee o novo ordenamento mantinha a mesma banda mas diminui o
-envelope da matriz.
+envelope da matriz. Essa versão do algoritmo é conhecida como Cuthill-McKee
+reverso.
 
-% \begin{algorithm}[H]
-%     \caption{Pseudo-algoritmo de Cuthill-McKee Reverso}
-%     \label{alg:rc}
-%     \begin{algorithmic}[1]
-%         \REQUIRE Grafo $G(A)$.
-%         \ENSURE $n$, novo ordenamento dos vértices de $G(A)$.
-%         \STATE $p = \text{ vetor de zeros}$
-%         \STATE $n = \text{ vetor de zeros}$
-%         \STATE $i = 1$
-%         \STATE $f = \text{ fila vazia}$
-%         \STATE Enfileira $v$ em $f$
-%         \STATE $p_v = 1$
-%         \WHILE{$f$ não for vazia}
-%             \STATE Desenfeira $f$ em $v$
-%             \STATE $n_v = i$
-%             \STATE $i = i + 1$
-%             \FOR{vertice $w$ adjacente a $v$}
-%                 \IF{$p_w == 0$}
-%                     \STATE Enfileira $w$ em $f$
-%                     \STATE $p_w = 1$
-%                 \ENDIF
-%             \ENDFOR
-%         \ENDWHILE
-%         \STATE Reverter a ordem de $n$.
-%     \end{algorithmic}
-% \end{algorithm}
+Uma dos parâmetros de entrada do Algoritmo Cuthill-McKee (reverso) é um nó inicial sendo
+experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
+nós pseudo-periféricos são bons candidados.
 
 Um dos algoritmos para encontrar nós pseudo-periféricos foi proposto por Alan
-George e Joseph W. H. Liu \cite{George:1979:NodeFinder} e é uma
+George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo
+abaixo, e é uma
 modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
 \cite{Gibbs:1976:ReducingBandwidth} baseado na observação de que
 \begin{align*}
     y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y).
 \end{align*}
-
 \begin{algorithm}[H]
     \caption{Pseudo-algoritmo para encontrar no pseudo-periférico, $x$.}
     \label{alg:ppn}
