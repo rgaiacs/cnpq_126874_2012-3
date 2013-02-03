@@ -11,17 +11,37 @@ then
 else
     # format="mat MM rb"
     sublib="LPnetlib Meszaros Mittelmann"
-    format="MM"
+    # format="MM"
+    #format='mps'
     for f in $format
     do
-        mkdir -p $f
-        for l in $sublib
-        do
-            mkdir -p $f/$l
-            wget --no-directories --directory-prefix=$f/$l --recursive --no-parent http://www.cise.ufl.edu/research/sparse/$f/$l/
-        done
-        rm -f $f/$sublib/index*
-        rm -f $f/$sublib/robots.txt
+        if [ $f == 'mps' ]
+        then
+            mkdir -p $f
+            mkdir -p $f/netlib
+            wget --no-directories --directory-prefix=$f/netlib --recursive --no-parent http://www.netlib.org/lp/data/
+            rm -f $f/netlib/ascii*
+            rm -f $f/netlib/changes*
+            rm -f $f/netlib/kennington*
+            rm -f $f/netlib/minos*
+            rm -f $f/netlib/mpc.src*
+            rm -f $f/netlib/standgub*
+            rm -f $f/netlib/stocfor3*
+            rm -f $f/netlib/truss*
+            rm -f $f/netlib/nams*
+            rm -f $f/netlib/index*
+            rm -f $f/netlib/robots.txt*
+            rm -f $f/netlib/readme*
+        else
+            mkdir -p $f
+            for l in $sublib
+            do
+                mkdir -p $f/$l
+                wget --no-directories --directory-prefix=$f/$l --recursive --no-parent http://www.cise.ufl.edu/research/sparse/$f/$l/
+            done
+            rm -f $f/$sublib/index*
+            rm -f $f/$sublib/robots.txt
+        fi
     done
     if [ -d mat ]
     then
@@ -82,6 +102,30 @@ else
             :
         fi
         if [ -d rb/Mittelmann ]
+        then
+            :
+        fi
+    fi
+    if [ -d mps ]
+    then
+        if [ -d mps/netlib ]
+        then
+            cd mps/netlib
+            for p in *
+            do
+                gunzip $p
+            done
+            gcc -o emps emps.c
+            shopt -s extglob
+            ./emps -s !(emps*)
+            shopt -u extglob
+            cd ../..
+        fi
+        if [ -d mps/Meszaros ]
+        then
+            :
+        fi
+        if [ -d mps/Mittelmann ]
         then
             :
         fi
