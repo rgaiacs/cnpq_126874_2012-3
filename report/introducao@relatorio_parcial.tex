@@ -10,7 +10,10 @@
 % useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-\section{Método Preditor-Corretor}
+\section{Introdução}
+% Add Resumo
+
+\section{Métodos de Pontos Interiores Primal-Dual}
 Consideremos o problema de programação linear na forma padrão:
 \begin{align*}
     \text{minimizar } & c^t x \\
@@ -47,7 +50,7 @@ A direção afim nos métodos de pontos interiores primais-duais é dada por:
      \end{bmatrix},
      \label{eq:primal_dual_intp:lin_system}
 \end{align}
-onde $X = \diag(x)$, $Z = \diag(z)$ e os respiduos são dados por $r_p = b - A
+onde $X = \diag(x)$, $Z = \diag(z)$ e os residuos são dados por $r_p = b - A
 x$, $r_d = c - A^t y - z$, $r_a = - X Z e$ e $e$ representa o vetor de uns.
 
 Eliminando as variáveis $\tilde{z}$ de \eqref{eq:primal_dual_intp:lin_system}
@@ -72,7 +75,7 @@ consiste em reduzir o sistema através de eliminção das variáveis $\tilde{x}$
 um sistema simétrico definido positivo com a matriz de equações normais $A
 D^{-1} A^t$ e aplicar então a fatoração de Cholesky.
 
-\section{Matrizes}
+\section{Matrizes Esparsas}
 Como visto na seção anterior, uma das passagens do Método Preditor-Corretor é
 resolver um sistema linear utilizando a fatoração de Cholesky. Na próxima
 subseção introduziremos as definições de banda e envelope de matrizes para
