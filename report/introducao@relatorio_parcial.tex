@@ -68,22 +68,29 @@ obtemos o sistema aumentado:
     \end{bmatrix},
     \label{eq:primal_dual_intp:aug_lin_system}
 \end{align}
-onde $D = X^{-1} Z$.
+onde $D = X^{-1} Z$, $r_1 = r_d - X^{-1} r_a$ e $r_2 = r_p$.
 
 A forma mais utilizada para resolver \eqref{eq:primal_dual_intp:aug_lin_system}
 consiste em reduzir o sistema através de eliminção das variáveis $\tilde{x}$ a
 um sistema simétrico definido positivo com a matriz de equações normais $A
-D^{-1} A^t$ e aplicar então a fatoração de Cholesky.
+D^{-1} A^t$,
+\begin{align*}
+    A D^{-1} A^t
+\end{align*}
+e aplicar então a fatoração de Cholesky.
+
+A fatoração de Cholesky é realizada apenas uma vez
 
 \section{Matrizes Esparsas}
-Como visto na seção anterior, uma das passagens do Método Preditor-Corretor é
-resolver um sistema linear utilizando a fatoração de Cholesky. Na próxima
-subseção introduziremos as definições de banda e envelope de matrizes para
-posteriormente apresentarmos a fatoração de Cholesky.
+Como visto na seção anterior, um dos passos dos Métodos de Pontos Interiores
+Primal-Dual consiste em resolver um sistema linear utilizando a fatoração de
+Cholesky. Na próxima subseção introduziremos as definições de banda e envelope
+de matrizes para posteriormente apresentarmos a fatoração de Cholesky.
 
 \subsection{Banda e Envelope de Matrizes}
-Considere $A \in \mathbb{R}^{n \times n}$ uma matriz simétrica definida positiva
-com entradas $A_{ij}$. Para cada linha $i$ de $A$, $i = 1, \ldots, n$, seja
+Mudando a notação, considere $A \in \mathbb{R}^{n \times n}$ uma matriz
+simétrica definida positiva genérica com entradas $A_{ij}$. Para cada linha $i$
+de $A$, $i = 1, \ldots, n$, seja
 \begin{align*}
     f_i(A) &= \min\left\{ j \mid A_{ij} \neq 0 \right\},
 \end{align*}
@@ -110,13 +117,13 @@ e ilustrado na figura abaixo.
         left delimiter  = (,%
         right delimiter = )] at (0,0)
         {%
-        X & X & X & X & X & 0 & 0 \\
-        X & X & 0 & 0 & 0 & X & X \\
-        X & 0 & X & 0 & 0 & X & X \\
-        X & 0 & 0 & X & 0 & 0 & 0 \\
-        X & 0 & 0 & 0 & X & 0 & 0 \\
-        0 & X & X & 0 & 0 & X & 0 \\
-        0 & X & X & 0 & 0 & 0 & X \\
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+            0 & 1 & 1 & 0 & 0 & 2 & 3 \\
         };
         \node[above, shift={(0,.5)}] at (A-1-1) {$1$};
         \node[above, shift={(0,.5)}] at (A-1-2) {$2$};
@@ -146,13 +153,13 @@ e ilustrado na figura abaixo.
         left delimiter  = (,%
         right delimiter = )] at (8,0)
         {%
-        X & 0 & X & X & 0 & 0 & 0 \\
-        0 & X & X & X & 0 & 0 & 0 \\
-        X & X & X & 0 & X & 0 & 0 \\
-        X & X & 0 & X & X & 0 & 0 \\
-        0 & 0 & X & X & X & X & X \\
-        0 & 0 & 0 & 0 & X & X & 0 \\
-        0 & 0 & 0 & 0 & X & 0 & X \\
+           10 &  0 &  2 &  3 &  0 &  0 &  0 \\
+            0 & 10 &  2 &  3 &  0 &  0 &  0 \\
+            2 &  2 & 10 &  0 &  4 &  0 &  0 \\
+            3 &  3 &  0 & 10 &  4 &  0 &  0 \\
+            0 &  0 &  4 &  4 & 10 &  2 &  2 \\
+            0 &  0 &  0 &  0 &  2 & 10 &  0 \\
+            0 &  0 &  0 &  0 &  2 &  0 & 10 \\
         };
         \node[above, shift={(0,.5)}] at (B-1-1) {$1$};
         \node[above, shift={(0,.5)}] at (B-1-2) {$2$};
@@ -181,7 +188,7 @@ e ilustrado na figura abaixo.
         } -- (B-1-1.south west);
     \end{tikzpicture}
     \caption{Ilustração da banda, em rachurado e contornado por pontos, e da
-    largura de banda, linha contínua, para duas matriz simétrica.}
+    largura de banda, linha contínua, para duas matrizes simétricas.}
     \label{fig:exem_bandwidth}
 \end{figure}
 
@@ -198,13 +205,13 @@ e ilustrado na figura abaixo.
         left delimiter  = (,%
         right delimiter = )] at (0,0)
         {%
-        X & X & X & X & X & 0 & 0 \\
-        X & X & 0 & 0 & 0 & X & X \\
-        X & 0 & X & 0 & 0 & X & X \\
-        X & 0 & 0 & X & 0 & 0 & 0 \\
-        X & 0 & 0 & 0 & X & 0 & 0 \\
-        0 & X & X & 0 & 0 & X & 0 \\
-        0 & X & X & 0 & 0 & 0 & X \\
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+            0 & 1 & 1 & 0 & 0 & 2 & 3 \\
         };
         \node[above, shift={(0,.5)}] at (A-1-1) {$1$};
         \node[above, shift={(0,.5)}] at (A-1-2) {$2$};
@@ -232,13 +239,13 @@ e ilustrado na figura abaixo.
         left delimiter  = (,%
         right delimiter = )] at (8,0)
         {%
-        X & 0 & X & X & 0 & 0 & 0 \\
-        0 & X & X & X & 0 & 0 & 0 \\
-        X & X & X & 0 & X & 0 & 0 \\
-        X & X & 0 & X & X & 0 & 0 \\
-        0 & 0 & X & X & X & X & X \\
-        0 & 0 & 0 & 0 & X & X & 0 \\
-        0 & 0 & 0 & 0 & X & 0 & X \\
+           10 &  0 &  2 &  3 &  0 &  0 &  0 \\
+            0 & 10 &  2 &  3 &  0 &  0 &  0 \\
+            2 &  2 & 10 &  0 &  4 &  0 &  0 \\
+            3 &  3 &  0 & 10 &  4 &  0 &  0 \\
+            0 &  0 &  4 &  4 & 10 &  2 &  2 \\
+            0 &  0 &  0 &  0 &  2 & 10 &  0 \\
+            0 &  0 &  0 &  0 &  2 &  0 & 10 \\
         };
         \node[above, shift={(0,.5)}] at (B-1-1) {$1$};
         \node[above, shift={(0,.5)}] at (B-1-2) {$2$};
@@ -263,7 +270,7 @@ e ilustrado na figura abaixo.
         -- (B-\x-\x.south east) -- (B-\x-\x.south west) -- (B-\x-\x.north west)
         } -- (B-2-1.south west);
     \end{tikzpicture}
-    \caption{Ilustração do envelope, em rechurado e contornado por
+    \caption{Ilustração do envelope, em rachurado e contornado por
     pontos, para duas matrizes simétricas.}
     \label{fig:exem_profile}
 \end{figure}
@@ -274,7 +281,6 @@ uma única matriz $G \in \mathbb{R}^{n \times n}$ triangular inferior com
 elementos positivos na diagonal tal que $A = G G^T$. A fatoração $A = G G^T$ é
 conhecida como fatoração de Cholesky e no algoritmo abaixo é apresentado
 uma forma de obter-se $G$.
-
 \begin{algorithm}[H]
     \caption{Pseudo-algoritmo da Fatoração de Cholesky}
     \label{alg:chol}
@@ -351,7 +357,7 @@ Considere a matriz $A$ e seu fator de Cholesky $G$ dados por
 \end{align*}
 Observa-se que vários elementos nulos na parte triangular inferior de $A$ são
 não nulos em $G$. A perda de elementos nulos ao realizar a fatoração de
-Cholesky é denominada de preeenchimento e deve ser evitada.
+Cholesky é denominada de preeenchimento e deve ser evitada sempre que possível.
 
 Na seção anterior verificou-se que a fatoração de Cholesky preserva a banda e
 envelope da matriz. Por esse motivo, ao utilizar matrizes de banda e
@@ -411,7 +417,7 @@ e/ou envelope de $A'$ é menor que o de $A$?
     Verifica-se que a largura da banda de $A$ e $G$ é $4$ e o envelope é $15$.
 \end{exem}
 
-Pelo exemplo anterior, verifica-se a possibilidade de pré-processar a matriz
+Pelo exemplo anterior, verifica-se a possibilidade de preprocessar a matriz
 de forma a reduzir a banda e envelope.
 
 % Alguns
@@ -438,9 +444,9 @@ de forma a reduzir a banda e envelope.
 % matriz de entrada que pode minimizar a largura de banda e o envelope da
 % matriz.
 
-Na próxima subseção apresentamos algumas definições da Teoria de Grafo que
-serão utilizadas no algoritmo estudado para obter uma permutação que reduza
-a largura de banda e envelope.
+Na próxima subseção apresentamos algumas definições da Teoria de Grafos que
+serão utilizadas no algoritmo estudado para obter uma permutação que busca
+reduzir a largura de banda e envelope.
 
 \subsection{Grafos e matrizes esparsas}
 Um grafo é, fundamentalmente, um modo de representar uma relação binária entre
@@ -462,13 +468,13 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
         left delimiter  = (,%
         right delimiter = )] at (0,0)
         {%
-        X & X & X & X & X & 0 & 0 \\
-        X & X & 0 & 0 & 0 & X & X \\
-        X & 0 & X & 0 & 0 & X & X \\
-        X & 0 & 0 & X & 0 & 0 & 0 \\
-        X & 0 & 0 & 0 & X & 0 & 0 \\
-        0 & X & X & 0 & 0 & X & 0 \\
-        0 & X & X & 0 & 0 & 0 & X \\
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+            0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+            0 & 1 & 1 & 0 & 0 & 2 & 3 \\
         };
         %Graph
         \node[draw, circle] (1) at (6,0) {1};
@@ -493,13 +499,13 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
         left delimiter  = (,%
         right delimiter = )] at (0,0)
         {%
-        X & 0 & X & X & 0 & 0 & 0 \\
-        0 & X & X & X & 0 & 0 & 0 \\
-        X & X & X & 0 & X & 0 & 0 \\
-        X & X & 0 & X & X & 0 & 0 \\
-        0 & 0 & X & X & X & X & X \\
-        0 & 0 & 0 & 0 & X & X & 0 \\
-        0 & 0 & 0 & 0 & X & 0 & X \\
+           10 &  0 &  2 &  3 &  0 &  0 &  0 \\
+            0 & 10 &  2 &  3 &  0 &  0 &  0 \\
+            2 &  2 & 10 &  0 &  4 &  0 &  0 \\
+            3 &  3 &  0 & 10 &  4 &  0 &  0 \\
+            0 &  0 &  4 &  4 & 10 &  2 &  2 \\
+            0 &  0 &  0 &  0 &  2 & 10 &  0 \\
+            0 &  0 &  0 &  0 &  2 &  0 & 10 \\
         };
         % Graph
         \node[draw, circle] (1) at (4,0) {1};
@@ -523,7 +529,7 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
     \label{fig:exem_matrix2graph}
 \end{figure}
 
-Um resumo dos principais conceitos é dado por:
+Um resumo dos principais conceitos é dado a seguir:
 \begin{description}
     \item[Grau do vértice] número de arestas incidentes no vértice.
     \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes quando existe uma aresta entre eles, ou seja, $e_1 = (v_1, v_2)$.
@@ -535,14 +541,13 @@ Um resumo dos principais conceitos é dado por:
     \item[Subgrafo completo (clique)] cada vértice do subgrafo possue aresta incidente em todos os outros vértices do subgrafo.
     \item[Árvore] grafo conectado sem ciclos.
 \end{description}
-\subsection{Algoritmo}
-Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram um algoritmo de
+\subsection{Método Cuthill-McKee Reverso}
+Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram uma heurística de
 reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largura
 de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 é conexo.
-
 \begin{algorithm}[H]
-    \caption{Pseudo-algoritmo de Cuthill-McKee}
+    \caption{Pseudo-icódigo de Cuthill-McKee}
     \label{alg:rcm}
     \begin{algorithmic}[1]
         \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
@@ -551,15 +556,15 @@ de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
         \STATE $o \longleftarrow \text{ vetor de zeros}$
         \STATE $i \longleftarrow 1$
         \STATE $f \longleftarrow \text{ fila vazia}$
-        \STATE Enfileira $v$ em $f$.
+        \STATE Adicionar $v$ na fila $f$.
         \STATE Marca $v$ como visitado.
         \WHILE{$f$ não for vazia}
-            \STATE Desenfeira $f$ em $v$
+            \STATE Desenfeira $f$ em $v$.
             \STATE $o_i \longleftarrow v$
             \STATE $i \longleftarrow i + 1$
             \FORALL{vértice $w$ adjacente a $v$, em ordem crescente de grau,}
                 \IF{$w$ ainda não foi visitado}
-                    \STATE Enfileira $w$ em $f$
+                    \STATE Adicionar $v$ na fila $f$.
                     \STATE Marca $w$ como visitado.
                 \ENDIF
             \ENDFOR
@@ -568,19 +573,19 @@ de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 \end{algorithm}
 
 Para o caso de uma matriz $A$ cujo grafo não é conexo, Cuthill e McKee propõe
-aplicar o mesmo algoritmo para cada uma das componentes conexas.
+aplicar a mesma heurística para cada uma das componentes conexas.
 
 George \cite{George:1971:ComputerImplementation} verificou
-experimentalmente que ao reverter o ordenamento obtido pelo Algoritmo
+experimentalmente que ao reverter o ordenamento obtido pelo Método
 Cuthill-McKee o novo ordenamento mantinha a mesma banda mas diminui o
-envelope da matriz. Essa versão do algoritmo é conhecida como Cuthill-McKee
-reverso.
+envelope da matriz. Essa versão do algoritmo é conhecida como Método Cuthill-McKee
+Reverso.
 
-Uma dos parâmetros de entrada do Algoritmo Cuthill-McKee (reverso) é um nó inicial sendo
+Uma dos parâmetros de entrada do Método Cuthill-McKee (Reverso) é o nó inicial sendo
 experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
 nós pseudo-periféricos são bons candidados.
 
-Um dos algoritmos para encontrar nós pseudo-periféricos foi proposto por Alan
+Uma heurística para encontrar nós pseudo-periféricos foi proposto por Alan
 George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo
 abaixo, e é uma
 modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
@@ -589,7 +594,7 @@ modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
     y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y).
 \end{align*}
 \begin{algorithm}[H]
-    \caption{Pseudo-algoritmo para encontrar no pseudo-periférico, $x$.}
+    \caption{Pseudo-código para encontrar no pseudo-periférico, $x$.}
     \label{alg:ppn}
     \begin{algorithmic}[1]
         \REQUIRE Grafo $G(A)$.
