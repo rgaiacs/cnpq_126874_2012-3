@@ -1,15 +1,31 @@
-\section{Resultados}
-Os dados referentes aos testes computacionais encontram-se nas
-Tabelas~\ref{tab:resul1}~e~\ref{tab:resul2}.
+\section{Resultados Obtidos}
+Os dados referentes aos testes computacionais encontram-se na
+Tabela~\ref{tab:resul}.
 \begin{table}
     \centering
-    \caption{Resultados experimentais (Parte 1)}
-    \label{tab:resul1}
-    \csvautotabular{../bench/netlib1.csv}
+    \caption{Resultados experimentais}
+    \label{tab:resul}
+    \csvautotabular{bench1@relatorio_parcial.csv}
 \end{table}
 \begin{table}
     \centering
-    \caption{Resultados experimentais (Parte 2)}
-    \label{tab:resul2}
-    \csvautotabular{../bench/netlib2.csv}
+    \csvautotabular{bench2@relatorio_parcial.csv}
 \end{table}
+
+A partir dos dados das tabelas anteriores temos que o reordenamento obtido
+através do Método Cuthill-McKee 
+\begin{itemize}
+    \item 71 matrizes (78,02\%) tiveram a largura de banda reduzida,
+    \item 7 matrizes (7.69\%) não apresentaram alteração na largura de banda, e
+    \item 13 matrizes (14.29\%) tiveram a largura de banda aumentada.
+\end{itemize}
+
+Dentre as 7 matrizes que não apresentaram alteração na largura de banda,
+\begin{itemize}
+    \item 1 matriz teve o envelope reduzido,
+    \item 5 matrizes não apresentaram alteração no envelope, e
+    \item 1 matriz teve o envelope aumentado.
+\end{itemize}
+
+Dentre as matrizes que tiveram a largura de banda aumentada, esse aumento foi
+em média de 3\% e no pior dos casos de aproximadamente 10\%.

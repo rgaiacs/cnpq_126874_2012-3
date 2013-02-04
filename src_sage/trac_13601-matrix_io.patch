@@ -1,8 +1,8 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1350337996 10800
-# Node ID c2569f30d4f40cf1bacac613da21f9c909d453fd
-# Parent  ed2ea25c4ceea668f1d7200c3e00f481c65d838d
+# Node ID a1227c0f697139ebf5af538ffa31599ef245dd23
+# Parent  037fbe8eea9ce53ee7d77a4453da1ca0aac0823e
 Version 0.2 of matrix_io.
 
 * Improve the parameters of the functions and the documentation.
@@ -40,7 +40,7 @@ diff --git a/sage/matrix/matrix_io.py b/sage/matrix/matrix_io.py
 new file mode 100644
 --- /dev/null
 +++ b/sage/matrix/matrix_io.py
-@@ -0,0 +1,1418 @@
+@@ -0,0 +1,1426 @@
 +"""
 +Matrix input and output
 +
@@ -872,7 +872,11 @@ new file mode 100644
 +                    elif p[0].upper() == 'ENDATA':
 +                        pass
 +                else:
-+                    p = line.split()
++                    # Split the line based in the position. Need because the
++                    # user can include white space inside the name of rows
++                    # and/or columns.
++                    p = filter(None,
++                            [line[s[0]:s[1]].strip() for s in [(1,3),(4,12),(14,22),(24,36),(39,47),(49,61)]])
 +                    if in_rows:
 +                        if p[0] == 'N':
 +                            rows[p[1]] = (None, p[0])
@@ -896,23 +900,27 @@ new file mode 100644
 +                        # Some files can not have the rhs name, e.g., blend from
 +                        # http://www.netlib.org/lp/data/blend. Because of this
 +                        # the lenght must be check.
++                        if len(p) == 3 or len(p) == 5:
++                            rhs_start = 1
 +                        if len(p) == 4:
-+                            for i_aux in xrange(0, len(p), 2):
-+                                b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
-+                        elif len(p) == 5:
-+                            for i_aux in xrange(1, len(p), 2):
++                            rhs_start = 0
++                        for i_aux in xrange(rhs_start, len(p), 2):
++                            if rows[p[i_aux]][0]:
 +                                b[rows[p[i_aux]][0]] = float(p[i_aux + 1])
 +                    elif in_rng:
 +                        pass
 +                    elif in_bnd:
-+                        i = cols[p[2]]
++                        try:
++                            i = cols[p[-2]]
++                        except:
++                            pass
 +                        if p[0] == 'LO':
-+                            l[i] = float(p[3])
++                            l[i] = float(p[-1])
 +                        elif p[0] == 'UP':
-+                            u[i] = float(p[3])
++                            u[i] = float(p[-1])
 +                        elif p[0] == 'FX':
-+                            l[i] = float(p[3])
-+                            u[i] = float(p[3])
++                            l[i] = float(p[-1])
++                            u[i] = float(p[-1])
 +                        elif p[0] == 'FR':
 +                            l[i] = float('-Infinity')
 +                            u[i] = float('Infinity')
@@ -927,10 +935,10 @@ new file mode 100644
 +                            u[i] = 1
 +                            cols_type[i] = 1
 +                        elif p[0] == 'LI':
-+                            l[i] = float(p[3])
++                            l[i] = float(p[-1])
 +                            cols_type[i] = 1
 +                        elif p[0] == 'UI':
-+                            u[i] = float(p[3])
++                            u[i] = float(p[-1])
 +                            cols_type[i] = 1
 +                    elif in_sos:
 +                        pass
