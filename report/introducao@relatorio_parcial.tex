@@ -14,7 +14,7 @@
 % Add Resumo
 
 \section{Métodos de Pontos Interiores Primal-Dual}
-Consideremos o problema de programação linear na forma padrão:
+Consideremos o Problema de Programação Linear na Forma Padrão (PPLFP):
 \begin{align*}
     \text{minimizar } & c^t x \\
     \text{sujeito a } & A x = b, \\
@@ -22,7 +22,7 @@ Consideremos o problema de programação linear na forma padrão:
 \end{align*}
 onde $A \in \mathbb{R}^{m \times n}$ é uma matriz de posto completo $m$ e $c$,
 $b$ e $x$ são vetores colunas de dimensão apropriada. Associado a este problema
-temos o problema dual:
+temos o problema dual (PPLFD):
 \begin{align*}
     \text{maximizar } & b^t y \\
     \text{sujeito a } & A^t y + z = c, \\
@@ -33,7 +33,19 @@ coluna de dimensão $n$ de variáveis de folga duais. O \textit{gap} dual é dad
 por $\gamma = c^t x - b^t y$ que se reduz a $\gamma = x^t z$ para pontos primais
 e duais factíveis.
 
-A direção afim nos métodos de pontos interiores primais-duais é dada por:
+Os Métodos de Pontos Interiores Primais-Duais para resolver PPLFP consistem em a
+partir de uma tripla inicial $(\bar{x}, \bar{y}, \bar{z})$ construir uma
+sequência de triplas, dada por
+\begin{align*}
+    x^{i + 1} &= x^i + \alpha \tilde{x}, \\
+    y^{i + 1} &= y^i + \alpha \tilde{y}, \\
+    z^{i + 1} &= z^i + \alpha \tilde{z}
+\end{align*}
+onde $\alpha \in \mathbb{R}$, que tende para a tripla $(x^*, y^*, z^*)$ que é
+solução de PPLFP e PPLFD.
+
+A direção afim nos Métodos de Pontos Interiores Primais-Duais, $(\tilde{x},
+\tilde{y}, \tilde{z})$,  é dada por:
 \begin{align}
     \begin{bmatrix}
          0 & I & A^t \\
@@ -50,7 +62,7 @@ A direção afim nos métodos de pontos interiores primais-duais é dada por:
      \end{bmatrix},
      \label{eq:primal_dual_intp:lin_system}
 \end{align}
-onde $X = \diag(x)$, $Z = \diag(z)$ e os residuos são dados por $r_p = b - A
+onde $X = \diag(x)$, $Z = \diag(z)$ e os resíduos são dados por $r_p = b - A
 x$, $r_d = c - A^t y - z$, $r_a = - X Z e$ e $e$ representa o vetor de uns.
 
 Eliminando as variáveis $\tilde{z}$ de \eqref{eq:primal_dual_intp:lin_system}
@@ -71,7 +83,7 @@ obtemos o sistema aumentado:
 onde $D = X^{-1} Z$, $r_1 = r_d - X^{-1} r_a$ e $r_2 = r_p$.
 
 A forma mais utilizada para resolver \eqref{eq:primal_dual_intp:aug_lin_system}
-consiste em reduzir o sistema através de eliminção das variáveis $\tilde{x}$ a
+consiste em reduzir o sistema através de eliminação das variáveis $\tilde{x}$ a
 um sistema simétrico definido positivo com a matriz de equações normais $A
 D^{-1} A^t$,
 \begin{align*}
@@ -100,22 +112,22 @@ diferente de zero.
 Seguindo Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth}, definimos
 \begin{align*}
     \beta_i(A) &= i - f_i(A), 1 \leq i \leq n, \\
-    \beta(A) &= \max\left\{ \beta_i(A) \mid 1 \leq i \leq n \right\},
+    \beta(A) &= \max\left\{ \beta_i(A) \mid 1 \leq i \leq n \right\}
 \end{align*}
 em que $\beta_i(A)$ é a largura de banda da $i$-ésima linha de $A$ e
 $\beta(A)$ é a largura de banda da matriz $A$. A banda da matriz $A$ é
 definida como
 \begin{align*}
     \text{Band}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
-    \beta(A) \right\}.
+    \beta(A) \right\}
 \end{align*}
-e ilustrado na figura abaixo.
+e ilustrada na Figura~\ref{fig:exem_bandwidth}.
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
         \matrix (A) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (0,0)
+        left delimiter  = \lbrack,%
+        right delimiter = \rbrack] at (0,0)
         {%
             1 & 1 & 1 & 1 & 1 & 0 & 0 \\
             1 & 2 & 1 & 1 & 1 & 1 & 1 \\
@@ -150,8 +162,8 @@ e ilustrado na figura abaixo.
         } -- (A-2-1.north west);
 
         \matrix (B) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (8,0)
+        left delimiter  = \lbrack,%
+        right delimiter = \rbrack] at (8,0)
         {%
            10 &  0 &  2 &  3 &  0 &  0 &  0 \\
             0 & 10 &  2 &  3 &  0 &  0 &  0 \\
@@ -187,7 +199,7 @@ e ilustrado na figura abaixo.
         -- (B-\x-\x.south east) -- (B-\x-\x.south west) -- (B-\x-\x.north west)
         } -- (B-1-1.south west);
     \end{tikzpicture}
-    \caption{Ilustração da banda, em rachurado e contornado por pontos, e da
+    \caption{Ilustração da banda, sombreado e contornado por pontos, e da
     largura de banda, linha contínua, para duas matrizes simétricas.}
     \label{fig:exem_bandwidth}
 \end{figure}
@@ -197,13 +209,13 @@ O envelope da matriz $A$ é definido como
     \text{Env}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
     \beta_i(A) \right\}.
 \end{align*}
-e ilustrado na figura abaixo.
+e ilustrado na Figura~\ref{fig:exem_profile}.
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
         \matrix (A) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (0,0)
+        left delimiter  = \lbrack,%
+        right delimiter = \lbrack] at (0,0)
         {%
             1 & 1 & 1 & 1 & 1 & 0 & 0 \\
             1 & 2 & 1 & 1 & 1 & 1 & 1 \\
@@ -236,8 +248,8 @@ e ilustrado na figura abaixo.
         } -- (A-2-1.north west);
 
         \matrix (B) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (8,0)
+        left delimiter  = \lbrack,%
+        right delimiter = \rbrack] at (8,0)
         {%
            10 &  0 &  2 &  3 &  0 &  0 &  0 \\
             0 & 10 &  2 &  3 &  0 &  0 &  0 \\
@@ -270,16 +282,16 @@ e ilustrado na figura abaixo.
         -- (B-\x-\x.south east) -- (B-\x-\x.south west) -- (B-\x-\x.north west)
         } -- (B-2-1.south west);
     \end{tikzpicture}
-    \caption{Ilustração do envelope, em rachurado e contornado por
+    \caption{Ilustração do envelope, sombreado e contornado por
     pontos, para duas matrizes simétricas.}
     \label{fig:exem_profile}
 \end{figure}
 
 \subsection{Fatoração de Cholesky}
-Seja $A \in \mathbb{R}^{n \times n}$ uma matriz simétrica definda positiva, então existe
+Seja $A \in \mathbb{R}^{n \times n}$ uma matriz simétrica definida positiva, então existe
 uma única matriz $G \in \mathbb{R}^{n \times n}$ triangular inferior com
 elementos positivos na diagonal tal que $A = G G^T$. A fatoração $A = G G^T$ é
-conhecida como fatoração de Cholesky e no algoritmo abaixo é apresentado
+conhecida como fatoração de Cholesky e no algoritmo a seguir é apresentado
 uma forma de obter-se $G$.
 \begin{algorithm}[H]
     \caption{Pseudo-algoritmo da Fatoração de Cholesky}
@@ -309,9 +321,9 @@ uma forma de obter-se $G$.
     A fatoração de Cholesky preserva o envelope da matriz.
 \end{prop}
 \begin{proof}
-    Para calcular $G$ no Algoritmo~\ref{alg:chol} ocorrem operações aritmeticas
+    Para calcular $G$ no Algoritmo~\ref{alg:chol} ocorrem operações aritméticas
     apenas nas linhas \ref{alg:chol:sqrt}, \ref{alg:chol:div} e
-    \ref{alg:chol:prod}. Vamos mostrar que nenhuma dessas operações aritmeticas
+    \ref{alg:chol:prod}. Vamos mostrar que nenhuma dessas operações aritméticas
     altera o envelope da matrix.
 
     Para a linha \ref{alg:chol:sqrt}, como $A$ é simétrica definida positiva,
@@ -357,7 +369,7 @@ Considere a matriz $A$ e seu fator de Cholesky $G$ dados por
 \end{align*}
 Observa-se que vários elementos nulos na parte triangular inferior de $A$ são
 não nulos em $G$. A perda de elementos nulos ao realizar a fatoração de
-Cholesky é denominada de preeenchimento e deve ser evitada sempre que possível.
+Cholesky é denominada de preenchimento e deve ser evitada sempre que possível.
 
 Na seção anterior verificou-se que a fatoração de Cholesky preserva a banda e
 envelope da matriz. Por esse motivo, ao utilizar matrizes de banda e
@@ -464,8 +476,8 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
     \centering
     \begin{tikzpicture}
         \matrix (A) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (0,0)
+        left delimiter  = \lbrack,%
+        right delimiter = \rbrack] at (0,0)
         {%
             1 & 1 & 1 & 1 & 1 & 0 & 0 \\
             1 & 2 & 1 & 1 & 1 & 1 & 1 \\
@@ -487,41 +499,16 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
         \draw (1) -- (3);
         \draw (1) -- (4);
         \draw (1) -- (5);
-        \draw (2) -- (6);
-        \draw (2) -- (7);
-        \draw (3) -- (6);
-        \draw (3) -- (7);
-    \end{tikzpicture}
-
-    \begin{tikzpicture}
-        \matrix (B) [matrix of math nodes,%
-        left delimiter  = (,%
-        right delimiter = )] at (0,0)
-        {%
-           10 &  0 &  2 &  3 &  0 &  0 &  0 \\
-            0 & 10 &  2 &  3 &  0 &  0 &  0 \\
-            2 &  2 & 10 &  0 &  4 &  0 &  0 \\
-            3 &  3 &  0 & 10 &  4 &  0 &  0 \\
-            0 &  0 &  4 &  4 & 10 &  2 &  2 \\
-            0 &  0 &  0 &  0 &  2 & 10 &  0 \\
-            0 &  0 &  0 &  0 &  2 &  0 & 10 \\
-        };
-        % Graph
-        \node[draw, circle] (1) at (4,0) {1};
-        \node[draw, circle] (2) at (6,0) {2};
-        \node[draw, circle] (3) at (6,1.5) {3};
-        \node[draw, circle] (4) at (6,-1.5) {4};
-        \node[draw, circle] (5) at (8,0) {5};
-        \node[draw, circle] (6) at (10,1.5) {6};
-        \node[draw, circle] (7) at (10,-1.5) {7};
-        \draw (1) -- (3);
-        \draw (1) -- (4);
         \draw (2) -- (3);
         \draw (2) -- (4);
-        \draw (5) -- (3);
-        \draw (5) -- (4);
-        \draw (5) -- (6);
-        \draw (5) -- (7);
+        \draw (2) to[out=190, in=60] (5);
+        \draw (2) -- (6);
+        \draw (2) -- (7);
+        \draw (3) to[out=120, in=-10] (4);
+        \draw (3) -- (5);
+        \draw (3) -- (6);
+        \draw (3) -- (7);
+        \draw (6) -- (7);
     \end{tikzpicture}
     \caption{Ilustração do grafo (a direita) correspondente a uma matriz (a
     esquerda).}
@@ -529,7 +516,52 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
 \end{figure}
 
 É importante destacar que permutar, simetricamente, linhas e colunas de uma
-matriz corresponde a renumerar os vértices do grafo.
+matriz corresponde a renumerar os vértices do grafo. Na
+Figura~\ref{fig:exem_matrix2graph_perm} é ilustrado uma permutação da matriz
+presente na Figura~\ref{fig:exem_matrix2graph} e a renumeração dos vértices do
+grafo.
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \matrix (A) [matrix of math nodes,%
+        left delimiter  = \lbrack,%
+        right delimiter = \rbrack] at (0,0)
+        {%
+            2 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 2 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+            1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 1 & 2 & 1 & 1 \\
+            0 & 0 & 0 & 1 & 1 & 3 & 2 \\
+            0 & 0 & 0 & 1 & 1 & 2 & 3 \\
+        };
+        %Graph
+        \node[draw, circle] (1) at (6,0) {3};
+        \node[draw, circle] (2) at (8,1) {4};
+        \node[draw, circle] (3) at (8,-1) {5};
+        \node[draw, circle] (4) at (4,1) {2};
+        \node[draw, circle] (5) at (4,-1) {3};
+        \node[draw, circle] (6) at (10,1) {6};
+        \node[draw, circle] (7) at (10,-1) {7};
+        \draw (1) -- (2);
+        \draw (1) -- (3);
+        \draw (1) -- (4);
+        \draw (1) -- (5);
+        \draw (2) -- (3);
+        \draw (2) -- (4);
+        \draw (2) to[out=190, in=60] (5);
+        \draw (2) -- (6);
+        \draw (2) -- (7);
+        \draw (3) to[out=120, in=-10] (4);
+        \draw (3) -- (5);
+        \draw (3) -- (6);
+        \draw (3) -- (7);
+        \draw (6) -- (7);
+    \end{tikzpicture}
+    \caption{Ilustração da permutação simétrica de uma matriz e a renumeração
+    dos vértices do grafo correspondente.}
+    \label{fig:exem_matrix2graph_perm}
+\end{figure}
 
 Um resumo dos principais conceitos é dado a seguir:
 \begin{description}
@@ -543,30 +575,31 @@ Um resumo dos principais conceitos é dado a seguir:
         número de arestas que o compõe.
     \item[Grafo conectado (conexo)] possui pelo menos um caminho entre qualquer
         par de vértices.
-    \item[Distância entre vértices] comprimento do menor caminho ligando dois vértices.
-    \item[Excentricidade] maior distância de um vértice a qual outro.
+    \item[Distância entre vértices] ou $d(v_1, v_2)$, número de arestas que
+        formam o menor caminho ligando os vértices $v_1$ e $v_2$.
+    \item[Excentricidade] ou $l(v)$, maior distância do vértice $v$ a qualquer outro.
     \item[Diâmetro] maior excentricidade dentre os vértices de um grafo.
     \item[Pseudo-diâmetro] corresponde a uma alta excentricidade, porém não
         necessariamente a maior de todas.
     \item[Vértices periféricos] são vértices cuja excentricidade é igual ao
         diâmetro do grafo.
-    \item[Vértices pseudo-periféricos] são vertices que apresentam altas
+    \item[Vértices pseudo-periféricos] são vértices que apresentam altas
         excentricidades, mas não necessariamente a maior.
-    \item[Estrutura de nível] é uma partição do conjunto $V$ em níveis $L_1,
-        L_2, \ldots, L_k$ tal que
+    \item[Estrutura de nível] é uma partição do conjunto $V$ em níveis $L_0,
+        L_2, \ldots, L_{l(v)}$ tal que
         \begin{enumerate}
-            \item todos os vértices adjacentes aos vértices do nível $L_1$
-                encontram-se nos níveis $L_1$ ou $L_2$,
-            \item todos os vértices adjacentes aos vértices no nível $L_k$
-                encontram-se nos níveis $L_k$ ou $L_{k - 1}$,
-            \item para $1 < i < k$, todos os vértices no nível $L_i$
+            \item todos os vértices adjacentes aos vértices do nível $L_0$
+                encontram-se nos níveis $L_0$ ou $L_1$,
+            \item todos os vértices adjacentes aos vértices no nível $L_{l(v)}$
+                encontram-se nos níveis $L_{l(v)}$ ou $L_{l(v) - 1}$,
+            \item para $0 < i < l(v)$, todos os vértices no nível $L_i$
                 encontram-se nos níveis $L_{i - 1}$, $L_i$ ou $L_{i + 1}$.
         \end{enumerate}
 
-        A extrutura de nível com raíz no vértice $v$ é corresponde a
+        A estrutura de nível com raiz no vértice $v$ é corresponde a
         \begin{enumerate}
-            \item $L_1 = \left\{ v \right\}$,
-            \item para $i > 1$, $L_i$ é o conjunto de vértices adjacentes aos
+            \item $L_0 = \left\{ v \right\}$,
+            \item para $i > 0$, $L_i$ é o conjunto de vértices adjacentes aos
                 vértices presentes no nível $L_{i - 1}$ e ainda não pertencentes
                 a nenhum nível.
         \end{enumerate}
@@ -586,22 +619,27 @@ Um resumo dos principais conceitos é dado a seguir:
         \draw (1) -- (3);
         \draw (1) -- (4);
         \draw (1) -- (5);
+        \draw (2) -- (3);
+        \draw (2) -- (4);
+        \draw (2) to[out=190, in=60] (5);
         \draw (2) -- (6);
         \draw (2) -- (7);
+        \draw (3) to[out=120, in=-10] (4);
+        \draw (3) -- (5);
         \draw (3) -- (6);
         \draw (3) -- (7);
+        \draw (6) -- (7);
         % level structure
-        \node[draw, circle] (L1) at (11,2) {6}
+        \node[draw, circle] at (10,2) {6}
             child { node[draw, circle] {2}
-                child { node[draw, circle] {1} 
-                    child { node[draw,circle] {4} }
-                    child { node[draw, circle] (L4) {5} } }
-                child { node[draw, circle] (L3) {7} } }
-            child { node[draw, circle] (L2) {3} };
+                child { node[draw, circle] {1} }
+                child { node[draw, circle] {4} }
+                child { node[draw, circle] {5} } } 
+            child { node[draw, circle] {3} }
+            child { node[draw, circle] {7} };
         \path[white, text=black] node at (13,2) {$L_1$}
             child { node {$L_2$}
-                child { node {$L_3$}
-                    child { node {$L_4$} } } };
+                child { node {$L_3$} } };
     \end{tikzpicture}
     \caption{Grafo (esquerda) e sua estrutura de nível com raiz no vértice 6
     (direita).}
@@ -613,7 +651,7 @@ reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largur
 de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 é conexo.
 \begin{algorithm}[H]
-    \caption{Pseudo-icódigo de Cuthill-McKee}
+    \caption{Pseudo-código de Cuthill-McKee}
     \label{alg:rcm}
     \begin{algorithmic}[1]
         \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
@@ -625,7 +663,7 @@ de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
         \STATE Adicionar $v$ na fila $f$.
         \STATE Marca $v$ como visitado.
         \WHILE{$f$ não for vazia}
-            \STATE Desenfeira $f$ em $v$.
+            \STATE Desenfileira $f$ em $v$.
             \STATE $o_i \longleftarrow v$
             \STATE $i \longleftarrow i + 1$
             \FORALL{vértice $w$ adjacente a $v$, em ordem crescente de grau,}
@@ -647,22 +685,23 @@ Cuthill-McKee, \textit{i.e.}, trocando $o_i$ por $o_{n - i + 1}$ para $i = 1, 2,
 \ldots, n$, o novo ordenamento mantinha a mesma banda mas diminui o
 envelope da matriz. Sherman e Liu \cite{Liu:1976:ComparativeCuthillMcKee}
 provaram que essa modificação nunca aumenta o envelope da matriz. Essa versão do
-algoritmo é conhecida como Cuthill-McKee reverso.
+algoritmo é conhecida como Cuthill-McKee Reverso.
 
-Uma dos parâmetros de entrada do Método Cuthill-McKee (Reverso) é o nó inicial sendo
-experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
-nós pseudo-periféricos são bons candidados.
+Uma dos parâmetros de entrada do Método Cuthill-McKee (Reverso) é o vértice inicial sendo
+que experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
+vértices pseudo-periféricos são bons candidatos.
 
-Uma heurística para encontrar nós pseudo-periféricos foi proposto por Alan
-George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo
-abaixo, e é uma
-modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
-\cite{Gibbs:1976:ReducingBandwidth} baseado na observação de que
+Uma heurística para encontrar vértices pseudo-periféricos foi proposto por Alan
+George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo abaixo, e
+é uma modificação de um algoritmo anteriormente proposto por Gibbs \textit{et.
+al} \cite{Gibbs:1976:ReducingBandwidth} baseado na observação de que
 \begin{align*}
-    y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y).
+    y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y),
 \end{align*}
+\textit{i.e.}, se $y$ pertence ao nível mais elevado da estrutura de níveis com
+raiz em $x$ então a excentricidade de $x$ é menor ou igual a $x$.
 \begin{algorithm}[H]
-    \caption{Pseudo-código para encontrar no pseudo-periférico, $x$.}
+    \caption{Pseudo-código para encontrar vértice pseudo-periférico, $x$.}
     \label{alg:ppn}
     \begin{algorithmic}[1]
         \REQUIRE Grafo $G(A)$.
@@ -670,7 +709,7 @@ modificação de um algoritmo anteriormente proposto por Gibbs \textit{et. al}
         \STATE $r \longleftarrow \text{Nó arbitrário em }G(A)$
         \STATE Construir estrutura de nível a partir de $r$, $\mathcal{L}(r)$.
         \label{alg:ppn:brle}
-        \STATE Escolher um nó $x$ pertencente ao último nível de
+        \STATE Escolher um vértice $x$ pertencente ao último nível de
         $\mathcal{L}(r)$.
         \STATE Construir estrutura de nível a partir de $x$, $\mathcal{L}(x)$.
         \IF{$l(x) > l(r)$}
