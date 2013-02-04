@@ -443,15 +443,14 @@ a largura de banda e envelope.
 Um grafo é, fundamentalmente, um modo de representar uma relação binária entre
 objetos. Para o propósito deste trabalho, considere um grafo $G = (V, E)$ como
 um conjunto de vértices $V = \{v_1, v_2, \ldots \}$ e um conjunto de
-arestas $E = \{e_1, e_2, \ldots \}$. Estas arestas são representadas por pares
-não ordenados, por exemplo, $e_1 = (v_1 , v_2)$.
+arestas $E = \{e_1, e_2, \ldots \}$, que são representadas por pares
+não ordenados, por exemplo, $e_1 = \{v_1 , v_2\}$.
 
 Assim como um grafo, uma matriz também descreve uma relação binária entre objetos
 através de seus elementos não nulos. Uma matriz simétrica $A \in \mathbb{R}^{n
 \times n}$ induz um grafo $G(A)$, onde os vértices do grafo correspondem as
-dimensões da matriz e a aresta $e = (i, j)$ existe se e somente se $A_{ij} \neq 0$.
+dimensões da matriz e a aresta $e = \{i, j\}$ existe se e somente se $A_{ij} \neq 0$.
 Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
-
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
@@ -520,18 +519,85 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
     \label{fig:exem_matrix2graph}
 \end{figure}
 
+É importante destacar que permutar, simetricamente, linhas e colunas de uma
+matriz corresponde a renumerar os vértices do grafo.
+
 Um resumo dos principais conceitos é dado por:
 \begin{description}
+    \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes
+        quando existe uma aresta entre eles, ou seja, $\{v_1, v_2\} \in E$.
+    \item[Incidência] uma aresta incide em um vértice se ele for um dos extremos
+        da aresta.
     \item[Grau do vértice] número de arestas incidentes no vértice.
-    \item[Vértices adjacentes]  dois vértices $v_1$ e $v_2$ são adjacentes quando existe uma aresta entre eles, ou seja, $e_1 = (v_1, v_2)$.
-    \item[Caminho] sequência de arestas disjuntas $\left( (x_1, x_2), (x_2, x_3), \ldots (x_{k - 1}, x_k) \right)$.
-    \item[Distância] comprimento do menor caminho ligando dois vértices.
+    \item[Caminho] sequência de arestas disjuntas $\left( (x_1, x_2), (x_2,
+        x_3), \ldots (x_{k - 1}, x_k) \right)$. O tamanho de um caminho é o
+        número de arestas que o compõe.
+    \item[Grafo conectado (conexo)] possui pelo menos um caminho entre qualquer
+        par de vértices.
+    \item[Distância entre vértices] comprimento do menor caminho ligando dois vértices.
     \item[Excentricidade] maior distância de um vértice a qual outro.
     \item[Diâmetro] maior excentricidade dentre os vértices de um grafo.
-    \item[Grafo conectado (conexo)] possui caminho entre qualquer par de vértices.
-    \item[Subgrafo completo (clique)] cada vértice do subgrafo possue aresta incidente em todos os outros vértices do subgrafo.
-    \item[Árvore] grafo conectado sem ciclos.
+    \item[Pseudo-diâmetro] corresponde a uma alta excentricidade, porém não
+        necessariamente a maior de todas.
+    \item[Vértices periféricos] são vértices cuja excentricidade é igual ao
+        diâmetro do grafo.
+    \item[Vértices pseudo-periféricos] são vertices que apresentam altas
+        excentricidades, mas não necessariamente a maior.
+    \item[Estrutura de nível] é uma partição do conjunto $V$ em níveis $L_1,
+        L_2, \ldots, L_k$ tal que
+        \begin{enumerate}
+            \item todos os vértices adjacentes aos vértices do nível $L_1$
+                encontram-se nos níveis $L_1$ ou $L_2$,
+            \item todos os vértices adjacentes aos vértices no nível $L_k$
+                encontram-se nos níveis $L_k$ ou $L_{k - 1}$,
+            \item para $1 < i < k$, todos os vértices no nível $L_i$
+                encontram-se nos níveis $L_{i - 1}$, $L_i$ ou $L_{i + 1}$.
+        \end{enumerate}
+
+        A extrutura de nível com raíz no vértice $v$ é corresponde a
+        \begin{enumerate}
+            \item $L_1 = \left\{ v \right\}$,
+            \item para $i > 1$, $L_i$ é o conjunto de vértices adjacentes aos
+                vértices presentes no nível $L_{i - 1}$ e ainda não pertencentes
+                a nenhum nível.
+        \end{enumerate}
 \end{description}
+\begin{figure}[htb]
+    \centering
+    \begin{tikzpicture}
+        % graph
+        \node[draw, circle] (1) at (2,0) {1};
+        \node[draw, circle] (2) at (4,1) {2};
+        \node[draw, circle] (3) at (4,-1) {3};
+        \node[draw, circle] (4) at (0,1) {4};
+        \node[draw, circle] (5) at (0,-1) {5};
+        \node[draw, circle] (6) at (6,1) {6};
+        \node[draw, circle] (7) at (6,-1) {7};
+        \draw (1) -- (2);
+        \draw (1) -- (3);
+        \draw (1) -- (4);
+        \draw (1) -- (5);
+        \draw (2) -- (6);
+        \draw (2) -- (7);
+        \draw (3) -- (6);
+        \draw (3) -- (7);
+        % level structure
+        \node[draw, circle] (L1) at (11,2) {6}
+            child { node[draw, circle] {2}
+                child { node[draw, circle] {1} 
+                    child { node[draw,circle] {4} }
+                    child { node[draw, circle] (L4) {5} } }
+                child { node[draw, circle] (L3) {7} } }
+            child { node[draw, circle] (L2) {3} };
+        \path[white, text=black] node at (13,2) {$L_1$}
+            child { node {$L_2$}
+                child { node {$L_3$}
+                    child { node {$L_4$} } } };
+    \end{tikzpicture}
+    \caption{Grafo (esquerda) e sua estrutura de nível com raiz no vértice 6
+    (direita).}
+    \label{fig:graph2level_struct}
+\end{figure}
 \subsection{Algoritmo}
 Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram um algoritmo de
 reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largura
@@ -569,8 +635,10 @@ aplicar o mesmo algoritmo para cada uma das componentes conexas.
 
 George \cite{George:1971:ComputerImplementation} verificou
 experimentalmente que ao reverter o ordenamento obtido pelo Algoritmo
-Cuthill-McKee o novo ordenamento mantinha a mesma banda mas diminui o
-envelope da matriz. Essa versão do algoritmo é conhecida como Cuthill-McKee
+Cuthill-McKee, \textit{i.e.}, trocando $o_i$ por $o_{n - i + 1}$ para $i = 1, 2,
+\ldots, n$, o novo ordenamento mantinha a mesma banda mas diminui o
+envelope da matriz. Sherman e Liu \cite{Liu:1976:ComparativeCuthillMcKee} provaram que essa modificação nunca
+aumenta o envelope da matriz. Essa versão do algoritmo é conhecida como Cuthill-McKee
 reverso.
 
 Uma dos parâmetros de entrada do Algoritmo Cuthill-McKee (reverso) é um nó inicial sendo
