@@ -1,9 +1,13 @@
-\section{Resultados Obtidos}
+\section{Resultados Obtidos e Conclusão}
 Os dados referentes aos testes computacionais encontram-se na
-Tabela~\ref{tab:resul}.
+Tabela~\ref{tab:resul} sendo que as colunas ``Lar. Banda'', ``Envelope''
+referem-se a matriz $A D^{-1} A^T$ e ``Lar. Banda R.'' e ``Envelope R.''
+referem-se a matriz $P A D^{-1} A^T P^T$ em que a matriz de permutação $P$ é
+obtida pelo Método Cuthill-McKee Reverso.
 \begin{table}
     \centering
-    \caption{Resultados experimentais}
+    \caption{Resultados experimentais do Método Cuthill-McKee Reverso para
+    a ``Netlib LP''.}
     \label{tab:resul}
     \csvautotabular{bench1@relatorio_parcial.csv}
 \end{table}
@@ -12,13 +16,18 @@ Tabela~\ref{tab:resul}.
     \csvautotabular{bench2@relatorio_parcial.csv}
 \end{table}
 
-A partir dos dados das tabelas anteriores temos que o reordenamento obtido
-através do Método Cuthill-McKee 
+A partir dos dados da Tabela~\ref{bench:resul} temos que o reordenamento obtido
+através do Método Cuthill-McKee Reverso resultou na
 \begin{itemize}
-    \item 71 matrizes (78,02\%) tiveram a largura de banda reduzida,
-    \item 7 matrizes (7.69\%) não apresentaram alteração na largura de banda, e
-    \item 13 matrizes (14.29\%) tiveram a largura de banda aumentada.
+    \item redução da largura de banda para 71 matrizes (78,02\%),
+    \item manutenção da largura de banda para 7 matrizes (7.69\%),
+    \item aumenta da largura de banda para 13 matrizes (14.29\%).
 \end{itemize}
+
+Dentre as matrizes que tiveram a largura de banda reduzida, a nova largura de
+banda corresponde, em média, a 60\% da largura de banda inicial. Já dentre as
+matrizes que tiveram a largura de banda aumentada, a nova largura de banda foi,
+em média, 24\% maior que a largura de banda inicial.
 
 Dentre as 7 matrizes que não apresentaram alteração na largura de banda,
 \begin{itemize}
@@ -27,5 +36,7 @@ Dentre as 7 matrizes que não apresentaram alteração na largura de banda,
     \item 1 matriz teve o envelope aumentado.
 \end{itemize}
 
-Dentre as matrizes que tiveram a largura de banda aumentada, esse aumento foi
-em média de 3\% e no pior dos casos de aproximadamente 10\%.
+Pelos resultados, concluímos ser vantajoso utilizar o reordenamento obtido pelo
+Método Cuthill-McKee Reverso pois este reordenamento reduz a largura de banda
+para a grande maioria dos casos, aproximadamente 80\% dos testes, e essa
+redução costuma ser significativa, superior a 40\%.

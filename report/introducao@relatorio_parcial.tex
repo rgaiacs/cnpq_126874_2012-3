@@ -11,12 +11,18 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 \section{Introdução}
-% Add Resumo
+Neste trabalho revisitou-se a heurística de reordenamento Cuthill-McKee
+Reversa, proposta em 1969, que busca um reordenamento para matrizes esparsas
+que reduza a largura de banda destas. O autor deste relatório implementou a heurística
+revisitada e utilizou para testar sua implementação problemas da biblioteca
+``Netlib LP'' para os quais obteve bons resultados visto que, aproximadamente,
+80\% das matrizes testadas tiveram a largura de banda reduzida com o
+reordenamento obtido pela heurística e essa redução foi em média de 60\%.
 
 \section{Métodos de Pontos Interiores Primal-Dual}
 Consideremos o Problema de Programação Linear na Forma Padrão (PPLFP):
 \begin{align*}
-    \text{minimizar } & c^t x \\
+    \text{minimizar } & c^T x \\
     \text{sujeito a } & A x = b, \\
     & x \geq 0,
 \end{align*}
@@ -24,78 +30,90 @@ onde $A \in \mathbb{R}^{m \times n}$ é uma matriz de posto completo $m$ e $c$,
 $b$ e $x$ são vetores colunas de dimensão apropriada. Associado a este problema
 temos o problema dual (PPLFD):
 \begin{align*}
-    \text{maximizar } & b^t y \\
-    \text{sujeito a } & A^t y + z = c, \\
+    \text{maximizar } & b^T y \\
+    \text{sujeito a } & A^T y + z = c, \\
     & z \geq 0,
 \end{align*}
 onde $y$ é um vetor coluna de dimensão $m$ de variáveis livres e $z$ é o vetor
 coluna de dimensão $n$ de variáveis de folga duais. O \textit{gap} dual é dado
-por $\gamma = c^t x - b^t y$ que se reduz a $\gamma = x^t z$ para pontos primais
+por $\gamma = c^T x - b^T y$ que se reduz a $\gamma = x^T z$ para pontos primais
 e duais factíveis.
 
-Os Métodos de Pontos Interiores Primais-Duais para resolver PPLFP consistem em a
-partir de uma tripla inicial $(\bar{x}, \bar{y}, \bar{z})$ construir uma
-sequência de triplas, dada por
+Os Métodos de Pontos Interiores Primais-Duais para resolver PPLFP consistem em, a
+partir de uma tripla inicial $(x^0, y^0, z^0)$, construir uma
+sequência de triplas, $(x^i, y^i, z^i)$, dada por
 \begin{align*}
-    x^{i + 1} &= x^i + \alpha \tilde{x}, \\
-    y^{i + 1} &= y^i + \alpha \tilde{y}, \\
-    z^{i + 1} &= z^i + \alpha \tilde{z}
+    x^{i + 1} &= x^i + \alpha^i \Delta x^i, \\
+    y^{i + 1} &= y^i + \alpha^i \Delta y^i, \\
+    z^{i + 1} &= z^i + \alpha^i \Delta z^i,
 \end{align*}
-onde $\alpha \in \mathbb{R}$, que tende para a tripla $(x^*, y^*, z^*)$ que é
-solução de PPLFP e PPLFD.
+onde $i \geq 0$ e $\alpha^i \in (0, 1]$, que tende para a tripla $(x^*, y^*, z^*)$ que é
+solução de PPLFP e PPLFD. A constante $\alpha^i$ deve ser escolhida tal que $x^i,
+z^i > 0$ e, frequentemente, $\alpha^i << 1$ \cite{Wright:1987:PrimalDualIP}.
 
-A direção afim nos Métodos de Pontos Interiores Primais-Duais, $(\tilde{x},
-\tilde{y}, \tilde{z})$,  é dada por:
+A direção afim nos Métodos de Pontos Interiores Primais-Duais, $(\Delta x^i,
+\Delta y^i, \Delta z^i)$,  é dada por:
 \begin{align}
     \begin{bmatrix}
-         0 & I & A^t \\
-         Z & X & 0 \\
-         A & 0 & 0
+         0 & A^T & I \\
+         A & 0 & 0 \\
+         Z & 0 & X
      \end{bmatrix} \begin{bmatrix}
-         \tilde{x} \\
-         \tilde{z} \\
-         \tilde{y}
+         \Delta x^i \\
+         \Delta y^i \\
+         \Delta z^i
      \end{bmatrix} &= \begin{bmatrix}
          r_d \\
-         r_a \\
-         r_p
+         r_p \\
+         r_a
      \end{bmatrix},
      \label{eq:primal_dual_intp:lin_system}
 \end{align}
-onde $X = \diag(x)$, $Z = \diag(z)$ e os resíduos são dados por $r_p = b - A
-x$, $r_d = c - A^t y - z$, $r_a = - X Z e$ e $e$ representa o vetor de uns.
+onde $X = \diag(x^i)$, $Z = \diag(z^i)$, $r_p = b - A x^i$, $r_d = c - A^T y^i
+- z^i$, $r_a = - X Z e$ e $e$ representa o vetor de uns.
 
-Eliminando as variáveis $\tilde{z}$ de \eqref{eq:primal_dual_intp:lin_system}
+Eliminando as variáveis $\Delta z^i$ de \eqref{eq:primal_dual_intp:lin_system}
 obtemos o sistema aumentado:
 \begin{align}
     \begin{bmatrix}
-        -D & A^t \\
+        -D & A^T \\
         A & 0
     \end{bmatrix} \begin{bmatrix}
-        \tilde{x} \\
-        \tilde{y}
+        \Delta x^i \\
+        \Delta y^i
     \end{bmatrix} &= \begin{bmatrix}
         r_1 \\
         r_2
     \end{bmatrix},
     \label{eq:primal_dual_intp:aug_lin_system}
 \end{align}
-onde $D = X^{-1} Z$, $r_1 = r_d - X^{-1} r_a$ e $r_2 = r_p$.
+onde $D = X^{-1} Z$, $r_1 = r_d - X^{-1} r_a$ e $r_2 = r_p$, e
+\begin{align*}
+    \Delta z^i &= X^{-1} \left( r_a - Z \Delta x^i \right).
+\end{align*}
 
 A forma mais utilizada para resolver \eqref{eq:primal_dual_intp:aug_lin_system}
-consiste em reduzir o sistema através de eliminação das variáveis $\tilde{x}$ a
-um sistema simétrico definido positivo com a matriz de equações normais $A
-D^{-1} A^t$,
+consiste em reduzir o sistema através de eliminação das variáveis $\Delta x^i$ de
+forma a obter o sistema dado por
+\begin{align}
+    A D^{-1} A^T \Delta y^i &= A D^{-1} r_1 - r_2
+    \label{eq:primal_dual_intp:lin_norm}
+\end{align}
+e que
 \begin{align*}
-    A D^{-1} A^t
+    \Delta x^i &= D^{-1} \left( r_1 - A^T \Delta y^i \right).
 \end{align*}
-e aplicar então a fatoração de Cholesky.
 
-A fatoração de Cholesky é realizada apenas uma vez
+Para resolver \eqref{eq:primal_dual_intp:lin_norm} costuma-se utilizar a
+fatoração de Cholesky pois $A D^{-1} A^T$ é uma matriz simétrica definida
+positiva. Durante a construção da sequência de triplas $(x^i, y^i, z^i)$ apenas
+$D$ muda e por esse motivo a estrutura esparsa de $A D^{-1} A^T$ é mantida
+inalterada durante todo o Método de Pontos Interiores Primal-Dual.
 
 \section{Matrizes Esparsas}
 Como visto na seção anterior, um dos passos dos Métodos de Pontos Interiores
-Primal-Dual consiste em resolver um sistema linear utilizando a fatoração de
+Primal-Dual consiste em resolver um sistema linear simétrico definido positivo,
+cuja estrutura esparsa é mantida inalterada durante todo o método, utilizando a fatoração de
 Cholesky. Na próxima subseção introduziremos as definições de banda e envelope
 de matrizes para posteriormente apresentarmos a fatoração de Cholesky.
 
@@ -293,8 +311,8 @@ uma única matriz $G \in \mathbb{R}^{n \times n}$ triangular inferior com
 elementos positivos na diagonal tal que $A = G G^T$. A fatoração $A = G G^T$ é
 conhecida como fatoração de Cholesky e no algoritmo a seguir é apresentado
 uma forma de obter-se $G$.
-\begin{algorithm}[H]
-    \caption{Pseudo-algoritmo da Fatoração de Cholesky}
+\begin{algorithm}[hbt]
+    \caption{Pseudo-código da Fatoração de Cholesky}
     \label{alg:chol}
     \begin{algorithmic}[1]
         \REQUIRE $A \in \mathbb{R}^{n \times n}$ simétrica definida positiva.
@@ -324,7 +342,7 @@ uma forma de obter-se $G$.
     Para calcular $G$ no Algoritmo~\ref{alg:chol} ocorrem operações aritméticas
     apenas nas linhas \ref{alg:chol:sqrt}, \ref{alg:chol:div} e
     \ref{alg:chol:prod}. Vamos mostrar que nenhuma dessas operações aritméticas
-    altera o envelope da matrix.
+    altera o envelope da matriz.
 
     Para a linha \ref{alg:chol:sqrt}, como $A$ é simétrica definida positiva,
     ocorre que $A_{k,k}$ é não nulo e, portanto, $G_{k,k}$ também.
@@ -432,30 +450,6 @@ e/ou envelope de $A'$ é menor que o de $A$?
 Pelo exemplo anterior, verifica-se a possibilidade de preprocessar a matriz
 de forma a reduzir a banda e envelope.
 
-% Alguns
-% exemplos de pré-processamentos indicados por Ghidetti
-% \cite{Ghidetti:2010:ComparativoReordenamento} são a minimização da
-% largura de banda e a redução do envelope ou \textit{profile}. ``Esses
-% pré-processamentos consistem em dispor os elementos não nulos da matriz o mais
-% próximo possível da diagonal principal.''
-% 
-% ``No contexto da solução de sisteas lineares via métodos diretos, a
-% minimização da largura da bnada pode proporcionar uma redução no
-% preenchimento que ocorre na decomposição. (\ldots) Contudo, atualmente
-% sistemas lineares de grande porte são usualmente solucionados por métodos
-% iterativos não estacionários que por um lado não alteram a esparsidade da
-% matriz, mas necessitam de critérios de convergência. Em geral, um
-% processo para acelerar a convergência, denominado precondicionamento, se faz
-% necessário. Os precondicionadores baseados na decomposição LU são
-% amplamente utilizados por apresentar uma taxa acentuada na aceleração da
-% convergência. Porém, tais operações alteram a esparsidade da matriz e
-% portanto um processo de reordenamento da matriz é fundamental para a
-% eficiência de tais precondicionadores.''
-% 
-% A saída do algoritmo de Cuthill-McKee reverso é um um reordenamento para a
-% matriz de entrada que pode minimizar a largura de banda e o envelope da
-% matriz.
-
 Na próxima subseção apresentamos algumas definições da Teoria de Grafos que
 serão utilizadas no algoritmo estudado para obter uma permutação que busca
 reduzir a largura de banda e envelope.
@@ -472,7 +466,7 @@ através de seus elementos não nulos. Uma matriz simétrica $A \in \mathbb{R}^{
 \times n}$ induz um grafo $G(A)$, onde os vértices do grafo correspondem as
 dimensões da matriz e a aresta $e = \{i, j\}$ existe se e somente se $A_{ij} \neq 0$.
 Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
-\begin{figure}[!htb]
+\begin{figure}[!hbt]
     \centering
     \begin{tikzpicture}
         \matrix (A) [matrix of math nodes,%
@@ -508,6 +502,7 @@ Na figura abaixo é ilustrado a relação entre uma matriz e um grafo.
         \draw (3) -- (5);
         \draw (3) -- (6);
         \draw (3) -- (7);
+        \draw (4) -- (5);
         \draw (6) -- (7);
     \end{tikzpicture}
     \caption{Ilustração do grafo (a direita) correspondente a uma matriz (a
@@ -520,7 +515,7 @@ matriz corresponde a renumerar os vértices do grafo. Na
 Figura~\ref{fig:exem_matrix2graph_perm} é ilustrado uma permutação da matriz
 presente na Figura~\ref{fig:exem_matrix2graph} e a renumeração dos vértices do
 grafo.
-\begin{figure}[!htb]
+\begin{figure}[!hbt]
     \centering
     \begin{tikzpicture}
         \matrix (A) [matrix of math nodes,%
@@ -556,6 +551,7 @@ grafo.
         \draw (3) -- (5);
         \draw (3) -- (6);
         \draw (3) -- (7);
+        \draw (4) -- (5);
         \draw (6) -- (7);
     \end{tikzpicture}
     \caption{Ilustração da permutação simétrica de uma matriz e a renumeração
@@ -603,6 +599,9 @@ Um resumo dos principais conceitos é dado a seguir:
                 vértices presentes no nível $L_{i - 1}$ e ainda não pertencentes
                 a nenhum nível.
         \end{enumerate}
+
+        Na Figura~\ref{fig:graph2level_struct} é ilustrado a estrutura de
+        nível, dentre as várias possíveis, para um grafo.
 \end{description}
 \begin{figure}[htb]
     \centering
@@ -628,6 +627,7 @@ Um resumo dos principais conceitos é dado a seguir:
         \draw (3) -- (5);
         \draw (3) -- (6);
         \draw (3) -- (7);
+        \draw (4) -- (5);
         \draw (6) -- (7);
         % level structure
         \node[draw, circle] at (10,2) {6}
@@ -650,7 +650,7 @@ Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram uma heurística
 reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largura
 de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 é conexo.
-\begin{algorithm}[H]
+\begin{algorithm}[hbt]
     \caption{Pseudo-código de Cuthill-McKee}
     \label{alg:rcm}
     \begin{algorithmic}[1]
@@ -692,14 +692,34 @@ que experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem qu
 vértices pseudo-periféricos são bons candidatos.
 
 Uma heurística para encontrar vértices pseudo-periféricos foi proposto por Alan
-George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo abaixo, e
+George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo a seguir, e
 é uma modificação de um algoritmo anteriormente proposto por Gibbs \textit{et.
 al} \cite{Gibbs:1976:ReducingBandwidth} baseado na observação de que
 \begin{align*}
     y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x) \leq l(y),
 \end{align*}
 \textit{i.e.}, se $y$ pertence ao nível mais elevado da estrutura de níveis com
-raiz em $x$ então a excentricidade de $x$ é menor ou igual a $x$.
+raiz em $x$ então a excentricidade de $x$ é menor ou igual a $x$. Essa
+observação é verificada com maior facilidade em grafos que são uma árvore, ver
+figura abaixo.
+\begin{figure}[!hbt]
+    \centering
+    \begin{tikzpicture}
+        \node[draw, circle] at (0,0) {1}
+            child { node[draw, circle] {2} }
+            child { node[draw, circle] {3}
+                child { node[draw, circle] {4} }
+                child { node[draw, circle] {5} } };
+        \node[draw, circle] at (6,0) {5}
+            child { node[draw, circle] {3}
+                child { node[draw, circle] {4} }
+                child { node[draw, circle] {1} 
+                    child { node[draw, circle] {2} } } };
+    \end{tikzpicture}
+    \caption{Grafo e sua estrutura de níveis com raiz em 1 (a esquerda) e sua
+    estrutura de níveis com raiz em 5 (a direita).}
+    \label{fig:ilus_obser}
+\end{figure}
 \begin{algorithm}[H]
     \caption{Pseudo-código para encontrar vértice pseudo-periférico, $x$.}
     \label{alg:ppn}

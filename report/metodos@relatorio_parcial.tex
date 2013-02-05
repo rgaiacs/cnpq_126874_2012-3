@@ -18,5 +18,7 @@ Python. A implementação desenvolvida foi submetida nos seguintes
         (\url{http://trac.sagemath.org/sage_trac/ticket/13601})
 \end{enumerate}
 
-Para testar a implementação, utilizou-se a biblioteca de testes ``Netlib LP''
-(\url{http://www.netlib.org/lp/}).
+Para testar a implementação, utilizou-se parte da biblioteca de testes ``Netlib LP''
+(\url{http://www.netlib.org/lp/}) e na construção da matriz $A D^{-1} A^T$ que
+compõe o sistema linear a ser resolvido no Método de Pontos Interiores
+Primal-Dual utilizou-se $D = I$, \textit{i.e.}, $D$ como a matriz identidade.
