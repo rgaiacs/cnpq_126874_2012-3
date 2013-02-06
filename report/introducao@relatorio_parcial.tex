@@ -107,8 +107,8 @@ e que
 Para resolver \eqref{eq:primal_dual_intp:lin_norm} costuma-se utilizar a
 fatoração de Cholesky pois $A D^{-1} A^T$ é uma matriz simétrica definida
 positiva. Durante a construção da sequência de triplas $(x^i, y^i, z^i)$ apenas
-$D$ muda e por esse motivo a estrutura esparsa de $A D^{-1} A^T$ é mantida
-inalterada durante todo o Método de Pontos Interiores Primal-Dual.
+$D$ se altera na matriz e por esse motivo a estrutura esparsa de $A D^{-1} A^T$ é mantida
+durante todas as iterações do Método de Pontos Interiores Primal-Dual.
 
 \section{Matrizes Esparsas}
 Como visto na seção anterior, um dos passos dos Métodos de Pontos Interiores
@@ -348,7 +348,7 @@ uma forma de obter-se $G$.
     ocorre que $A_{k,k}$ é não nulo e, portanto, $G_{k,k}$ também.
 
     Para a linha \ref{alg:chol:div} é fácil verificar que $G_{i,k}$ é nulo se e
-    somente se $A_{i,k}$.
+    somente se $A_{i,k}$ também for nulo.
 
     Para a linha \ref{alg:chol:prod}, se $A_{i,j}$ não pertence ao envelope de $A$
     então $A_{i,j}$ e $G_{i,k}$ são nulos e portanto o envelope não é alterado.
@@ -364,7 +364,7 @@ uma forma de obter-se $G$.
     de Cholesky também preserva a banda da matriz.
 \end{proof}
 
-\section{Cuthill-McKee reverso}
+\section{Método Cuthill-McKee Reverso}
 Considere a matriz $A$ e seu fator de Cholesky $G$ dados por
 \begin{align*}
     A &= \begin{bmatrix}
@@ -376,13 +376,13 @@ Considere a matriz $A$ e seu fator de Cholesky $G$ dados por
         1 &  0 &  0 &  0 &  0 & 10 &  0 \\
         1 &  0 &  0 &  0 &  0 &  0 & 10
     \end{bmatrix}, & G &= \begin{bmatrix}
-        1.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 \\
-        1.0 &  3.0 &  0.0 &  0.0 &  0.0 &  0.0 &  0.0 \\
-        1.0 & -0.3 &  2.9 &  0.0 &  0.0 &  0.0 &  0.0 \\
-        1.0 & -0.3 & -0.3 &  2.9 &  0.0 &  0.0 &  0.0 \\
-        1.0 & -0.3 & -0.3 & -0.4 &  2.9 &  0.0 &  0.0 \\
-        1.0 & -0.3 & -0.3 & -0.4 & -0.4 &  2.8 &  0.0 \\
-        1.0 & -0.3 & -0.3 & -0.4 & -0.4 & -0.5 &  2.8
+        1,0 &  0,0 &  0,0 &  0,0 &  0,0 &  0,0 &  0,0 \\
+        1,0 &  3,0 &  0,0 &  0,0 &  0,0 &  0,0 &  0,0 \\
+        1,0 & -0,3 &  2,9 &  0,0 &  0,0 &  0,0 &  0,0 \\
+        1,0 & -0,3 & -0,3 &  2,9 &  0,0 &  0,0 &  0,0 \\
+        1,0 & -0,3 & -0,3 & -0,4 &  2,9 &  0,0 &  0,0 \\
+        1,0 & -0,3 & -0,3 & -0,4 & -0,4 &  2,8 &  0,0 \\
+        1,0 & -0,3 & -0,3 & -0,4 & -0,4 & -0,5 &  2,8
     \end{bmatrix}.
 \end{align*}
 Observa-se que vários elementos nulos na parte triangular inferior de $A$ são
@@ -435,19 +435,19 @@ e/ou envelope de $A'$ é menor que o de $A$?
             0 & 0 & 0 & 1 & 1 & 2 & 3
         \end{bmatrix},
         & G' &= \begin{bmatrix}
-             1.4 & 0 & 0 & 0 & 0 & 0 & 0 \\
-            0.70 & 1.2 & 0 & 0 & 0 & 0 & 0 \\
-            0.70 & 0.40 & 0.57 & 0 & 0 & 0 & 0 \\
-            0.70 & 0.40 & 0.57 & 1 & 0 & 0 & 0 \\
-            0.70 & 0.40 & 0.57 & 0 & 1 & 0 & 0 \\
+             1,4 & 0 & 0 & 0 & 0 & 0 & 0 \\
+            0,70 & 1,2 & 0 & 0 & 0 & 0 & 0 \\
+            0,70 & 0,40 & 0,57 & 0 & 0 & 0 & 0 \\
+            0,70 & 0,40 & 0,57 & 1 & 0 & 0 & 0 \\
+            0,70 & 0,40 & 0,57 & 0 & 1 & 0 & 0 \\
             0 & 0 & 0 & 1 & 1 & 1 & 0 \\
             0 & 0 & 0 & 1 & 1 & 0 & 1
-        \end{bmatrix}
+        \end{bmatrix}.
     \end{align*}
     Verifica-se que a largura da banda de $A$ e $G$ é $4$ e o envelope é $15$.
 \end{exem}
 
-Pelo exemplo anterior, verifica-se a possibilidade de preprocessar a matriz
+De acordo com o exemplo anterior, verifica-se a possibilidade de preprocessar a matriz
 de forma a reduzir a banda e envelope.
 
 Na próxima subseção apresentamos algumas definições da Teoria de Grafos que
@@ -682,10 +682,10 @@ aplicar a mesma heurística para cada uma das componentes conexas.
 George \cite{George:1971:ComputerImplementation} verificou
 experimentalmente que ao reverter o ordenamento obtido pelo Algoritmo
 Cuthill-McKee, \textit{i.e.}, trocando $o_i$ por $o_{n - i + 1}$ para $i = 1, 2,
-\ldots, n$, o novo ordenamento mantinha a mesma banda mas diminui o
+\ldots, n$, o novo ordenamento mantém a mesma banda mas diminui o
 envelope da matriz. Sherman e Liu \cite{Liu:1976:ComparativeCuthillMcKee}
 provaram que essa modificação nunca aumenta o envelope da matriz. Essa versão do
-algoritmo é conhecida como Cuthill-McKee Reverso.
+algoritmo é conhecida como Método Cuthill-McKee Reverso.
 
 Uma dos parâmetros de entrada do Método Cuthill-McKee (Reverso) é o vértice inicial sendo
 que experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem que
