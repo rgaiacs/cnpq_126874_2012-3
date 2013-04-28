@@ -2,17 +2,17 @@
 Os dados referentes aos testes computacionais encontram-se nas
 Tabelas~\ref{tab:resul1}~e~\ref{tab:resul2} sendo que ``Col. b.p'', ``Col,
 a.p'', ``EI'', ``ERCM'' e ``EMG'' significam, respectivamente ``Número de
-colunas antes do pré-solver'', ``Número de colunas depois do pré-solver'',
+colunas antes do preprocessamento'', ``Número de colunas depois do preprocessamento'',
 ``Envelope inicial'', ``Envelope com Método Cuthill-McKee Reverso'', ``Envelope
 com Mínimo Grau Múltiplo''.
 \begin{table}[h]
     \centering
-    \caption{Resultados experimentais sem alteração de $A$ no pré-solver.}
+    \caption{Resultados experimentais sem alteração de $A$ no preprocessamento.}
     \label{tab:resul1}
     \csvautotabular{bench1@sbpo.csv}
 \end{table}
 \begin{sidewaystable}
-  \caption{Resultados experimentais com alteração de $A$ no pré-solver.}
+  \caption{Resultados experimentais com alteração de $A$ no preprocessamento.}
   \label{tab:resul2}
   \csvautotabular{bench2@sbpo.csv}\hfill\vspace{-11pt}
   \csvautotabular{bench3@sbpo.csv}
@@ -20,29 +20,14 @@ com Mínimo Grau Múltiplo''.
 
 Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
 em que a matriz de permutação $P$ é obtida pelo RCM, observamos
-\begin{itemize}
-    \item redução do envelope para 56 matrizes (75,67\%),
-    \item manutenção do envelope para 7 matrizes (9,45\%) e
-    \item aumenta do envelope para 11 matrizes (14,86\%).
-\end{itemize}
+redução do envelope para 56 matrizes (75,67\%),
+manutenção do envelope para 7 matrizes (9,45\%) e
+aumenta do envelope para 11 matrizes (14,86\%).
 Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 35,05\%.
 
 Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
 em que a matriz de permutação $P$ é obtida pelo MMD
 observamos
-\begin{itemize}
-    \item redução do envelope para 68 matrizes (91,89\%) e
-    \item aumenta do envelope para 6 matrizes (8,10\%).
-\end{itemize}
+redução do envelope para 68 matrizes (91,89\%) e
+aumenta do envelope para 6 matrizes (8,10\%).
 Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 72,83\%.
-
-A primeira vista, pelos resultados, concluímos ser vantajoso utilizar algum
-reordenamento e que o RCM é muito inferior ao MMD. Infelizmente, a comparação
-entre o RCM e o MMD é desequilibrada pois
-\begin{itemize}
-  \item antes de aplicar o MMD a matriz passou pelo pré-solver do PCx (enquanto
-    que o RCM foi aplicado na matriz inicial) e
-  \item a implementação do MMD utiliza supernós (enquanto que o RCM não).
-\end{itemize}
-Ainda em relação a comparação entre o RCM e o MMD gostariamos de destacar que
-para 6 problemas a redução do envelope utilizando o RCM foi melhor que o MMD.
