@@ -1,4 +1,4 @@
-file,Cols b.p.,Cols a.p.,profile,rcm profile,Density
+Problema,Col. b.p.,Col. a.p.,EI,ERCM,EMG
 fit2d,25,25,300,300,324
 afiro,27,27,185,136,107
 scsd1,77,77,1407,1402,1392

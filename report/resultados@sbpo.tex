@@ -1,21 +1,25 @@
 \section{Resultados Obtidos e Conclusão}
-
-rcm melhor que mg: 6
-rcm melhor que mg: 0
-RCM
-red: 56 - 0.7567567567567568
-media: 0.35052302815089803
-man: 7 - 0.0945945945945946
-aum: 11 - 0.14864864864864866
-MG
-red: 68 - 0.918918918918919
-media: 0.7283838871092406
-man: 0 - 0.0
-aum: 6 - 0.08108108108108109
+Os dados referentes aos testes computacionais encontram-se nas
+Tabelas~\ref{tab:resul1}~e~\ref{tab:resul2} sendo que ``Col. b.p'', ``Col,
+a.p'', ``EI'', ``ERCM'' e ``EMG'' significam, respectivamente ``Número de
+colunas antes do pré-solver'', ``Número de colunas depois do pré-solver'',
+``Envelope inicial'', ``Envelope com Método Cuthill-McKee Reverso'', ``Envelope
+com Mínimo Grau Múltiplo''.
+\begin{table}[h]
+    \centering
+    \caption{Resultados experimentais sem alteração de $A$ no pré-solver.}
+    \label{tab:resul1}
+    \csvautotabular{bench1@sbpo.csv}
+\end{table}
+\begin{sidewaystable}
+  \caption{Resultados experimentais com alteração de $A$ no pré-solver.}
+  \label{tab:resul2}
+  \csvautotabular{bench2@sbpo.csv}\hfill\vspace{-11pt}
+  \csvautotabular{bench3@sbpo.csv}
+\end{sidewaystable}
 
 Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
-em que a matriz de permutação $P$ é obtida pelo Método Cuthill-McKee Reverso,
-observamos
+em que a matriz de permutação $P$ é obtida pelo RCM, observamos
 \begin{itemize}
     \item redução do envelope para 56 matrizes (75,67\%),
     \item manutenção do envelope para 7 matrizes (9,45\%) e
@@ -24,7 +28,7 @@ observamos
 Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 35,05\%.
 
 Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
-em que a matriz de permutação $P$ é obtida pelo Método do Mínimo Grau Múltiplo
+em que a matriz de permutação $P$ é obtida pelo MMD
 observamos
 \begin{itemize}
     \item redução do envelope para 68 matrizes (91,89\%) e
@@ -32,34 +36,13 @@ observamos
 \end{itemize}
 Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 72,83\%.
 
-%\begin{table}
-%    \centering
-%    \caption{Resultados experimentais do Método Cuthill-McKee Reverso para
-%    a ``Netlib LP''.}
-%    \label{tab:resul}
-%    \csvautotabular{bench1@sbpo.csv}
-%\end{table}
-%\begin{table}
-%    \centering
-%    \csvautotabular{bench2@sbpo.csv}
-%\end{table}
-%\begin{table}
-%    \centering
-%    \csvautotabular{bench3@sbpo.csv}
-%\end{table}
-
 A primeira vista, pelos resultados, concluímos ser vantajoso utilizar algum
-reordenamento e que o Método Cuthill-McKee Reverso é muito inferior ao Método do
-Mínimo Grau Múltiplo. Infelizmente, a comparação entre o Método Cuthill-McKee
-Reverso e o Método do Mínimo Grau Múltiplo é desequilibrada pois
+reordenamento e que o RCM é muito inferior ao MMD. Infelizmente, a comparação
+entre o RCM e o MMD é desequilibrada pois
 \begin{itemize}
-  \item antes de aplicar o Método do Mínimo Grau Múltiplo a matriz passou pelo
-    pré-solver do PCx (enquanto que o Método Cuthill-McKee foi aplicado na
-    matriz inicial) e
-  \item a implementação do Método do Mínimo Grau Múltiplo utiliza super-nós
-    (enquanto que o Método Cuthill-McKee não).
+  \item antes de aplicar o MMD a matriz passou pelo pré-solver do PCx (enquanto
+    que o RCM foi aplicado na matriz inicial) e
+  \item a implementação do MMD utiliza supernós (enquanto que o RCM não).
 \end{itemize}
-Ainda em relação a comparação entre o Método Cuthill-McKee Reverso e o Método do
-Mínimo Grau Múltiplo gostariamos de destacar que para 6 problemas a redução do
-envelope utilizando o Método Cuthill-McKee Reverso foi melhor que o Método do
-Mínimo Grau.
+Ainda em relação a comparação entre o RCM e o MMD gostariamos de destacar que
+para 6 problemas a redução do envelope utilizando o RCM foi melhor que o MMD.

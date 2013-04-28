@@ -1,4 +1,4 @@
-file,Cols b.p.,Cols a.p.,profile,rcm profile,Density
+Problema,Col. b.p.,Col. a.p.,EI,ERCM,EMG
 sc50a,50,49,302,287,242
 sc50b,50,48,321,305,231
 adlittle,56,55,1163,682,404
@@ -28,3 +28,4 @@ ship04s,402,216,59709,14317,1778
 pilot4,410,396,36916,29760,14279
 scagr25,471,469,4488,4728,2944
 agg,488,390,83962,48170,12297
+scrs8,490,421,13157,13547,4477
