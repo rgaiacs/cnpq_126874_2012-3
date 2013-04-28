@@ -1,0 +1,183 @@
+% Copyright (C) 2012 Raniere Silva
+% 
+% This file is part of 'CNPq 126874/2012-3'.
+% 
+% 'CNPq 126874/2012-3' is licensed under the Creative Commons
+% Attribution 3.0 Unported License. To view a copy of this license,
+% visit http://creativecommons.org/licenses/by/3.0/.
+% 
+% 'CNPq 126874/2012-3' is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+\documentclass[11pt,a4paper]{article}
+% Limite de 8 páginas.
+\usepackage[utf8]{inputenc} %Ser\'{a} utilizado a codifica\c{c}ao UTF8
+\usepackage[top=3.3cm,left=2.9cm,right=2.9cm,bottom=2.5cm]{geometry} %Borda das p\'{a}gina
+\usepackage[T1]{fontenc}
+%\usepackage{fontspec}
+%\setmainfont{Times New Roman}
+\usepackage[brazil]{babel} %Ser\'{a} utilizado o idioma portugu\^{e}s
+\usepackage{indentfirst} %Identa\c{c}\~{a}o de linha
+\usepackage{amsmath, amsfonts, amssymb, amsthm} % Pacote matem\'{a}tico
+\DeclareMathOperator*{\diag}{diag}
+\usepackage{graphicx} %Pacote para incluir figuras
+\usepackage{color} %Pacote para cores
+\usepackage{tikz} %Pacote para desenho de figuras
+\usetikzlibrary{matrix}
+\usepackage{pgfplots} %Pacote para desenho de gr\'{a}ficos
+% \usepackage{subfigure} % Pacote para subfiguras
+\usepackage{url} % Pacote para url
+\usepackage{hyperref} % Pacote para hyperlink
+\usepackage{csvsimple}
+\usepackage{algorithmic} % Pacote para algoritmos
+\usepackage{algorithm} % Pacote para algoritmos
+\usepackage{listings} % Pacote para c\'{o}digos
+
+%Personalização
+%\pgfplotsset{
+%height=0.35\textheight,
+%width=0.8\textwidth,
+%legend style={
+%at={(0.3,0.97)},
+%anchor=north,
+%font=\footnotesize
+%},
+%xlabel={},
+%ylabel={},
+%xtick={},
+%grid=major,
+%}
+
+\hypersetup{
+%colorlinks = true,
+}
+
+\floatname{algorithm}{Algoritmo}
+
+\algsetup{linenosize=\small}
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Saída:}}
+\renewcommand{\algorithmicend}{\textbf{fim}}
+\renewcommand{\algorithmicif}{\textbf{se}}
+\renewcommand{\algorithmicthen}{\textbf{ent\~{a}o}}
+\renewcommand{\algorithmicelse}{\textbf{caso contr\'{a}rio}}
+\renewcommand{\algorithmicendif}{\algorithmicend}
+\renewcommand{\algorithmicfor}{\textbf{para}}
+\renewcommand{\algorithmicforall}{\textbf{para todo}}
+\renewcommand{\algorithmicdo}{\textbf{fa\c{c}a}}
+\renewcommand{\algorithmicendfor}{\algorithmicend}
+\renewcommand{\algorithmicwhile}{\textbf{enquanto}}
+\renewcommand{\algorithmicendwhile}{\algorithmicend}
+\renewcommand{\algorithmicrepeat}{\textbf{repita}}
+\renewcommand{\algorithmicuntil}{\textbf{at\'{e}}}
+\renewcommand{\algorithmicreturn}{\textbf{retorne}}
+\renewcommand{\algorithmiccomment}[1]{\hspace{2em}/* #1 */}
+
+\renewcommand{\lstlistingname}{C\'{o}digo}
+\lstset{ %
+% language=Octave,                % the language of the code
+basicstyle=\ttfamily\small,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=5,                   % the step between two line-numbers. If it's 1, each line 
+% will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+% backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+% frame=single,                   % adds a frame around the code
+tabsize=4,                      % sets default tabsize to 2 spaces
+captionpos=t,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+caption={\texttt{\lstname}},                 % show the filename of files included with \lstinputlisting;
+% also try caption instead of title
+% escapeinside={\%*}{*)},         % if you want to add a comment within your code
+% morekeywords={#}            % if you want to add more keywords to the set
+}
+
+\newtheorem{defi}{Definição}
+\newtheorem{prop}{Proposição}
+\newtheorem{exem}{Exemplo}
+
+\begin{document}
+% Identificação
+%     Projeto
+%     Bolsista / RA
+%     Orientador
+%     Local de execução
+%     Vigência
+\title{Implementa\c{c}\~{a}o eficiente da heur\'{i}stica de reordenamento de Cuthill-McKee Reversa}
+\author{Raniere Silva \\ Orientando \and Aurelio Oliveira \\ Orientador}
+\maketitle
+
+\tableofcontents
+
+% Introdução
+%     Introdução ao assunto: deve ser bastante geral
+%     Informações da literatura: tornam a introdução mais específica ao assunto
+%     Colocação da questão estudada: especificar os objetivos do trabalho
+%     Atividades desenvolvidas: dar uma idéia geral de como foi desenvolvido o
+%     trabalho
+\input{introducao@sbpo.tex}
+
+% Materiais e Métodos
+%     Materiais: citar os equipamentos, reagentes e outros ítens utilizados,
+%     informando fabricante ou fornecedor
+%     Métodos: descrever os procedimentos detalhados, que possam ser
+%     reproduzidos com os materiais e equipamentos descritos
+\input{metodos@relatorio_parcial.tex}
+
+% Resultados
+%     Descrição dos resultados: deve ser clara e objetiva, resumindo os achados
+%     principais que serão detalhados em tabelas e figuras.
+%     Ilustrações dos resultados: tabelas e figuras são muito importantes; seu
+%     número deve ser o menor possível, e elas devem ser construídas com cuidado
+%     para incluir todas as informações necessárias com clareza.
+%     Tabelas: devem ser numeradas sequencialmente (Tabela 1, Tabela 2, etc).
+%     Seu título deve ser informativo, colocado acima e justificado à esquerda.
+%     Notas de rodapé (a, b, c...) podem ser colocados diretamente abaixo da
+%     mesma.
+%     Figuras (fotos, esquemas, gráficos): devem ser numeradas sequencialmente
+%     (Figura 1, Figura 2, etc). Seu título deve ser informativo, colocado
+%     abaixo e justificado à esquerda, descrevendo o que é mostrado.
+\input{resultados@sbpo.tex}
+
+% Discussão / Conclusões
+%     Descrição dos dados à luz da literatura
+%     Descrição de possíveis fontes de erro e seu efeito sobre os dados
+%     Se seus experimentos falharam, quais as sugestões para corrigir o
+%     problema?
+\input{conclusoes@relatorio_parcial.tex}
+
+% Matéria encaminhada para publicação
+%     Quando houver, referir resumos ou artigos científicos publicados ou
+%     encaminhados para publicação
+\input{publicacoes@relatorio_parcial.tex}
+
+% Perspectivas de continuidade ou desdobramento do trabalho
+%     O projeto foi concluído ou será continuado?
+\input{desdobramentos@relatorio_parcial.tex}
+
+% Outras atividades de interesse universitário
+%     Descrever participações em congressos, cursos extra-curriculares, etc
+\input{congressos@relatorio_parcial.tex}
+
+% TODO Para a versao final, comentar as linhas a seguir.
+\appendix
+% Apoio
+%     Citar as agências que financiaram o projeto
+%\input{info.tex}
+%\input{faq@relatorio_parcial.tex}
+%\input{implementacoes@relatorio_parcial.tex}
+
+% Bibliografia
+%     Diversos formatos: definir qual o mais apropriado
+%     IMPORTANTE
+%     - Não liste se não citar.
+%     - Não cite se não listar.
+\bibliographystyle{alpha}
+\bibliography{../references}
+\end{document}
