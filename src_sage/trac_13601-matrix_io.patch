@@ -1,9 +1,13 @@
 # HG changeset patch
 # User Raniere Silva <r.gaia.cs@gmail.com>
 # Date 1350337996 10800
-# Node ID a1227c0f697139ebf5af538ffa31599ef245dd23
-# Parent  037fbe8eea9ce53ee7d77a4453da1ca0aac0823e
-Version 0.2 of matrix_io.
+# Node ID e3dc0a28e1ab1c1351324e84cc1b4d306e479314
+# Parent  b2f2a3c081d1bb4b7409355e5972882b6d795b18
+Version 0.2.1 of matrix_io.
+
+* Update documentation.
+
+Version 0.2.0 of matrix_io.
 
 * Improve the parameters of the functions and the documentation.
 * Add some files to test.
@@ -14,10 +18,10 @@ is a common way to share information.
 Work supported by CNPq, Conselho Nacional de Desenvolvimento Cientifico  e
 Tecnologico - Brasil.
 
-diff --git a/doc/en/reference/matrices.rst b/doc/en/reference/matrices.rst
---- a/doc/en/reference/matrices.rst
-+++ b/doc/en/reference/matrices.rst
-@@ -52,6 +52,8 @@
+diff --git a/doc/en/reference/matrices/index.rst b/doc/en/reference/matrices/index.rst
+--- a/doc/en/reference/matrices/index.rst
++++ b/doc/en/reference/matrices/index.rst
+@@ -50,6 +50,8 @@
  
     sage/matrix/constructor
  
