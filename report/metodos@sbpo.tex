@@ -1,11 +1,34 @@
 \section{Implementação do Método e Testes Computacionais}
-O Método Cuthill-McKee Reverso foi implementado pelo autor deste trabalho para
-o Sage (\url{http://www.sagemath.org/}), um sistema matemático em Python. 
+O Método Cuthill-McKee Reverso foi implementado, na linguagem C, pelo autor
+deste trabalho como um patch para o PCx
+(\url{http://pages.cs.wisc.edu/~swright/PCx/}), e a implementação desenvolvida
+encontra-se disponível em \url{https://github.com/r-gaia-cs/PCx.git}.
 
-Testou-se a implementação com parte da biblioteca ``Netlib LP''
-(\url{http://www.netlib.org/lp/}) e na construção da matriz $A D^{-1} A^T$
-utilizou-se $D$ como a matriz identidade.
+O PCx é um solver de Programação Linear que utilizar a variante de Mehrotra do
+Método Preditor Corretor com a estratégia de correção de Gondzio e o Método do
+Mínimo Grau Múltiplo de Liu\cite{George:1981:ComputerSolutionPD} (MMD) para o
+reordenamento da matriz $A D^{-1} A^T$.
 
-Utilizou-se o PCx (\url{http://pages.cs.wisc.edu/~swright/PCx/}) com o Método do
-Mínimo Grau Múltiplo de Liu (MMD) para comparar a
-esparcidade da matriz $A D^{-1} A^T$ obtida pelo Método Cuthill-McKee.
+Testou-se a implementação (tendo como último commit aquele cuja identificação
+inicia com c8e1e1d) com 94 problemas da biblioteca ``Netlib LP''
+(\url{http://www.netlib.org/lp/}), cujo acesso é livre.
+
+Dos 94 problemas testados, ao utilizar reordenamento obtido com o MMD 87
+problemas foram resolvidos enquanto que com o reordenamento do RCM apenas 85
+problemas foram resolvidos. Dentre estes 85 problemas resolvidos por ambos, os
+dados referentes aos testes computacionais dos 43 maiores problemas encontram-se
+na Tabela~\ref{tab:resul2} sendo que ``LIN'', ``COL'', ``ENV'', ``IT'' e ``T''
+significam, respectivamente, ``número de linhas originais'', ``número de colunas
+originais'', ``tamanho do envelope'', ``número de iterações'' e ``tempo
+computacional'' (em segundos).
+\begin{table}
+  \caption{Resultados experimentais.}
+  \label{tab:resul2}
+  \input{bench2@sbpo.csv}
+\end{table}
+
+O envelope decorrente do uso do RCM foi menor que o do MMD em apenas 4 problemas
+e empatou em outros 5. Para os problemas em que o envelope decorrente do RCM foi
+maior que o do MMD, esse aumento foi em média de 55\%. Em relação ao número de
+iterações do PCx, o RCM foi melhor em 2 problemas e empatou nos outros 81. Já em
+relação ao tempo, o RCM foi melhor em 6 problemas e empatou em outros 17.

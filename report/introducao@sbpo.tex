@@ -11,8 +11,8 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 \section{Métodos de Pontos Interiores Primal-Dual}
-Consideremos o Problema de Programação Linear na Forma Padrão (PPLFP) e o
-problema dual (PPLFD) associado:
+Consideremos o Problema de Programação Linear na forma primal e o
+na forma dual associado:
 \begin{align*}
     \text{minimizar } & c^T x
     &&& \text{maximizar } & b^T y \\
@@ -26,13 +26,13 @@ $b$, $x$, $y$ e $z$ são vetores colunas de dimensão apropriada.  O \textit{gap
 dual é dado por $\gamma = c^T x - b^T y$ que se reduz a $\gamma = x^T z$ para
 pontos primais e duais factíveis.
 
-Os Métodos de Pontos Interiores Primais-Duais para resolver PPLFP consistem em, a
+Os Métodos de Pontos Interiores Primais-Duais para resolver os problemas na forma primal consistem em, a
 partir de uma tripla inicial $(x^0, y^0, z^0)$, construir uma
 sequência de triplas, $(x^i, y^i, z^i)$, dada por $x^{i + 1} = x^i + \alpha^i
 \Delta x^i$, $y^{i + 1} = y^i + \alpha^i \Delta y^i$, $z^{i + 1} = z^i +
 \alpha^i \Delta z^i$, onde $i \geq 0$ e $\alpha^i \in (0, 1]$, que convirja para a
-tripla $(x^*, y^*, z^*)$ que é solução de PPLFP e PPLFD. A constante $\alpha^i$
-deve ser escolhida tal que $x^i, z^i > 0$ e, frequentemente, $\alpha^i << 1$.
+tripla $(x^*, y^*, z^*)$ que é solução da forma primal e dual. A constante $\alpha^i$
+deve ser escolhida tal que $x^i, z^i > 0$.
 
 A direção afim nos Métodos de Pontos Interiores Primais-Duais, $(\Delta x^i,
 \Delta y^i, \Delta z^i)$,  é dada por:
@@ -347,9 +347,15 @@ Além dos conceitos básicos da Teoria de Grafos, temos:
 \end{figure}
 \subsection{Método Cuthill-McKee Reverso}
 Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth} propuseram uma heurística de
-reordenação, ver algoritmo abaixo, cujo objetivo principal é reduzir a largura
+reordenação cujo objetivo principal é reduzir a largura
 de banda de uma matriz simétrica $A \in \mathbb{R}^{n \times n}$ cujo grafo
 é conexo.
+
+A heurística proposta por Cuthill e McKee consiste em utilizar para o
+reordenamento a sequência em que os vértices do grafo correspondente a uma
+matriz são visitados ao realizar uma busca em largura na estrutura de nível do
+grafo sendo que os vértices de cada nível encontram-se ordenados em ordem
+crescente de grau. Um resumo da heurística é apresentado abaixo.
 \begin{algorithm}[hbt]
     \caption{Pseudo-código de Cuthill-McKee}
     \label{alg:rcm}
@@ -391,8 +397,8 @@ que experimentos computacionais \cite{Cuthill:1969:ReducingBandwidth} sugerem qu
 vértices pseudo-periféricos são bons candidatos.
 
 Uma heurística para encontrar vértices pseudo-periféricos foi proposto por Alan
-George e Joseph W. H. Liu \cite{George:1979:NodeFinder}, ver algoritmo a seguir, e
-é baseado na observação que $y \in \mathcal{L}_{l(x)}(x) \Longrightarrow l(x)
+George e Joseph W. H. Liu \cite{George:1979:NodeFinder} e
+é baseado na observação que $y \in L_{l(x)}(x) \Longrightarrow l(x)
 \leq l(y)$, \textit{i.e.}, se $y$ pertence ao nível mais elevado da estrutura de
 níveis com raiz em $x$ então a excentricidade de $x$ é menor ou igual a $x$.
 Essa observação é verificada com maior facilidade em grafos que são uma árvore,
@@ -415,6 +421,11 @@ ver Figura~\ref{fig:ilus_obser}.
     estrutura de níveis com raiz em 5 (à direita).}
     \label{fig:ilus_obser}
 \end{figure}
+
+A heurística proposta por George e Liu consiste em dada uma estrutura de nível
+com raiz no vértice $r$, escolher um nó $x$ do último nível e enquanto $l(x)
+> l(r)$ fazer $r = x$ e escolher um novo nó $x$. Um resumo da heurística é apresentado
+abaixo.
 \begin{algorithm}[H]
     \caption{Pseudo-código para encontrar vértice pseudo-periférico, $x$.}
     \label{alg:ppn}
@@ -422,11 +433,11 @@ ver Figura~\ref{fig:ilus_obser}.
         \REQUIRE Grafo $G(A)$.
         \ENSURE $x$.
         \STATE $r \longleftarrow \text{Nó arbitrário em }G(A)$
-        \STATE Construir estrutura de nível a partir de $r$, $\mathcal{L}(r)$.
+        \STATE Construir estrutura de nível a partir de $r$, $L(r)$.
         \label{alg:ppn:brle}
         \STATE Escolher um vértice $x$ pertencente ao último nível de
-        $\mathcal{L}(r)$.
-        \STATE Construir estrutura de nível a partir de $x$, $\mathcal{L}(x)$.
+        $L(r)$.
+        \STATE Construir estrutura de nível a partir de $x$, $L(x)$.
         \IF{$l(x) > l(r)$}
             \STATE $r \longleftarrow x$
             \STATE Retorna para a linha~\ref{alg:ppn:brle}

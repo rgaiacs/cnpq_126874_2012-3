@@ -1,33 +1,9 @@
-\section{Resultados Obtidos e Conclusão}
-Os dados referentes aos testes computacionais encontram-se nas
-Tabelas~\ref{tab:resul1}~e~\ref{tab:resul2} sendo que ``Col. b.p'', ``Col,
-a.p'', ``EI'', ``ERCM'' e ``EMG'' significam, respectivamente ``Número de
-colunas antes do preprocessamento'', ``Número de colunas depois do preprocessamento'',
-``Envelope inicial'', ``Envelope com Método Cuthill-McKee Reverso'', ``Envelope
-com Mínimo Grau Múltiplo''.
-\begin{table}[h]
-    \centering
-    \caption{Resultados experimentais sem alteração de $A$ no preprocessamento.}
-    \label{tab:resul1}
-    \csvautotabular{bench1@sbpo.csv}
-\end{table}
-\begin{sidewaystable}
-  \caption{Resultados experimentais com alteração de $A$ no preprocessamento.}
-  \label{tab:resul2}
-  \csvautotabular{bench2@sbpo.csv}\hfill\vspace{-11pt}
-  \csvautotabular{bench3@sbpo.csv}
-\end{sidewaystable}
+\section{Conclusões}
+Concluímos, pelo menos para os problemas testados, que a heurística de mínimo
+grau múltiplo é superior à heurística de Cuthill e McKee por gerar menos
+elementos não nulos na decomposição de Cholesky (levando em conta o tamanho do
+envelope). Estudos futuros visarão identificar classes de problemas onde a
+heurística Cuthill-McKee Reversa pode obter melhor desempenho.
 
-Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
-em que a matriz de permutação $P$ é obtida pelo RCM, observamos
-redução do envelope para 56 matrizes (75,67\%),
-manutenção do envelope para 7 matrizes (9,45\%) e
-aumenta do envelope para 11 matrizes (14,86\%).
-Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 35,05\%.
-
-Comparando o envelope da matriz $A D^{-1} A^T$ e da matriz $P A D^{-1} A^T P^T$,
-em que a matriz de permutação $P$ é obtida pelo MMD
-observamos
-redução do envelope para 68 matrizes (91,89\%) e
-aumenta do envelope para 6 matrizes (8,10\%).
-Nas matrizes onde ocorreu a redução do envelope essa foi, em média, de 72,83\%.
+\section*{Agradecimentos}
+Este trabalho foi financiado pelo CNPq através do projeto PIBIC.
