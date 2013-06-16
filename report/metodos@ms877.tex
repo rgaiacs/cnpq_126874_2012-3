@@ -1,0 +1,98 @@
+\section{Implementação do Método e Testes Computacionais}
+O Método Cuthill-McKee Reverso foi implementado, na linguagem C, pelo autor
+deste trabalho como um patch para o PCx
+(\url{http://pages.cs.wisc.edu/~swright/PCx/}), e a implementação desenvolvida
+encontra-se disponível em \url{https://github.com/r-gaia-cs/PCx.git}.
+
+O PCx é um solver de Programação Linear que utilizar a variante de Mehrotra do
+Método Preditor Corretor com a estratégia de correção de Gondzio e o Método do
+Mínimo Grau Múltiplo de Liu\cite{George:1981:ComputerSolutionPD} (MMD) para o
+reordenamento da matriz $A D^{-1} A^T$.
+
+Testou-se a implementação (tendo como último commit aquele cuja identificação
+inicia com 259cf79) com todos os problemas das bibliotecas:
+\begin{itemize}
+  \item ``Netlib LP'' (\url{http://www.netlib.org/lp/}),
+  \item ``Kennington'' (\url{http://www.netlib.org/lp/data/kennington/}),
+  \item ``Meszaros'' (\url{http://www.sztaki.hu/~meszaros/public_ftp/lptestset/misc/}),
+  \item ``PDS'' (\url{http://plato.asu.edu/ftp/lptestset/pds/}),
+  \item ``Rail'' (\url{http://plato.asu.edu/ftp/lptestset/rail/}).
+\end{itemize}
+
+Juntando os problemas de todas a bibliotecas, foram utilizados mais de 200
+problemas dos quais apenas 4 o RCM apresentou um memor número de elementos não
+zeros (3 problemas da Netlib e 1 da Meszaros). Em relação a problemas não
+resolvidos, destaca-se os problemas da PDS que o MMD resolveu 5 e o RCM 1
+dentre 9 problemas.
+
+Informações adicionas sobre o resultado obtido para cada um dos problemas testados
+encontram-se nas Tabelas~\ref{tab:resulken}-\ref{tab:resulrail} sendo que
+``R'', ``NNZ'', ``IT'' e ``T''
+significam, respectivamente, ``código de retorno'', ``número de elementos não
+nulos'', ``número de iterações'' e ``tempo computacional'' (em segundos).
+%\begin{table}
+%  \centering
+%  \caption{Resultados experimentais da biblioteca FCTP.}
+%  \label{tab:resulfctp}
+%  \input{bench-fctplib.join.tex}
+%\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Kennington.}
+  \label{tab:resulken}
+  \input{bench-kenlib.join.tex}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Meszaros (1/3).}
+  \label{tab:resulmes0}
+  \input{bench-meslib.join.tex0}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Meszaros (2/3).}
+  \label{tab:resulmes1}
+  \input{bench-meslib.join.tex1}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Meszaros (3/3).}
+  \label{tab:resulmes2}
+  \input{bench-meslib.join.tex2}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Netlib (1/3).}
+  \label{tab:resulnet0}
+  \input{bench-netlib.join.tex0}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Netlib (2/3).}
+  \label{tab:resulnet1}
+  \input{bench-netlib.join.tex1}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Netlib (3/3).}
+  \label{tab:resulnet2}
+  \input{bench-netlib.join.tex2}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Netlib-QAP.}
+  \label{tab:resulnetqap}
+  \input{bench-netlibqap.join.tex}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca PDS.}
+  \label{tab:resulpds}
+  \input{bench-pdslib.join.tex}
+\end{table}
+\begin{table}
+  \centering
+  \caption{Resultados experimentais da biblioteca Rail.}
+  \label{tab:resulrail}
+  \input{bench-raillib.join.tex}
+\end{table}
