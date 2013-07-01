@@ -35,6 +35,7 @@
 \usepackage{algorithmic} % Pacote para algoritmos
 \usepackage{algorithm} % Pacote para algoritmos
 \usepackage{listings} % Pacote para c\'{o}digos
+\usepackage{lscape}
 
 %Personalização
 %\pgfplotsset{
@@ -185,7 +186,7 @@ Distr. Barão Geraldo – Campinas – São Paulo – Brasil CEP 13083-859 \\
 \appendix
 % Apoio
 %     Citar as agências que financiaram o projeto
-%\input{info.tex}
+\input{info.tex}
 %\input{faq@relatorio_parcial.tex}
 %\input{implementacoes@relatorio_parcial.tex}
 
@@ -196,4 +197,14 @@ Distr. Barão Geraldo – Campinas – São Paulo – Brasil CEP 13083-859 \\
 %     - Não cite se não listar.
 \bibliographystyle{siam}
 \bibliography{../references}
+
+% Tabela aqui devido ao limite do número de páginas.
+\begin{landscape}
+\begin{table}
+  \caption{Resultados experimentais.}
+  \label{tab:resul2}
+  \input{bench-netlib@sbpo.tex}
+  \input{bench-meslib@sbpo.tex}
+\end{table}
+\end{landscape}
 \end{document}

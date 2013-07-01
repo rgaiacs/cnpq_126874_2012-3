@@ -10,25 +10,22 @@ Mínimo Grau Múltiplo de Liu\cite{George:1981:ComputerSolutionPD} (MMD) para o
 reordenamento da matriz $A D^{-1} A^T$.
 
 Testou-se a implementação (tendo como último commit aquele cuja identificação
-inicia com c8e1e1d) com 94 problemas da biblioteca ``Netlib LP''
-(\url{http://www.netlib.org/lp/}), cujo acesso é livre.
+inicia com a27fab4) com os problemas das bibliotecas:
+\begin{itemize}
+  \item ``Netlib LP'' (\url{http://www.netlib.org/lp/}),
+  \item ``Kennington'' (\url{http://www.netlib.org/lp/data/kennington/}),
+  \item ``Mészáros'' (\url{http://www.sztaki.hu/~meszaros/public_ftp/lptestset/misc/}),
+  \item ``PDS'' (\url{http://plato.asu.edu/ftp/lptestset/pds/}),
+  \item ``Rail'' (\url{http://plato.asu.edu/ftp/lptestset/rail/}).
+\end{itemize}
 
-Dos 94 problemas testados, ao utilizar reordenamento obtido com o MMD 87
-problemas foram resolvidos enquanto que com o reordenamento do RCM apenas 85
-problemas foram resolvidos. Dentre estes 85 problemas resolvidos por ambos, os
-dados referentes aos testes computacionais dos 43 maiores problemas encontram-se
-na Tabela~\ref{tab:resul2} sendo que ``LIN'', ``COL'', ``ENV'', ``IT'' e ``T''
-significam, respectivamente, ``número de linhas originais'', ``número de colunas
-originais'', ``tamanho do envelope'', ``número de iterações'' e ``tempo
-computacional'' (em segundos).
-\begin{table}
-  \caption{Resultados experimentais.}
-  \label{tab:resul2}
-  \input{bench2@sbpo.csv}
-\end{table}
-
-O envelope decorrente do uso do RCM foi menor que o do MMD em apenas 4 problemas
-e empatou em outros 5. Para os problemas em que o envelope decorrente do RCM foi
-maior que o do MMD, esse aumento foi em média de 55\%. Em relação ao número de
-iterações do PCx, o RCM foi melhor em 2 problemas e empatou nos outros 81. Já em
-relação ao tempo, o RCM foi melhor em 6 problemas e empatou em outros 17.
+Juntando os problemas de todas a bibliotecas, foram utilizados mais de 200
+problemas sendo que o RCM falhou em 2 problemas a mais que o MMD e o RCM
+apresentou um memor número de elementos não zeros em 4 problemas em comparação
+com o MMD. Na Tabela~\ref{tab:resul2} encontram-se os resultados obtidos para
+os 25 maiores problemas das bibliotecas ``Netlib LP`` e ``Mészaros'' sendo que
+``R'', ``NNZ'', ``IT'' e ``T'' significam, respectivamente, ``código de retorno do
+PCx'', ``número de elementos não zeros'', ``número de iterações'' e ``tempo
+computacional'' (em segundos). Em relação ao ``código de retorno do PCx'', -1
+indica que o tempo limite foi atingido e outros valores diferentes de 0 que
+alguma instabilidade numérica foi detectada.
