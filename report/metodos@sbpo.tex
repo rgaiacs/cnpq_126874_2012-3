@@ -4,12 +4,12 @@ deste trabalho como um patch para o PCx
 (\url{http://pages.cs.wisc.edu/~swright/PCx/}), e a implementação desenvolvida
 encontra-se disponível em \url{https://github.com/r-gaia-cs/PCx.git}.
 
-O PCx é um solver de Programação Linear que utilizar a variante de Mehrotra do
+O PCx é um solver de Programação Linear que utiliza a variante de Mehrotra do
 Método Preditor Corretor com a estratégia de correção de Gondzio e o Método do
 Mínimo Grau Múltiplo de Liu\cite{George:1981:ComputerSolutionPD} (MMD) para o
 reordenamento da matriz $A D^{-1} A^T$.
 
-Testou-se a implementação (tendo como último commit aquele cuja identificação
+Testou-se a implementação (tendo como última revisão aquele cuja identificação
 inicia com a27fab4) com os problemas das bibliotecas:
 \begin{itemize}
   \item ``Netlib LP'' (\url{http://www.netlib.org/lp/}),
@@ -19,9 +19,9 @@ inicia com a27fab4) com os problemas das bibliotecas:
   \item ``Rail'' (\url{http://plato.asu.edu/ftp/lptestset/rail/}).
 \end{itemize}
 
-Juntando os problemas de todas a bibliotecas, foram utilizados mais de 200
+Considerando os problemas de todas a bibliotecas, foram utilizados mais de 200
 problemas sendo que o RCM falhou em 2 problemas a mais que o MMD e o RCM
-apresentou um memor número de elementos não zeros em 4 problemas em comparação
+apresentou um menor número de elementos não zeros em 4 problemas em comparação
 com o MMD. Na Tabela~\ref{tab:resul2} encontram-se os resultados obtidos para
 os 25 maiores problemas das bibliotecas ``Netlib LP`` e ``Mészaros'' sendo que
 ``R'', ``NNZ'', ``IT'' e ``T'' significam, respectivamente, ``código de retorno do
