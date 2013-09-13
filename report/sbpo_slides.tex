@@ -1,0 +1,233 @@
+\documentclass[10pt]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Configuração: pacotes %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: básicos %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{indentfirst}
+\usetheme{CambridgeUS}
+%\usepackage{biblatex}
+%\addbibresource{tese.bib}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: links %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{url}
+\usepackage{breakurl}
+\usepackage{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: ams %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{breqn}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: tabelas %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{multirow}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: figuras %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz} %Pacote para desenho de figuras
+\usetikzlibrary{matrix}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: algoritmos %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{algorithmic} % Pacote para algoritmos
+\usepackage{algorithm} % Pacote para algoritmos
+\usepackage{listings} % Pacote para c\'{o}digos
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Saída:}}
+\renewcommand{\algorithmicend}{\textbf{fim}}
+\renewcommand{\algorithmicif}{\textbf{se}}
+\renewcommand{\algorithmicthen}{\textbf{ent\~{a}o}}
+\renewcommand{\algorithmicelse}{\textbf{caso contr\'{a}rio}}
+\renewcommand{\algorithmicendif}{\algorithmicend}
+\renewcommand{\algorithmicfor}{\textbf{para}}
+\renewcommand{\algorithmicforall}{\textbf{para todo}}
+\renewcommand{\algorithmicdo}{\textbf{fa\c{c}a}}
+\renewcommand{\algorithmicendfor}{\algorithmicend}
+\renewcommand{\algorithmicwhile}{\textbf{enquanto}}
+\renewcommand{\algorithmicendwhile}{\algorithmicend}
+\renewcommand{\algorithmicrepeat}{\textbf{repita}}
+\renewcommand{\algorithmicuntil}{\textbf{at\'{e}}}
+\renewcommand{\algorithmicreturn}{\textbf{retorne}}
+\renewcommand{\algorithmiccomment}[1]{\hspace{2em}/* #1 */}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Início do poster %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\title[Cuthill-McKee Reversa]{Implementa\c{c}\~{a}o eficiente da heur\'{i}stica de reordenamento de Cuthill-McKee Reversa}
+\author[Raniere Silva]{Raniere Gaia Costa da
+Silva\footnote{ra092767@ime.unicamp.br}
+\and Aurelio Ribeiro Leite de Oliveira\footnote{aurelio@ime.unicamp.br}}
+\date{}
+\begin{frame}
+  \maketitle
+
+  \footnotesize{Este trabalho foi financiado pelo Conselho Nacional de
+  Desenvolvimento Cient\'{i}fico e Tecnol\'{o}gico pelo Processo 126874/2012-3.}
+
+  \footnotesize{Salvo indicado o contrário, esta apresentação está licenciada sob a licença
+  Creative Commons Atribuição 3.0 Não Adaptada. Para ver uma cópia desta
+  licença, visite \url{http://creativecommons.org/licenses/by/3.0/}.}
+  \begin{center}
+    \includegraphics[scale=.5]{figures/cc-by.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Problema de Programação Linear}
+  \begin{align*}
+      \text{minimizar } & c^T x
+      &&& \text{maximizar } & b^T y \\
+      \text{sujeito a } & A x = b
+      &&\text{e}& \text{sujeito a } & A^T y + z = c \\
+      & x \geq 0
+      &&& & z \geq 0.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Métodos de Pontos Interiores Primal-Dual}
+  Método iterativo descrito por
+  \begin{align*}
+      x^{i + 1} &= x^i + \alpha^i \Delta x^i, \\
+      y^{i + 1} &= y^i + \alpha^i \Delta y^i, \\
+      z^{i + 1} &= z^i + \alpha^i \Delta z^i,
+  \end{align*}
+  onde
+  \begin{align*}
+      \begin{bmatrix}
+           0 & A^T & I \\
+           A & 0 & 0 \\
+           Z & 0 & X
+       \end{bmatrix} \begin{bmatrix}
+           \Delta x^i \\
+           \Delta y^i \\
+           \Delta z^i
+       \end{bmatrix} &= \begin{bmatrix}
+           r_d \\
+           r_p \\
+           r_a
+       \end{bmatrix}.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Decomposição de Cholesky e preenchimento (1)}
+  % O vetor de permutação é
+  % [3, 1, 2, 0, 4, 5, 6]
+  \begin{align*}
+      A &= \begin{bmatrix}
+          1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+          1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+          1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+          0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+          0 & 1 & 1 & 0 & 0 & 2 & 3
+      \end{bmatrix}, \\
+      G &\sim \begin{bmatrix}
+          1,4 & 0   & 0   &  0    & 0                &  0                &  0   \\
+          0,70& 1,2 & 0   &  0    & 0                &  0                &  0   \\
+          0,70& 0,40& 1,1 &  0    & 0                &  0                &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 0                &  0                &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 1,0              &  0                &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4\mathrm{E}-16 &  1,0              &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4\mathrm{E}-16 & -1,7\mathrm{E}-15 &  1,0
+      \end{bmatrix}.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Decomposição de Cholesky e preenchimento (2)}
+  % O vetor de permutação é
+  % [4, 3, 0, 2, 1, 6, 5]
+  \begin{align*}
+      A' &= \begin{bmatrix}
+          2 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 2 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+          1 & 1 & 1 & 1 & 2 & 1 & 1 \\
+          0 & 0 & 0 & 1 & 1 & 3 & 2 \\
+          0 & 0 & 0 & 1 & 1 & 2 & 3
+      \end{bmatrix}, \\
+      G' &\sim \begin{bmatrix}
+          1,4 & 0 & 0 & 0 & 0 & 0 & 0 \\
+          0,70 & 1,2 & 0 & 0 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 0 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 1 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 0 & 1 & 0 & 0 \\
+          0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 & 1 & 0 & 1
+      \end{bmatrix}.
+  \end{align*}
+\end{frame}
+
+\begin{frame}[fragile]{Método Cuthill-McKee Reverso}
+  \begin{algorithmic}[1]
+      \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
+      \ENSURE $o$, novo ordenamento dos vértices de $G(A)$.
+      \STATE Marca todos os vértices como não visitados.
+      \STATE $o \longleftarrow \text{ vetor de zeros}$, $i \longleftarrow
+      1$, $f \longleftarrow \text{ fila vazia}$
+      \STATE Adicionar $v$ na fila $f$.
+      \STATE Marca $v$ como visitado.
+      \WHILE{$f$ não for vazia}
+          \STATE Desenfileira $f$ em $v$.
+          \STATE $o_i \longleftarrow v$
+          \STATE $i \longleftarrow i + 1$
+          \FORALL{vértice $w$ adjacente a $v$, em ordem crescente de grau,}
+              \IF{$w$ ainda não foi visitado}
+                  \STATE Adicionar $v$ na fila $f$.
+                  \STATE Marca $w$ como visitado.
+              \ENDIF
+          \ENDFOR
+      \ENDWHILE
+  \end{algorithmic}
+\end{frame}
+
+\begin{frame}[fragile]{Vértice pseudo-periférico}
+  \begin{algorithmic}[1]
+      \REQUIRE Grafo $G(A)$.
+      \ENSURE $x$.
+      \STATE $r \longleftarrow \text{Nó arbitrário em }G(A)$
+      \STATE Construir estrutura de nível a partir de $r$, $L(r)$.
+      \label{alg:ppn:brle}
+      \STATE Escolher um vértice $x$ pertencente ao último nível de
+      $L(r)$.
+      \STATE Construir estrutura de nível a partir de $x$, $L(x)$.
+      \IF{$l(x) > l(r)$}
+          \STATE $r \longleftarrow x$
+          \STATE Retorna para a linha~\ref{alg:ppn:brle}
+      \ENDIF
+  \end{algorithmic}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados experimentais}
+  \begin{center}
+\begin{tabular}{|l|r|r|r|r|r|r|}
+\hline
+\multicolumn{7}{|c|}{Problema da biblioteca Netlib} \\ \hline
+\multicolumn{1}{|c|}{Problema} & \multicolumn{3}{|c|}{MMD} &         \multicolumn{3}{|c|}{RCM} \\ \hline
+\multicolumn{1}{|c|}{Nome} &
+        \multicolumn{1}{|c|}{NNZ} & \multicolumn{1}{|c|}{IT} &
+        \multicolumn{1}{|c|}{T} &
+        \multicolumn{1}{|c|}{NNZ} & \multicolumn{1}{|c|}{IT} &
+        \multicolumn{1}{|c|}{T} \\ \hline
+dfl001       & 1,64E+06 & 45 & 2,44E+01 & 5,72E+06 & 60 & 3,47E+02 \\ \hline
+fit2p        & 3,00E+03 & 20 & 5,40E-01 & 3,00E+03 & 20 & 5,80E-01 \\ \hline
+80bau3b      & 4,14E+04 & 36 & 3,10E-01 & 2,30E+05 & 36 & 1,44E+00 \\ \hline
+maros-r7     & 5,34E+05 & 14 & 1,61E+00 & 4,40E+05 & 14 & 4,10E+00 \\ \hline
+pilot87      & 4,26E+05 & 29 & 3,35E+00 & 7,71E+05 & 25 & 7,71E+00 \\ \hline
+d2q06c       & 1,37E+05 & 27 & 5,40E-01 & 4,55E+05 & 24 & 3,01E+00 \\ \hline
+greenbea     & 4,91E+04 & 50 & 4,40E-01 & 1,51E+05 & 49 & 1,52E+00 \\ \hline
+greenbeb     & 4,78E+04 & 40 & 3,50E-01 & 1,68E+05 & 39 & 1,18E+00 \\ \hline
+bnl2         & 8,13E+04 & 33 & 3,10E-01 & 2,34E+05 & 33 & 1,34E+00 \\ \hline
+pilot        & 2,01E+05 & 34 & 1,30E+00 & 4,36E+05 & 30 & 4,18E+00 \\ \hline
+stocfor2     & 2,28E+04 & 19 & 7,00E-02 & 3,26E+04 & 19 & 2,40E-01 \\ \hline
+sctap3       & 1,61E+04 & 14 & 6,00E-02 & 1,03E+05 & 14 & 2,60E-01 \\ \hline
+cycle        & 5,61E+04 & 23 & 1,60E-01 & 1,78E+05 & 23 & 8,00E-01 \\ \hline
+degen3       & 1,21E+05 & 16 & 5,00E-01 & 5,31E+05 & 13 & 2,53E+00 \\ \hline
+\end{tabular}
+  \end{center}
+\end{frame}
+\end{document}
