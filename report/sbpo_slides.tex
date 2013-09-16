@@ -87,7 +87,7 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{align*}
 \end{frame}
 
-\begin{frame}{Métodos de Pontos Interiores Primal-Dual}
+\begin{frame}{Métodos de Pontos Interiores Primal-Dual (1)}
   Método iterativo descrito por
   \begin{align*}
       x^{i + 1} &= x^i + \alpha^i \Delta x^i, \\
@@ -109,6 +109,15 @@ Silva\footnote{ra092767@ime.unicamp.br}
            r_p \\
            r_a
        \end{bmatrix}.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Métodos de Pontos Interiores Primal-Dual (2)}
+  Atráves da eliminação de variáveis do sistema anterior,
+  \begin{align*}
+      A D^{-1} A^T \Delta y^i &= A D^{-1} r_1 - r_2, \\
+      \Delta x^i &= D^{-1} \left( r_1 - A^T \Delta y^i \right), \\
+      \Delta z^i &= X^{-1} \left( r_a - Z \Delta x^i \right).
   \end{align*}
 \end{frame}
 
@@ -202,11 +211,21 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{algorithmic}
 \end{frame}
 
+\begin{frame}{Implementação}
+  Ambos as heurísticas foram implementadas em C e integradas ao PCx,
+  inicialmente escrito por Joe Czyzyk, Sanjay Mehrotra, Michael Wagner, Stephen
+  Wright, \textit{et al}.
+
+  A implementação encontra-se disponível em
+  \url{https://github.com/r-gaia-cs/PCx}.
+\end{frame}
+
 \begin{frame}[fragile]{Resultados experimentais}
   \begin{center}
 \begin{tabular}{|l|r|r|r|r|r|r|}
 \hline
-\multicolumn{7}{|c|}{Problema da biblioteca Netlib} \\ \hline
+\multicolumn{7}{|c|}{9 Problema da biblioteca Netlib com elevado número de
+elementos não zero} \\ \hline
 \multicolumn{1}{|c|}{Problema} & \multicolumn{3}{|c|}{MMD} &         \multicolumn{3}{|c|}{RCM} \\ \hline
 \multicolumn{1}{|c|}{Nome} &
         \multicolumn{1}{|c|}{NNZ} & \multicolumn{1}{|c|}{IT} &
@@ -222,12 +241,19 @@ d2q06c       & 1,37E+05 & 27 & 5,40E-01 & 4,55E+05 & 24 & 3,01E+00 \\ \hline
 greenbea     & 4,91E+04 & 50 & 4,40E-01 & 1,51E+05 & 49 & 1,52E+00 \\ \hline
 greenbeb     & 4,78E+04 & 40 & 3,50E-01 & 1,68E+05 & 39 & 1,18E+00 \\ \hline
 bnl2         & 8,13E+04 & 33 & 3,10E-01 & 2,34E+05 & 33 & 1,34E+00 \\ \hline
-pilot        & 2,01E+05 & 34 & 1,30E+00 & 4,36E+05 & 30 & 4,18E+00 \\ \hline
-stocfor2     & 2,28E+04 & 19 & 7,00E-02 & 3,26E+04 & 19 & 2,40E-01 \\ \hline
-sctap3       & 1,61E+04 & 14 & 6,00E-02 & 1,03E+05 & 14 & 2,60E-01 \\ \hline
-cycle        & 5,61E+04 & 23 & 1,60E-01 & 1,78E+05 & 23 & 8,00E-01 \\ \hline
-degen3       & 1,21E+05 & 16 & 5,00E-01 & 5,31E+05 & 13 & 2,53E+00 \\ \hline
 \end{tabular}
+  \end{center}
+
+Dentre todos os problemas testados o RCM apresentou um menor número de elementos
+não zeros em apenas 4 problemas quando comparado ao Método do Mínimo Grau
+Múltiplo.
+
+Resultados completos disponíveis em \url{https://github.com/r-gaia-cs/PCx}.
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    Perguntas?
   \end{center}
 \end{frame}
 \end{document}
