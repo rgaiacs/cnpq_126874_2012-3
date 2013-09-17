@@ -66,7 +66,9 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \maketitle
 
   \footnotesize{Este trabalho foi financiado pelo Conselho Nacional de
-  Desenvolvimento Cient\'{i}fico e Tecnol\'{o}gico pelo Processo 126874/2012-3.}
+  Desenvolvimento Cient\'{i}fico e Tecnol\'{o}gico pelo Processo 126874/2012-3 e
+  encontra-se disponível em
+  \url{https://github.com/r-gaia-cs/cnpq_126874_2012-3}.}
 
   \footnotesize{Salvo indicado o contrário, esta apresentação está licenciada sob a licença
   Creative Commons Atribuição 3.0 Não Adaptada. Para ver uma cópia desta
@@ -76,6 +78,11 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{center}
 \end{frame}
 
+\begin{frame}
+  \tableofcontents
+\end{frame}
+
+\section{Motivação}
 \begin{frame}{Problema de Programação Linear}
   \begin{align*}
       \text{minimizar } & c^T x
@@ -135,13 +142,13 @@ Silva\footnote{ra092767@ime.unicamp.br}
           0 & 1 & 1 & 0 & 0 & 2 & 3
       \end{bmatrix}, \\
       G &\sim \begin{bmatrix}
-          1,4 & 0   & 0   &  0    & 0                &  0                &  0   \\
-          0,70& 1,2 & 0   &  0    & 0                &  0                &  0   \\
-          0,70& 0,40& 1,1 &  0    & 0                &  0                &  0   \\
-          0,70& 0,40& 0,28&  0,50 & 0                &  0                &  0   \\
-          0,70& 0,40& 0,28&  0,50 & 1,0              &  0                &  0   \\
-          0   & 0,81& 0,57& -1,0  & 2,4\mathrm{E}-16 &  1,0              &  0   \\
-          0   & 0,81& 0,57& -1,0  & 2,4\mathrm{E}-16 & -1,7\mathrm{E}-15 &  1,0
+          1,4 & 0   & 0   &  0    & 0                   &  0                   &  0   \\
+          0,70& 1,2 & 0   &  0    & 0                   &  0                   &  0   \\
+          0,70& 0,40& 1,1 &  0    & 0                   &  0                   &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 0                   &  0                   &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 1,0                 &  0                   &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4 \times 10^{-16} &  1,0                 &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4 \times 10^{-16} & -1,7 \times 10^{-15} &  1,0
       \end{bmatrix}.
   \end{align*}
 \end{frame}
@@ -171,7 +178,8 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{align*}
 \end{frame}
 
-\begin{frame}[fragile]{Método Cuthill-McKee Reverso}
+\section{A Heurística}
+\begin{frame}[fragile]{Método Cuthill-McKee}
   \begin{algorithmic}[1]
       \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
       \ENSURE $o$, novo ordenamento dos vértices de $G(A)$.
@@ -194,6 +202,13 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{algorithmic}
 \end{frame}
 
+\begin{frame}[fragile]{Método Cuthill-McKee Reverso}
+  Utilizar o ordenamento ``inverso'' obtido pelo algoritmo anterior, i.e.,
+  \begin{dmath*}
+    o_i' = o_{n - i + 1}, \condition{$\forall i = 1, 2, \ldots, n$}
+  \end{dmath*}
+\end{frame}
+
 \begin{frame}[fragile]{Vértice pseudo-periférico}
   \begin{algorithmic}[1]
       \REQUIRE Grafo $G(A)$.
@@ -211,6 +226,7 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \end{algorithmic}
 \end{frame}
 
+\section{Experimentos Computacionais}
 \begin{frame}{Implementação}
   Ambos as heurísticas foram implementadas em C e integradas ao PCx,
   inicialmente escrito por Joe Czyzyk, Sanjay Mehrotra, Michael Wagner, Stephen
@@ -220,6 +236,7 @@ Silva\footnote{ra092767@ime.unicamp.br}
   \url{https://github.com/r-gaia-cs/PCx}.
 \end{frame}
 
+\section{Resultados}
 \begin{frame}[fragile]{Resultados experimentais}
   \begin{center}
 \begin{tabular}{|l|r|r|r|r|r|r|}
@@ -251,9 +268,22 @@ Múltiplo.
 Resultados completos disponíveis em \url{https://github.com/r-gaia-cs/PCx}.
 \end{frame}
 
+\begin{frame}{Conclusões}
+  O RCM foi descartado para investigação futuras uma vez que é inferior
+  ao Mínimo Grau Múltiplo.
+\end{frame}
+
 \begin{frame}
   \begin{center}
     Perguntas?
   \end{center}
+
+  \begin{block}{Links}
+    \begin{itemize}
+      \item Email: \url{ra092767@ime.unicamp.br}
+      \item Código: \url{https://github.com/r-gaia-cs/PCx}.
+      \item Relatório: \url{https://github.com/r-gaia-cs/cnpq_126874_2012-3}
+    \end{itemize}
+  \end{block}
 \end{frame}
 \end{document}
