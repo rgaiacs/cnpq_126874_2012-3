@@ -8,8 +8,8 @@
 \usepackage{indentfirst}
 \usepackage{beamerposter}
 \usepackage{geometry}
-%\usepackage{biblatex}
-%\addbibresource{tese.bib}
+\usepackage{biblatex}
+\addbibresource{../references.bib}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: links %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,6 +34,29 @@
 \usepackage{tikz} %Pacote para desenho de figuras
 \usetikzlibrary{matrix}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pacotes: algoritmos %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{algorithmic} % Pacote para algoritmos
+\usepackage{algorithm} % Pacote para algoritmos
+\usepackage{listings} % Pacote para c\'{o}digos
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Saída:}}
+\renewcommand{\algorithmicend}{\textbf{fim}}
+\renewcommand{\algorithmicif}{\textbf{se}}
+\renewcommand{\algorithmicthen}{\textbf{ent\~{a}o}}
+\renewcommand{\algorithmicelse}{\textbf{caso contr\'{a}rio}}
+\renewcommand{\algorithmicendif}{\algorithmicend}
+\renewcommand{\algorithmicfor}{\textbf{para}}
+\renewcommand{\algorithmicforall}{\textbf{para todo}}
+\renewcommand{\algorithmicdo}{\textbf{fa\c{c}a}}
+\renewcommand{\algorithmicendfor}{\algorithmicend}
+\renewcommand{\algorithmicwhile}{\textbf{enquanto}}
+\renewcommand{\algorithmicendwhile}{\algorithmicend}
+\renewcommand{\algorithmicrepeat}{\textbf{repita}}
+\renewcommand{\algorithmicuntil}{\textbf{at\'{e}}}
+\renewcommand{\algorithmicreturn}{\textbf{retorne}}
+\renewcommand{\algorithmiccomment}[1]{\hspace{2em}/* #1 */}
+
+\DeclareMathOperator*{\diag}{diag}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Início do poster %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \geometry{paperwidth=90cm,paperheight=100cm}
 \begin{document}
@@ -65,7 +88,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Corpo do poster %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % O ambiente columns é definido na classe beamer.
   \begin{columns}[t]
-    \begin{column}{0.3\textwidth}
+    \begin{column}{0.4\textwidth}
+      \textbf{Resumo}
+
       Neste trabalho revisitou-se a heurística de reordenamento Cuthill-McKee Reversa,
       proposta em 1969, que busca um reordenamento para matrizes esparsas que reduza a
       largura de banda destas. O autor deste trabalho implementou a heurística
@@ -74,7 +99,68 @@
       heurística Cuthill-McKee Reversa é inferior a heurística de mínimo grau
       múltiplo por gerar mais elementos não nulos na decomposição de Cholesky.
 
-      Seguindo Cuthill e McKee \cite{Cuthill:1969:ReducingBandwidth}, definimos
+      \textbf{Métodos de Pontos Interiores Primal-Dual}
+
+      Consideremos o Problema de Programação Linear na Forma Padrão (PPLFP)
+      \begin{align*}
+          \text{minimizar } & c^T x \\
+          \text{sujeito a } & A x = b, \\
+          & x \geq 0,
+      \end{align*}
+      onde $A \in \mathbb{R}^{m \times n}$ é uma matriz de posto completo $m$ e $c$,
+      $b$ e $x$ são vetores colunas de dimensão apropriada. Associado a este problema
+      temos o problema dual
+      \begin{align*}
+          \text{maximizar } & b^T y \\
+          \text{sujeito a } & A^T y + z = c, \\
+          & z \geq 0,
+      \end{align*}
+      onde $y$ e $z$ possuem dimensão adequada.
+
+      Os Métodos de Pontos Interiores Primais-Duais para resolver PPLFP consistem em, a
+      partir de uma tripla inicial $(x^0, y^0, z^0)$, construir uma
+      sequência de triplas, $(x^i, y^i, z^i)$, dada por
+      \begin{align*}
+          x^{i + 1} &= x^i + \alpha^i \Delta x^i, \\
+          y^{i + 1} &= y^i + \alpha^i \Delta y^i, \\
+          z^{i + 1} &= z^i + \alpha^i \Delta z^i.
+      \end{align*}
+
+      A direção afim nos Métodos de Pontos Interiores Primais-Duais, $(\Delta x^i,
+      \Delta y^i, \Delta z^i)$,  é dada por:
+      \begin{align*}
+          \begin{bmatrix}
+               0 & A^T & I \\
+               A & 0 & 0 \\
+               Z & 0 & X
+           \end{bmatrix} \begin{bmatrix}
+               \Delta x^i \\
+               \Delta y^i \\
+               \Delta z^i
+           \end{bmatrix} &= \begin{bmatrix}
+               r_d \\
+               r_p \\
+               r_a
+           \end{bmatrix},
+      \end{align*}
+      onde $X = \diag(x^i)$, $Z = \diag(z^i)$, $r_p = b - A x^i$, $r_d = c - A^T y^i
+      - z^i$, $r_a = - X Z e$ e $e$ representa o vetor de uns.
+
+      Eliminando variáveis, chegamos a
+      \begin{align*}
+          A D^{-1} A^T \Delta y^i &= A D^{-1} r_1 - r_2, \\
+          \Delta x^i &= D^{-1} \left( r_1 - A^T \Delta y^i \right), \\
+          \Delta z^i &= X^{-1} \left( r_a - Z \Delta x^i \right),
+      \end{align*}
+      onde $D = X^{-1} Z$, $r_1 = r_d - X^{-1} r_a$ e $r_2 = r_p$.
+
+      \textbf{Fatoração de Cholesky}
+
+      O sistema linear $A D^{-1} A^T \Delta y^i = A D^{-1} r_1 - r_2$ pode ser
+      resolvido por meio da fatoração de Cholesky que possui algumas
+      propriedades abaixo descritas.
+
+      Seguindo Cuthill e McKee \nocite{Cuthill:1969:ReducingBandwidth}, definimos
       \begin{align*}
           \beta_i(A) &= i - f_i(A), 1 \leq i \leq n, \\
           \beta(A) &= \max\left\{ \beta_i(A) \mid 1 \leq i \leq n \right\}
@@ -86,7 +172,7 @@
           \text{Band}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
           \beta(A) \right\}
       \end{align*}
-      e ilustrada na Figura~\ref{fig:exem_bandwidth}.
+      e ilustrada abaixo.
       \begin{figure}[!htb]
           \centering
           \begin{tikzpicture}
@@ -102,20 +188,20 @@
                   0 & 1 & 1 & 0 & 0 & 3 & 2 \\
                   0 & 1 & 1 & 0 & 0 & 2 & 3 \\
               };
-              \node[above, shift={(0,.5)}] at (A-1-1) {$1$};
-              \node[above, shift={(0,.5)}] at (A-1-2) {$2$};
-              \node[above, shift={(0,.5)}] at (A-1-3) {$3$};
-              \node[above, shift={(0,.5)}] at (A-1-4) {$4$};
-              \node[above, shift={(0,.5)}] at (A-1-5) {$5$};
-              \node[above, shift={(0,.5)}] at (A-1-6) {$6$};
-              \node[above, shift={(0,.5)}] at (A-1-7) {$7$};
-              \node[right, shift={(-1.5,0)}] at (A-1-1) {$1$};
-              \node[right, shift={(-1.5,0)}] at (A-2-1) {$2$};
-              \node[right, shift={(-1.5,0)}] at (A-3-1) {$3$};
-              \node[right, shift={(-1.5,0)}] at (A-4-1) {$4$};
-              \node[right, shift={(-1.5,0)}] at (A-5-1) {$5$};
-              \node[right, shift={(-1.5,0)}] at (A-6-1) {$6$};
-              \node[right, shift={(-1.5,0)}] at (A-7-1) {$7$};
+              \node[above, shift={(0,1)}] at (A-1-1) {$1$};
+              \node[above, shift={(0,1)}] at (A-1-2) {$2$};
+              \node[above, shift={(0,1)}] at (A-1-3) {$3$};
+              \node[above, shift={(0,1)}] at (A-1-4) {$4$};
+              \node[above, shift={(0,1)}] at (A-1-5) {$5$};
+              \node[above, shift={(0,1)}] at (A-1-6) {$6$};
+              \node[above, shift={(0,1)}] at (A-1-7) {$7$};
+              \node[right, shift={(-2.5,0)}] at (A-1-1) {$1$};
+              \node[right, shift={(-2.5,0)}] at (A-2-1) {$2$};
+              \node[right, shift={(-2.5,0)}] at (A-3-1) {$3$};
+              \node[right, shift={(-2.5,0)}] at (A-4-1) {$4$};
+              \node[right, shift={(-2.5,0)}] at (A-5-1) {$5$};
+              \node[right, shift={(-2.5,0)}] at (A-6-1) {$6$};
+              \node[right, shift={(-2.5,0)}] at (A-7-1) {$7$};
               % Largura de banda
               % \draw (A-1-6.north east) -- (A-2-7.north east);
               \draw (A-6-1.south west) -- (A-7-2.south west);
@@ -128,7 +214,7 @@
 
               \matrix (B) [matrix of math nodes,%
               left delimiter  = \lbrack,%
-              right delimiter = \rbrack] at (8,0)
+              right delimiter = \rbrack] at (12,0)
               {%
                  10 &  0 &  2 &  3 &  0 &  0 &  0 \\
                   0 & 10 &  2 &  3 &  0 &  0 &  0 \\
@@ -138,20 +224,20 @@
                   0 &  0 &  0 &  0 &  2 & 10 &  0 \\
                   0 &  0 &  0 &  0 &  2 &  0 & 10 \\
               };
-              \node[above, shift={(0,.5)}] at (B-1-1) {$1$};
-              \node[above, shift={(0,.5)}] at (B-1-2) {$2$};
-              \node[above, shift={(0,.5)}] at (B-1-3) {$3$};
-              \node[above, shift={(0,.5)}] at (B-1-4) {$4$};
-              \node[above, shift={(0,.5)}] at (B-1-5) {$5$};
-              \node[above, shift={(0,.5)}] at (B-1-6) {$6$};
-              \node[above, shift={(0,.5)}] at (B-1-7) {$7$};
-              \node[right, shift={(-1.5,0)}] at (B-1-1) {$1$};
-              \node[right, shift={(-1.5,0)}] at (B-2-1) {$2$};
-              \node[right, shift={(-1.5,0)}] at (B-3-1) {$3$};
-              \node[right, shift={(-1.5,0)}] at (B-4-1) {$4$};
-              \node[right, shift={(-1.5,0)}] at (B-5-1) {$5$};
-              \node[right, shift={(-1.5,0)}] at (B-6-1) {$6$};
-              \node[right, shift={(-1.5,0)}] at (B-7-1) {$7$};
+              \node[above, shift={(0,1)}] at (B-1-1) {$1$};
+              \node[above, shift={(0,1)}] at (B-1-2) {$2$};
+              \node[above, shift={(0,1)}] at (B-1-3) {$3$};
+              \node[above, shift={(0,1)}] at (B-1-4) {$4$};
+              \node[above, shift={(0,1)}] at (B-1-5) {$5$};
+              \node[above, shift={(0,1)}] at (B-1-6) {$6$};
+              \node[above, shift={(0,1)}] at (B-1-7) {$7$};
+              \node[right, shift={(-2.5,0)}] at (B-1-1) {$1$};
+              \node[right, shift={(-2.5,0)}] at (B-2-1) {$2$};
+              \node[right, shift={(-2.5,0)}] at (B-3-1) {$3$};
+              \node[right, shift={(-2.5,0)}] at (B-4-1) {$4$};
+              \node[right, shift={(-2.5,0)}] at (B-5-1) {$5$};
+              \node[right, shift={(-2.5,0)}] at (B-6-1) {$6$};
+              \node[right, shift={(-2.5,0)}] at (B-7-1) {$7$};
               % Largura de banda
               % \draw (B-1-4.north east) -- (B-4-7.north east);
               \draw (B-4-1.south west) -- (B-7-4.south west);
@@ -174,13 +260,13 @@
           \text{Env}(A) &= \left\{ \left\{ i, j \right\} \mid 0 < i - j \leq
           \beta_i(A) \right\}.
       \end{align*}
-      e ilustrado na Figura~\ref{fig:exem_profile}.
+      e ilustrado abaixo.
       \begin{figure}[!htb]
           \centering
           \begin{tikzpicture}
               \matrix (A) [matrix of math nodes,%
               left delimiter  = \lbrack,%
-              right delimiter = \lbrack] at (0,0)
+              right delimiter = \rbrack] at (0,0)
               {%
                   1 & 1 & 1 & 1 & 1 & 0 & 0 \\
                   1 & 2 & 1 & 1 & 1 & 1 & 1 \\
@@ -190,20 +276,20 @@
                   0 & 1 & 1 & 0 & 0 & 3 & 2 \\
                   0 & 1 & 1 & 0 & 0 & 2 & 3 \\
               };
-              \node[above, shift={(0,.5)}] at (A-1-1) {$1$};
-              \node[above, shift={(0,.5)}] at (A-1-2) {$2$};
-              \node[above, shift={(0,.5)}] at (A-1-3) {$3$};
-              \node[above, shift={(0,.5)}] at (A-1-4) {$4$};
-              \node[above, shift={(0,.5)}] at (A-1-5) {$5$};
-              \node[above, shift={(0,.5)}] at (A-1-6) {$6$};
-              \node[above, shift={(0,.5)}] at (A-1-7) {$7$};
-              \node[right, shift={(-1.5,0)}] at (A-1-1) {$1$};
-              \node[right, shift={(-1.5,0)}] at (A-2-1) {$2$};
-              \node[right, shift={(-1.5,0)}] at (A-3-1) {$3$};
-              \node[right, shift={(-1.5,0)}] at (A-4-1) {$4$};
-              \node[right, shift={(-1.5,0)}] at (A-5-1) {$5$};
-              \node[right, shift={(-1.5,0)}] at (A-6-1) {$6$};
-              \node[right, shift={(-1.5,0)}] at (A-7-1) {$7$};
+              \node[above, shift={(0,1)}] at (A-1-1) {$1$};
+              \node[above, shift={(0,1)}] at (A-1-2) {$2$};
+              \node[above, shift={(0,1)}] at (A-1-3) {$3$};
+              \node[above, shift={(0,1)}] at (A-1-4) {$4$};
+              \node[above, shift={(0,1)}] at (A-1-5) {$5$};
+              \node[above, shift={(0,1)}] at (A-1-6) {$6$};
+              \node[above, shift={(0,1)}] at (A-1-7) {$7$};
+              \node[right, shift={(-2.5,0)}] at (A-1-1) {$1$};
+              \node[right, shift={(-2.5,0)}] at (A-2-1) {$2$};
+              \node[right, shift={(-2.5,0)}] at (A-3-1) {$3$};
+              \node[right, shift={(-2.5,0)}] at (A-4-1) {$4$};
+              \node[right, shift={(-2.5,0)}] at (A-5-1) {$5$};
+              \node[right, shift={(-2.5,0)}] at (A-6-1) {$6$};
+              \node[right, shift={(-2.5,0)}] at (A-7-1) {$7$};
               % Perfil
               \fill[gray, fill opacity=0.2, draw=black, dotted] (A-2-1.north west) -- (A-6-1.north
               west) -- (A-6-2.north west) --
@@ -214,7 +300,7 @@
 
               \matrix (B) [matrix of math nodes,%
               left delimiter  = \lbrack,%
-              right delimiter = \rbrack] at (8,0)
+              right delimiter = \rbrack] at (12,0)
               {%
                  10 &  0 &  2 &  3 &  0 &  0 &  0 \\
                   0 & 10 &  2 &  3 &  0 &  0 &  0 \\
@@ -224,20 +310,20 @@
                   0 &  0 &  0 &  0 &  2 & 10 &  0 \\
                   0 &  0 &  0 &  0 &  2 &  0 & 10 \\
               };
-              \node[above, shift={(0,.5)}] at (B-1-1) {$1$};
-              \node[above, shift={(0,.5)}] at (B-1-2) {$2$};
-              \node[above, shift={(0,.5)}] at (B-1-3) {$3$};
-              \node[above, shift={(0,.5)}] at (B-1-4) {$4$};
-              \node[above, shift={(0,.5)}] at (B-1-5) {$5$};
-              \node[above, shift={(0,.5)}] at (B-1-6) {$6$};
-              \node[above, shift={(0,.5)}] at (B-1-7) {$7$};
-              \node[right, shift={(-1.5,0)}] at (B-1-1) {$1$};
-              \node[right, shift={(-1.5,0)}] at (B-2-1) {$2$};
-              \node[right, shift={(-1.5,0)}] at (B-3-1) {$3$};
-              \node[right, shift={(-1.5,0)}] at (B-4-1) {$4$};
-              \node[right, shift={(-1.5,0)}] at (B-5-1) {$5$};
-              \node[right, shift={(-1.5,0)}] at (B-6-1) {$6$};
-              \node[right, shift={(-1.5,0)}] at (B-7-1) {$7$};
+              \node[above, shift={(0,1)}] at (B-1-1) {$1$};
+              \node[above, shift={(0,1)}] at (B-1-2) {$2$};
+              \node[above, shift={(0,1)}] at (B-1-3) {$3$};
+              \node[above, shift={(0,1)}] at (B-1-4) {$4$};
+              \node[above, shift={(0,1)}] at (B-1-5) {$5$};
+              \node[above, shift={(0,1)}] at (B-1-6) {$6$};
+              \node[above, shift={(0,1)}] at (B-1-7) {$7$};
+              \node[right, shift={(-2.5,0)}] at (B-1-1) {$1$};
+              \node[right, shift={(-2.5,0)}] at (B-2-1) {$2$};
+              \node[right, shift={(-2.5,0)}] at (B-3-1) {$3$};
+              \node[right, shift={(-2.5,0)}] at (B-4-1) {$4$};
+              \node[right, shift={(-2.5,0)}] at (B-5-1) {$5$};
+              \node[right, shift={(-2.5,0)}] at (B-6-1) {$6$};
+              \node[right, shift={(-2.5,0)}] at (B-7-1) {$7$};
               % Perfil
               \fill[gray, fill opacity=0.2, draw=black, dotted] (B-2-1.south west) -- (B-5-1.north
               west) -- (B-5-3.north west) --
@@ -253,10 +339,139 @@
       \end{figure}
     \end{column}
     \hfill
-    \begin{column}{0.3\textwidth}
-    \end{column}
-    \hfill
-    \begin{column}{0.3\textwidth}
+    \begin{column}{0.4\textwidth}
+      É possível provar que a fatoração de Cholesky preserva a largura de banda
+      e o envelope da matriz. Abaixo encontra-se um exemplo.
+  \begin{align*}
+      A &= \begin{bmatrix}
+          1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 2 & 1 & 1 & 1 & 1 & 1 \\
+          1 & 1 & 2 & 1 & 1 & 1 & 1 \\
+          1 & 1 & 1 & 2 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 1 & 2 & 0 & 0 \\
+          0 & 1 & 1 & 0 & 0 & 3 & 2 \\
+          0 & 1 & 1 & 0 & 0 & 2 & 3
+      \end{bmatrix}, &
+      G &\sim \begin{bmatrix}
+          1,4 & 0   & 0   &  0    & 0                   &  0                   &  0   \\
+          0,70& 1,2 & 0   &  0    & 0                   &  0                   &  0   \\
+          0,70& 0,40& 1,1 &  0    & 0                   &  0                   &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 0                   &  0                   &  0   \\
+          0,70& 0,40& 0,28&  0,50 & 1,0                 &  0                   &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4 \times 10^{-16} &  1,0                 &  0   \\
+          0   & 0,81& 0,57& -1,0  & 2,4 \times 10^{-16} & -1,7 \times 10^{-15} &  1,0
+      \end{bmatrix}.
+  \end{align*}
+
+  Permutando, simetricamente, as linhas e colunas da matriz é possível reduzir a
+  largura de banda e o envelope da mesma. Abaixo encontra-se um exemplo de
+  permutação da matriz anterior para o qual observa a redução da largura de
+  banda e do envelope.
+  \begin{align*}
+      A' &= \begin{bmatrix}
+          2 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 2 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 1 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+          1 & 1 & 1 & 1 & 2 & 1 & 1 \\
+          0 & 0 & 0 & 1 & 1 & 3 & 2 \\
+          0 & 0 & 0 & 1 & 1 & 2 & 3
+      \end{bmatrix}, &
+      G' &\sim \begin{bmatrix}
+          1,4 & 0 & 0 & 0 & 0 & 0 & 0 \\
+          0,70 & 1,2 & 0 & 0 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 0 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 1 & 0 & 0 & 0 \\
+          0,70 & 0,40 & 0,57 & 0 & 1 & 0 & 0 \\
+          0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 & 1 & 0 & 1
+      \end{bmatrix}.
+  \end{align*}
+      \textbf{Reordenamento de Cuthill-McKee reversa}
+
+      O reordenamento proposto por Cuthill e McKee corresponde ao algoritmo
+      abaixo:
+
+  \begin{algorithmic}[1]
+      \REQUIRE Grafo $G(A)$ e um vértice inicial $v$.
+      \ENSURE $o$, novo ordenamento dos vértices de $G(A)$.
+      \STATE Marca todos os vértices como não visitados.
+      \STATE $o \longleftarrow \text{ vetor de zeros}$, $i \longleftarrow
+      1$, $f \longleftarrow \text{ fila vazia}$
+      \STATE Adicionar $v$ na fila $f$.
+      \STATE Marca $v$ como visitado.
+      \WHILE{$f$ não for vazia}
+          \STATE Desenfileira $f$ em $v$.
+          \STATE $o_i \longleftarrow v$
+          \STATE $i \longleftarrow i + 1$
+          \FORALL{vértice $w$ adjacente a $v$, em ordem crescente de grau,}
+              \IF{$w$ ainda não foi visitado}
+                  \STATE Adicionar $v$ na fila $f$.
+                  \STATE Marca $w$ como visitado.
+              \ENDIF
+          \ENDFOR
+      \ENDWHILE
+  \end{algorithmic}
+
+  Utilizar o ordenamento ``inverso'' obtido pelo algoritmo anterior corresponde
+  a
+  \begin{dmath*}
+    o_i' = o_{n - i + 1}, \condition{$\forall i = 1, 2, \ldots, n$.}
+  \end{dmath*}
+
+  O reordenamento depende do vértice inicial $v$. Experimentos computacionais
+  mostram que vértices pseudo-periférico produzem bons resultados e estes podem
+  ser obtidos pelo algoritmo abaixo proposto por George e Liu
+  \cite{George:1979:NodeFinder}.
+
+  \begin{algorithmic}[1]
+      \REQUIRE Grafo $G(A)$.
+      \ENSURE $x$.
+      \STATE $r \longleftarrow \text{Nó arbitrário em }G(A)$
+      \STATE Construir estrutura de nível a partir de $r$, $L(r)$.
+      \label{alg:ppn:brle}
+      \STATE Escolher um vértice $x$ pertencente ao último nível de
+      $L(r)$.
+      \STATE Construir estrutura de nível a partir de $x$, $L(x)$.
+      \IF{$l(x) > l(r)$}
+          \STATE $r \longleftarrow x$
+          \STATE Retorna para a linha~\ref{alg:ppn:brle}
+      \ENDIF
+  \end{algorithmic}
+
+  \textbf{Implementação}
+
+  Ambos as heurísticas foram implementadas em C e integradas ao PCx \cite{PCx},
+  sendo que a implementação encontra-se disponível em
+  \url{https://github.com/r-gaia-cs/PCx}.
+
+  \textbf{Resultados experimentais}
+  \begin{center}
+\begin{tabular}{|l|r|r|r|r|r|r|}
+\hline
+\multicolumn{7}{|c|}{5 Problema da biblioteca Netlib} \\ \hline
+\multicolumn{1}{|c|}{Problema} & \multicolumn{3}{|c|}{MMD} &         \multicolumn{3}{|c|}{RCM} \\ \hline
+\multicolumn{1}{|c|}{Nome} &
+        \multicolumn{1}{|c|}{NNZ} & \multicolumn{1}{|c|}{IT} &
+        \multicolumn{1}{|c|}{T} &
+        \multicolumn{1}{|c|}{NNZ} & \multicolumn{1}{|c|}{IT} &
+        \multicolumn{1}{|c|}{T} \\ \hline
+dfl001       & 1,64E+06 & 45 & 2,44E+01 & 5,72E+06 & 60 & 3,47E+02 \\ \hline
+fit2p        & 3,00E+03 & 20 & 5,40E-01 & 3,00E+03 & 20 & 5,80E-01 \\ \hline
+80bau3b      & 4,14E+04 & 36 & 3,10E-01 & 2,30E+05 & 36 & 1,44E+00 \\ \hline
+maros-r7     & 5,34E+05 & 14 & 1,61E+00 & 4,40E+05 & 14 & 4,10E+00 \\ \hline
+pilot87      & 4,26E+05 & 29 & 3,35E+00 & 7,71E+05 & 25 & 7,71E+00 \\ \hline
+\end{tabular}
+  \end{center}
+
+  \textbf{Conclusões}
+
+  Concluí-se que a heurística Cuthill-McKee reversa é inferior ao mínimo grau
+  múltiplo pois este último produz um menor número de elementos não nulos.
+
+    \textbf{Referências}
+
+    \printbibliography
     \end{column}
   \end{columns}
 
